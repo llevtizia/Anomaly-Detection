@@ -1,0 +1,22 @@
+\documentclass{report}
+\usepackage{graphicx} % Required for inserting images
+\graphicspath{{immagini/}}
+
+\usepackage[backend=biber,style=ieee]{biblatex} % puoi cambiare stile
+\addbibresource{capitoli/bibliografia.bib}              % collega il file .bib
+
+\title{Tesi}
+\author{Letizia Mancini}
+\date{August 2025}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\chapter{Introduzione}
+\input{capitoli/capitolo 1}
+
+\printbibliography
+\end{document}
