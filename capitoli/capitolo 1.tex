@@ -1,0 +1,53 @@
+\section{Machine Learning}
+Negli ultimi decenni, l'utilizzo di sistemi informatici per la risoluzone di problemi complessi ha subito uina trasformazione radicale. Tradizionalmente, gli algoritmi richiedono la codifica esplicita di regole e procedure. Il Machine Learning (ML), al contrario, introduce un paradigma alternativo. 
+
+Con Machine Learning si intende la branca dell'intelligenza artificiale che si occupa dello sviluppo di algoritmi e modelli statistici in grado di migliorare le proprie prestazioni in un determinato compito attraverso l'esperienza. Secondo la definizione classica di Mitchell \cite{mitchell1997machine}, "un programma per computer apprende dall'esperienza \textbf{E} rispetto a una classe di compiti \textbf{T} e a una misura di performance \textbf{P} se le sue prestazioni nei compiti T, misurate da P, migliorano con l'esperienza E.
+
+L'apprendimento automatico si contrappone all'approccio tradizionale, dove regole e logica sono codificate 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Anomalie}
+Un’anomalia viene definita come un oggetto che si discosta in maniera significativa dalla nozione di normalità. A seconda del contesto applicativo, tali osservazioni possono essere indicate come outlier o novelty. Ulteriori denominazioni ricorrenti includono, tra le altre, quelle di oggetto insolito, irregolare, atipico, incoerente, inaspettato, raro, errato, difettoso, 
+fraudolento, malevolo, innaturale o anomalo \cite{ruff2021anomaly}. 
+Tra le prime formalizzazioni del concetto troviamo \cite{barnett1994outliers}, che definisce un outlier in un insieme di dati come un’osservazione (o un sottoinsieme di osservazioni) apparentemente incoerente rispetto al resto dei dati dell’insieme.
+
+L’approccio predominante nell’anomaly detection è l’adozione di strategie non supervisionate: la ragione risiede nella frequente assenza, o comunque marcata scarsità, di dati etichettati relativi ad anomalie. Anche quando presenti, infatti, tali dati risultano insufficienti per caratterizzare in modo esaustivo le diverse manifestazioni possibili di anomalie, limitando l’efficacia degli approcci supervisionati. Una delle idee centrali nell’anomaly detection consiste quindi nell’apprendere un modello normale a partire da dati normali, in modo non supervisionato, per  rilevare le anomalie come deviazioni dal modello appreso. Attualmente, l’anomaly detection trova impiego in una vasta gamma di settori: ad esempio, dalla cybersecurity \cite{malaiya2018anomaly} alle scienze della terra \cite{fisher2017anomaly}, in ambiti finanziari \cite{ahmed2016survey}, per la diagnosi medica \cite{baur2019fusing} o nella bioinformatica \cite{min2017deep}.
+
+\section{Representation Learning}
+La crescente disponibilità di dati è accompagnata da un’evoluzione verso forme diverse, comprendenti immagini, video, testi, audio, grafi. Le prestazioni dei metodi sono direttamente influenzate dalla qualità della rappresentazione dei dati (o features) su cui operano: si parla di \textit{representation learning} in riferimento all’apprendimento di rappresentazioni che facilitino l’estrazione di informazione utile ai fini di classificazione o previsione \cite{bengio2013representation}.
+
+Le metodologie tradizionali di apprendimento automatico risultavano intrinsecamente limitate nella capacità di 
+elaborare dati naturali nella loro forma grezza. Inizialmente, la progettazione di sistemi di riconoscimento 
+richiedeva la definizione manuale di feature extractor specifici per dominio, in grado di trasformare segnali 
+grezzi in rappresentazioni strutturate adatte all’elaborazione \cite{lecun2015deep}.
+
+\subsection{Deep Learning}
+Il representation learning è un insieme di metodi che consentono l’appren\-di\-mento automatico delle rappresentazioni necessarie per il rilevamento o la classificazione a partire dai dati grezzi. Il \textit{deep learning} si basa sull’idea di apprendere rappresentazioni efficaci direttamente dai dati stessi.
+ L’obiettivo viene realizzato attraverso architetture composte da molteplici livelli di rappresentazione (reti neurali flessibili e multistrato, \textit{deep}): tramite trasformazioni non lineari, le rappresentazioni diventano più astratte. Con la composizione di un numero sufficiente di tali trasformazioni, possono essere apprese funzioni molto complesse. 
+
+Negli ultimi anni si è registrato un crescente interesse verso l’applicazione di tecniche di deep learning al rilevamento di anomalie per garantire la qualità dei prodotti e migliorare l’efficienza e la qualità della produzione. Tuttavia, la natura prevalentemente non supervisionata del problema rende meno immediata la definizione di obiettivi di representation learning adeguati.
+
+Il rilevamento di anomalie generico si confronta con tipologie di anomalie più eterogenee, prive delle severe restrizioni tipiche delle applicazioni industriali: limitata disponibilità di campioni anomali, vincoli stringenti in termini di accuratezza e tempo di elaborazione, specifiche caratteristiche strutturali e semantiche (disallineamenti logici, micro difetti superficiali o deviazioni dimensionali di precisione).
+
+Il rilevamento di anomalie visive in ambito industriale, al contrario, affronta diverse sfide pratiche intrinseche agli scenari reali \cite{zhuo2025survey}. La variabilità delle condizioni di produzione (fattori ambientali, variazioni di illuminazione, angolazioni della telecamera) influenza in modo significativo l’aspetto visivo dei prodotti: i dati considerati normali possono presentare un’elevata variabilità, richiedendo ai metodi di rilevamento delle anomalie di mantenere robustezza in condizioni operative diverse per evitare classificazioni errato o mancati riconoscimenti. 
+
+In secondo luogo, i dataset presentano spesso un forte sbilanciamento: le istanze normali superano di gran lunga quelle anomale e non sono etichettate, rendendo difficile identificare cosa costituisca un’anomalia e per quali motivi. Imperfezioni dei sensori o a condizioni ambientali difficili generano elevati livelli di rumore nelle immagini, che possono complicare ulteriormente il rilevamento 
+
+Il problema del rilevamento delle anomalie si configura quindi come un compito di apprendimento non supervisionato, con l’obiettivo di costruire un modello rappresentativo della maggioranza dei punti dati. La complessità aumenta a causa dell’elevata eterogeneità delle anomalie, rendendo difficile la definizione di un modello esaustivo per tali eventi. Di conseguenza, l’approccio comunemente adottato consiste nell’apprendere un modello dei campioni normali e considerare anomale le deviazioni rispetto ad esso.
+
+
+
