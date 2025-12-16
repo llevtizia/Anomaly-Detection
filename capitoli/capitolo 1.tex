@@ -15,49 +15,83 @@ L'apprendimento automatico si contrappone all'approccio tradizionale, dove regol
 
 \subsection{Teoria della probabilità}
 
-Il machine learning moderno adotta un approccio intrinsecamente probabilistico alla modellazione dei dati e all'inferenza \cite[pp.~12-20]{bishop2006pattern}. Questa prospettiva riconosce che l'incertezza è una componente inevitabile di qualsiasi processo di apprendimento: i dati osservati possono contenere rumore, essere incompleti o ambigui, e le relazioni tra variabili raramente sono deterministiche.
-
-La teoria della probabilità fornisce un framework matematico rigoroso per quantificare e manipolare l'incertezza. Due regole fondamentali governano il ragionamento probabilistico \cite[p.~13]{bishop2006pattern}: la \textit{regola della somma}, che permette di marginalizzare variabili non osservate, e la \textit{regola del prodotto}, che consente di fattorizzare distribuzioni di probabilità congiunte. Da queste derivano strumenti potenti come il \textit{teorema di Bayes}, che rappresenta il fondamento dell'inferenza probabilistica:
+L'incertezza è un concetto chiave nel riconoscimento di pattern: i dati osservati possono contenere rumore, essere incompleti o ambigui. Due regole fondamentali di probabilità determinao il ragionamento probabilistico \cite[p.~14]{bishop2006pattern}: la \textit{regola della somma}, che permette di il calcolo delle distribuzioni marginali, e la \textit{regola del prodotto}, che consente di calcolare probabilità congiunte. Da queste deriva il \textit{teorema di Bayes}, che svolge un ruolo centrale nel machine learning: fondamento dell'inferenza probabilistica:
 \begin{equation}
-p(\mathbf{w}|\mathcal{D}) = \frac{p(\mathcal{D}|\mathbf{w})p(\mathbf{w})}{p(\mathcal{D})}
+p(Y | X) = \frac{p(X | Y) \, p(Y)}{p(X)}
 \end{equation}
-dove $\mathbf{w}$ rappresenta i parametri del modello e $\mathcal{D}$ i dati osservati. Questa equazione esprime come le nostre credenze sui parametri (la \textit{prior} $p(\mathbf{w})$) vengano aggiornate alla luce dei dati osservati (tramite la \textit{likelihood} $p(\mathcal{D}|\mathbf{w})$) per ottenere la distribuzione \textit{a posteriori} $p(\mathbf{w}|\mathcal{D})$ \cite[pp.~21-22]{bishop2006pattern}.
+dove \( X \) e \( Y \) sono variabili casuali, \( p(Y | X) \) è la distribuzione \textit{a posteriori}, \( p(X | Y) \) è la \textit{verosimiglianza}, \( p(Y) \) è la distribuzione \textit{a priori}, e \( p(X) \) è l'\textit{evidenza} (o probabilità marginale dei dati).
 
-Nell'ambito del machine learning, due approcci principali emergono dalla prospettiva probabilistica: l'approccio \textit{frequentista} e quello \textit{Bayesiano} \cite[pp.~19-22]{bishop2006pattern}. L'approccio frequentista tratta i parametri del modello come quantità fisse ma sconosciute, stimandole tipicamente attraverso la \textit{massima verosimiglianza} (maximum likelihood). L'approccio Bayesiano, invece, considera i parametri come variabili casuali e fornisce una distribuzione di probabilità completa su di essi, permettendo di quantificare esplicitamente l'incertezza nelle predizioni.
+
+Nelle applicazioni pratiche di machine learning, dove spesso si lavora con dati multidimensionali come immagini, la formulazione si specializza considerando \( \mathcal{X} \) come l'insieme dei dati osservati e \( \mathbf{Y} \) come il vettore dei parametri o variabili latenti:
+
+\begin{equation}
+p(\mathbf{Y} | \mathcal{X}) = \frac{p(\mathcal{X} | \mathbf{Y}) \, p(\mathbf{Y})}{p(\mathcal{X})}
+\label{eq:bayes_applied}
+\end{equation}
+
+Le credenze iniziali sui parametri (la \textit{prior} \( p(\mathbf{Y}) \)) vengono aggiornate alla luce dei dati osservati (tramite la \textit{likelihood} \( p(\mathcal{X} | \mathbf{Y}) \)) per ottenere la distribuzione \textit{a posteriori} \( p(\mathbf{Y} | \mathcal{X}) \), che rappresenta la conoscenza aggiornata dopo aver visto i dati.
+
+Nell'ambito del machine learning, emergono due approcci principali per l'interpretazione dell'incertezza: l'approccio \textit{frequentista} e quello \textit{Bayesiano} \cite[pp.~19-22]{bishop2006pattern}. L'approccio frequentista stima un singolo set ottimale di parametri attraverso la \textit{massima ve\-ro\-si\-mi\-glian\-za} (maximum likelihood). L'approccio Ba\-ye\-sia\-no, invece, considera i parametri come variabili casuali e, partendo da una distribuzione a priori, la aggiorna alla luce dei dati per ottenere una distribuzione a posteriori.
 
 \subsection{Paradigmi di Apprendimento}
 
-Le metodologie di machine learning si articolano in diversi paradigmi, ciascuno caratterizzato dal tipo di supervisione disponibile durante la fase di addestramento e dalla natura del compito da risolvere \cite[Cap.~1]{bishop2006pattern}.
+Le metodologie di machine learning si dividono principalmente in due approcci, quello \textbf{supervisionato} e quello \textbf{non supervisionato} \cite{murphy2012}.
 
 \subsubsection{Apprendimento Supervisionato}
 
-L'apprendimento supervisionato rappresenta il paradigma più diffuso e studiato \cite[pp.~4-20]{bishop2006pattern}. In questo scenario, l'algoritmo viene addestrato su un insieme di dati etichettati, dove ogni esempio di input $\mathbf{x}_n$ è associato a un vettore target corrispondente $\mathbf{t}_n$. L'obiettivo è apprendere una funzione di mapping che, dato un nuovo input, sia in grado di predire l'output corrispondente con accuratezza.
+L'apprendimento supervisionato rappresenta il paradigma più applicato \cite{murphy2012}. L'obiettivo è apprendere una funzione di mapping che, dato un nuovo input $\mathbf{x}$, sia in grado di predire l'output $\mathbf{y}$ corrispondente con accuratezza.
 
-Formalmente, dato un training set $\{(\mathbf{x}_n, \mathbf{t}_n)\}_{n=1}^{N}$, l'algoritmo cerca di apprendere una funzione $y(\mathbf{x})$ tale che per un nuovo input $\mathbf{x}$, il valore predetto $y(\mathbf{x})$ sia il più possibile vicino al vero valore target $\mathbf{t}$ \cite[p.~4]{bishop2006pattern}.
+
+In questo paradigma, il modello ha accesso a un dataset di addestramento, chiamato \textbf{training set} $\mathcal{D}$, composto da coppie input-output $\mathcal{D} = \{(\mathbf{x}_i, \mathbf{y}_i)\}_{i=1}^N$, con $N$ esempi. dove $\mathbf{y}_i$ è l'etichetta o il valore target desiderato per l'input $\mathbf{x}_i$. L'obiettivo è apprendere una funzione di mappatura $f: \mathcal{X} \rightarrow \mathcal{Y}$ che generalizzi bene a nuovi input. Come evidenziato da \cite{buskirk2018}, la tecnica si basa su una variabile dipendente (continua) per individuare il migliore fitting lineare con più variabili indipendenti.
 
 L'apprendimento supervisionato si suddivide in due categorie principali in base alla natura dell'output:
 
-\paragraph{Classificazione.} Nei problemi di classificazione, il target appartiene a un insieme discreto di classi. L'obiettivo è assegnare ciascun input a una delle $K$ categorie disponibili. Esempi tipici includono il riconoscimento di cifre manoscritte, dove l'input è un'immagine e l'output è una delle dieci cifre possibili \cite[pp.~2-3]{bishop2006pattern}, o la diagnosi medica binaria (malato/sano).
+\paragraph{Classificazione.} Nei problemi di classificazione, il target appartiene a un insieme discreto di classi $y \in \{1, 2, ..., C\}$ \cite[p.~3]{murphy2012}. L'obiettivo è assegnare ciascun input a una delle $C$ categorie disponibili. Esempi tipici includono il riconoscimento di cifre scritte a mano, dove l'input è un'immagine e l'output è una delle dieci cifre possibili, la classificazione di immagini o il rilevamento di email spam.
 
-\paragraph{Regressione.} Nei problemi di regressione, il target è una o più variabili continue. L'obiettivo è predire il valore di tali variabili dato un input. Un esempio classico è la previsione del prezzo di una casa in funzione delle sue caratteristiche (superficie, posizione, numero di stanze) \cite[p.~3]{bishop2006pattern}.
+Gli algoritmi per la classificazione includono classificatori tradizionali come la regressione logistica, le Support Vector Machines (SVM), gli alberi decisionali, ma anche reti neurali e metodi ensemble come random forests e boosting \cite{hastie2009}. Ciascun metodo presenta vantaggi e limitazioni in termini di interpretabilità, capacità di gestire dati ad alta dimensionalità, e robustezza al rumore.
 
-Una sfida fondamentale nell'apprendimento supervisionato è il fenomeno dell'\textit{overfitting} \cite[pp.~8-10]{bishop2006pattern}. Un modello eccessivamente complesso può adattarsi non solo ai pattern genuini nei dati, ma anche al rumore casuale presente nel training set. Questo porta a prestazioni eccellenti sui dati di addestramento ma scadenti su nuovi dati, compromettendo la capacità di generalizzazione. La scelta della complessità del modello richiede quindi un bilanciamento attento tra la capacità di catturare la struttura sottostante dei dati e il rischio di memorizzare il rumore.
+\paragraph{Regressione.} Nei problemi di regressione, l'output è una o più variabili continue $y \in \mathbb{R}$  
+\cite[p.~3]{murphy2012}. L'obiettivo è predire il valore di tali variabili dato un input, minimizzando tipicamente una funzione di loss come l'errore quadratico medio (Mean Square Error, MSE). Un esempio classico è la previsione del prezzo di una casa in funzione delle sue caratteristiche o le variazioni dei prezzi di mercato.
+
+Tra gli algoritmi più utilizzati si annoverano la regressione lineare, la regressione ridge e lasso (per gestire la regolarizzazione, Shrinkage Methods), le reti neurali e metodi ensemble come random forests \cite{hastie2009}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{immagini/capitolo1/overfitting_bishop.png}
+\caption{Illustrazione del fenomeno di overfitting: modelli di complessità 
+crescente (polinomi di ordine $M$) applicati allo stesso dataset. 
+Un modello troppo complesso ($M=9$) si adatta al rumore nei dati 
+piuttosto che alla funzione sottostante. Adattato da \cite[Fig.~1.4]{bishop2006pattern}.}
+\label{fig:overfitting}
+\end{figure}
+
+Un problema fondamentale nell'apprendimento supervisionato è il fenomeno dell'\textit{over\-fit\-ting} \cite[pp.~8-10]{bishop2006pattern}. Un modello eccessivamente complesso si adatta sia ai pattern nei dati, ma anche al rumore casuale presente nel training set. Questo compromette la capacità di generalizzare, determinando ottime prestazioni sui dati di addestramento conosciuti ma peggiori su dati nuovi. La scelta della com\-ples\-sità del modello richiede quindi un bilanciamento attento tra la capacità di catturare la struttura sottostante dei dati e il rischio di memorizzare il rumore.
 
 \subsubsection{Apprendimento Non Supervisionato}
 
-L'apprendimento non supervisionato affronta scenari in cui i dati di addestramento consistono solo in vettori di input $\mathbf{x}_n$ senza alcuna variabile target associata \cite[p.~2]{bishop2006pattern}. L'obiettivo non è predire un output specifico, ma piuttosto scoprire strutture, pattern o rappresentazioni latenti nei dati che possano rivelare informazioni significative sulla loro distribuzione.
-
-Gli algoritmi non supervisionati trovano applicazione in diversi contesti:
-
-\paragraph{Clustering.} Il clustering mira a scoprire raggruppamenti nei dati tali che elementi all'interno dello stesso cluster siano più simili tra loro rispetto a elementi di cluster diversi \cite[p.~424]{bishop2006pattern}. Algoritmi classici includono K-means, che partiziona i dati minimizzando la varianza intra-cluster, e metodi gerarchici che costruiscono una gerarchia di raggruppamenti. Applicazioni tipiche spaziano dalla segmentazione di immagini all'analisi di mercato.
-
-\paragraph{Riduzione della Dimensionalità.} Queste tecniche proiettano dati ad alta dimensionalità in uno spazio a dimensionalità ridotta, preservando le caratteristiche essenziali della distribuzione originale \cite[pp.~559-577]{bishop2006pattern}. La Principal Component Analysis (PCA), per esempio, identifica le direzioni di massima varianza nei dati, permettendo una rappresentazione compatta che cattura la maggior parte dell'informazione. Tali metodi sono cruciali per visualizzazione, compressione dati e preprocessing.
-
-\paragraph{Density Estimation.} L'obiettivo è modellare la distribuzione di probabilità sottostante ai dati osservati $p(\mathbf{x})$ \cite[p.~2]{bishop2006pattern}. Una volta appresa questa distribuzione, è possibile generare nuovi campioni, identificare regioni ad alta probabilità, o rilevare osservazioni anomale che si discostano dalla distribuzione appresa.
-
-L'apprendimento non supervisionato risulta particolarmente rilevante in contesti reali dove l'etichettatura dei dati è costosa, time-consuming o impossibile, come nel caso del rilevamento di anomalie in ambito industriale.
+[--- da scrivere]
 
 
+
+
+
+\section{Representation Learning}
+La crescente disponibilità di dati è accompagnata da un’evoluzione verso forme diverse, comprendenti immagini, video, testi, audio, grafi. Le prestazioni dei metodi sono direttamente influenzate dalla qualità della rappresentazione dei dati (o features) su cui operano: si parla di \textit{representation learning} in riferimento all’apprendimento di rappresentazioni che facilitino l’estrazione di informazione utile ai fini di classificazione o previsione \cite{bengio2013representation}.
+
+Le metodologie tradizionali di apprendimento automatico risultavano intrinsecamente limitate nella capacità di elaborare dati naturali nella loro forma grezza. Inizialmente, la progettazione di sistemi di riconoscimento richiedeva la definizione manuale di feature extractor specifici per dominio, in grado di trasformare segnali grezzi in rappresentazioni strutturate adatte all’elaborazione \cite{lecun2015deep}.
+
+\section{Deep Learning}
+Il representation learning è un insieme di metodi che consentono l’appren\-di\-mento automatico delle rappresentazioni necessarie per il rilevamento o la classificazione a partire dai dati grezzi. Il \textit{deep learning} si basa sull’idea di apprendere rappresentazioni efficaci direttamente dai dati stessi. L’obiettivo viene realizzato attraverso architetture composte da molteplici livelli di rappresentazione (reti neurali flessibili e multistrato, \textit{deep}): tramite trasformazioni non lineari, le rappresentazioni diventano più astratte. Con la composizione di un numero sufficiente di tali trasformazioni, possono essere apprese funzioni molto complesse. 
+
+Negli ultimi anni si è registrato un crescente interesse verso l’applicazione di tecniche di deep learning al rilevamento di anomalie per garantire la qualità dei prodotti e migliorare l’efficienza e la qualità della produzione. Tuttavia, la natura prevalentemente non supervisionata del problema rende meno immediata la definizione di obiettivi di representation learning adeguati.
+
+Il rilevamento di anomalie generico si confronta con tipologie di anomalie più eterogenee, prive delle severe restrizioni tipiche delle applicazioni industriali: limitata disponibilità di campioni anomali, vincoli stringenti in termini di accuratezza e tempo di elaborazione, specifiche caratteristiche strutturali e semantiche (disallineamenti logici, micro difetti superficiali o deviazioni dimensionali di precisione).
+
+Il rilevamento di anomalie visive in ambito industriale, al contrario, affronta diverse sfide pratiche intrinseche agli scenari reali \cite{zhuo2025survey}. La variabilità delle condizioni di produzione (fattori ambientali, variazioni di illuminazione, angolazioni della telecamera) influenza in modo significativo l’aspetto visivo dei prodotti: i dati considerati normali possono presentare un’elevata variabilità, richiedendo ai metodi di rilevamento delle anomalie di mantenere robustezza in condizioni operative diverse per evitare classificazioni errato o mancati riconoscimenti. 
+
+In secondo luogo, i dataset presentano spesso un forte sbilanciamento: le istanze normali superano di gran lunga quelle anomale e non sono etichettate, rendendo difficile identificare cosa costituisca un’anomalia e per quali motivi. Imperfezioni dei sensori o condizioni ambientali difficili generano elevati livelli di rumore nelle immagini, che possono complicare ulteriormente il rilevamento 
+
+Il problema del rilevamento delle anomalie si configura quindi come un compito di apprendimento non supervisionato, con l’obiettivo di costruire un modello rappresentativo della maggioranza dei punti dati. La complessità aumenta a causa dell’elevata eterogeneità delle anomalie, rendendo difficile la definizione di un modello esaustivo per tali eventi. Di conseguenza, l’approccio comunemente adottato consiste nell’apprendere un modello dei campioni normali e considerare anomale le deviazioni rispetto ad esso.
 
 
 
@@ -78,23 +112,6 @@ Tra le prime formalizzazioni del concetto troviamo \cite{barnett1994outliers}, c
 
 L’approccio predominante nell’anomaly detection è l’adozione di strategie non supervisionate: la ragione risiede nella frequente assenza, o comunque marcata scarsità, di dati etichettati relativi ad anomalie. Anche quando presenti, infatti, tali dati risultano insufficienti per caratterizzare in modo esaustivo le diverse manifestazioni possibili di anomalie, limitando l’efficacia degli approcci supervisionati. Una delle idee centrali nell’anomaly detection consiste quindi nell’apprendere un modello normale a partire da dati normali, in modo non supervisionato, per  rilevare le anomalie come deviazioni dal modello appreso. Attualmente, l’anomaly detection trova impiego in una vasta gamma di settori: ad esempio, dalla cybersecurity \cite{malaiya2018anomaly} alle scienze della terra \cite{fisher2017anomaly}, in ambiti finanziari \cite{ahmed2016survey}, per la diagnosi medica \cite{baur2019fusing} o nella bioinformatica \cite{min2017deep}.
 
-\section{Representation Learning}
-La crescente disponibilità di dati è accompagnata da un’evoluzione verso forme diverse, comprendenti immagini, video, testi, audio, grafi. Le prestazioni dei metodi sono direttamente influenzate dalla qualità della rappresentazione dei dati (o features) su cui operano: si parla di \textit{representation learning} in riferimento all’apprendimento di rappresentazioni che facilitino l’estrazione di informazione utile ai fini di classificazione o previsione \cite{bengio2013representation}.
-
-Le metodologie tradizionali di apprendimento automatico risultavano intrinsecamente limitate nella capacità di elaborare dati naturali nella loro forma grezza. Inizialmente, la progettazione di sistemi di riconoscimento richiedeva la definizione manuale di feature extractor specifici per dominio, in grado di trasformare segnali grezzi in rappresentazioni strutturate adatte all’elaborazione \cite{lecun2015deep}.
-
-\subsection{Deep Learning}
-Il representation learning è un insieme di metodi che consentono l’appren\-di\-mento automatico delle rappresentazioni necessarie per il rilevamento o la classificazione a partire dai dati grezzi. Il \textit{deep learning} si basa sull’idea di apprendere rappresentazioni efficaci direttamente dai dati stessi. L’obiettivo viene realizzato attraverso architetture composte da molteplici livelli di rappresentazione (reti neurali flessibili e multistrato, \textit{deep}): tramite trasformazioni non lineari, le rappresentazioni diventano più astratte. Con la composizione di un numero sufficiente di tali trasformazioni, possono essere apprese funzioni molto complesse. 
-
-Negli ultimi anni si è registrato un crescente interesse verso l’applicazione di tecniche di deep learning al rilevamento di anomalie per garantire la qualità dei prodotti e migliorare l’efficienza e la qualità della produzione. Tuttavia, la natura prevalentemente non supervisionata del problema rende meno immediata la definizione di obiettivi di representation learning adeguati.
-
-Il rilevamento di anomalie generico si confronta con tipologie di anomalie più eterogenee, prive delle severe restrizioni tipiche delle applicazioni industriali: limitata disponibilità di campioni anomali, vincoli stringenti in termini di accuratezza e tempo di elaborazione, specifiche caratteristiche strutturali e semantiche (disallineamenti logici, micro difetti superficiali o deviazioni dimensionali di precisione).
-
-Il rilevamento di anomalie visive in ambito industriale, al contrario, affronta diverse sfide pratiche intrinseche agli scenari reali \cite{zhuo2025survey}. La variabilità delle condizioni di produzione (fattori ambientali, variazioni di illuminazione, angolazioni della telecamera) influenza in modo significativo l’aspetto visivo dei prodotti: i dati considerati normali possono presentare un’elevata variabilità, richiedendo ai metodi di rilevamento delle anomalie di mantenere robustezza in condizioni operative diverse per evitare classificazioni errato o mancati riconoscimenti. 
-
-In secondo luogo, i dataset presentano spesso un forte sbilanciamento: le istanze normali superano di gran lunga quelle anomale e non sono etichettate, rendendo difficile identificare cosa costituisca un’anomalia e per quali motivi. Imperfezioni dei sensori o condizioni ambientali difficili generano elevati livelli di rumore nelle immagini, che possono complicare ulteriormente il rilevamento 
-
-Il problema del rilevamento delle anomalie si configura quindi come un compito di apprendimento non supervisionato, con l’obiettivo di costruire un modello rappresentativo della maggioranza dei punti dati. La complessità aumenta a causa dell’elevata eterogeneità delle anomalie, rendendo difficile la definizione di un modello esaustivo per tali eventi. Di conseguenza, l’approccio comunemente adottato consiste nell’apprendere un modello dei campioni normali e considerare anomale le deviazioni rispetto ad esso.
 
 
-
+\section{Depth Estimation}

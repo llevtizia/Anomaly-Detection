@@ -1,6 +1,20 @@
 \documentclass{report}
-\usepackage{graphicx} % Required for inserting images
-\graphicspath{{immagini/}}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+% PACCHETTI PER LE IMMAGINI
+\usepackage{graphicx}          % Pacchetto base per immagini
+\usepackage{float}             % Per posizionamento preciso [H]
+\usepackage{subfig} 
+\usepackage{subcaption}        % Alternativa più moderna a subfig
+
+% SPECIFICA IL PATH DELLE IMMAGINI
+\graphicspath{{immagini/capitolo1/}{immagini/capitolo2/}{immagini/capitolo3/}}
+
+% Altri pacchetti utili
+\usepackage[font=small,labelfont=bf]{caption}  % Caption personalizzate
 
 \usepackage[backend=biber,style=ieee]{biblatex} % puoi cambiare stile
 \usepackage[autostyle,italian=guillemets]{csquotes}
