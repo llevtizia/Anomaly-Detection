@@ -2373,22 +2373,38 @@
     <bcf:citekey order="6" intorder="1">murphy2012</bcf:citekey>
     <bcf:citekey order="7" intorder="1">buskirk2018</bcf:citekey>
     <bcf:citekey order="8" intorder="1">murphy2012</bcf:citekey>
-    <bcf:citekey order="9" intorder="1">hastie2009</bcf:citekey>
+    <bcf:citekey order="9" intorder="1">hastie2009elements</bcf:citekey>
     <bcf:citekey order="10" intorder="1">murphy2012</bcf:citekey>
-    <bcf:citekey order="11" intorder="1">hastie2009</bcf:citekey>
+    <bcf:citekey order="11" intorder="1">hastie2009elements</bcf:citekey>
     <bcf:citekey order="12" intorder="1">bishop2006pattern</bcf:citekey>
     <bcf:citekey order="13" intorder="1">bishop2006pattern</bcf:citekey>
     <bcf:citekey order="14" intorder="1">bishop2006pattern</bcf:citekey>
-    <bcf:citekey order="15" intorder="1">bengio2013representation</bcf:citekey>
-    <bcf:citekey order="16" intorder="1">lecun2015deep</bcf:citekey>
-    <bcf:citekey order="17" intorder="1">zhuo2025survey</bcf:citekey>
-    <bcf:citekey order="18" intorder="1">ruff2021anomaly</bcf:citekey>
-    <bcf:citekey order="19" intorder="1">barnett1994outliers</bcf:citekey>
-    <bcf:citekey order="20" intorder="1">malaiya2018anomaly</bcf:citekey>
-    <bcf:citekey order="21" intorder="1">fisher2017anomaly</bcf:citekey>
-    <bcf:citekey order="22" intorder="1">ahmed2016survey</bcf:citekey>
-    <bcf:citekey order="23" intorder="1">baur2019fusing</bcf:citekey>
-    <bcf:citekey order="24" intorder="1">min2017deep</bcf:citekey>
+    <bcf:citekey order="15" intorder="1">hastie2009elements</bcf:citekey>
+    <bcf:citekey order="16" intorder="1">murphy2012</bcf:citekey>
+    <bcf:citekey order="17" intorder="1">bishop2006pattern</bcf:citekey>
+    <bcf:citekey order="18" intorder="1">murphy2012</bcf:citekey>
+    <bcf:citekey order="19" intorder="1">hastie2009elements</bcf:citekey>
+    <bcf:citekey order="20" intorder="1">murphy2012</bcf:citekey>
+    <bcf:citekey order="21" intorder="1">lo2009automated</bcf:citekey>
+    <bcf:citekey order="22" intorder="1">berkhin2006survey</bcf:citekey>
+    <bcf:citekey order="23" intorder="1">cheeseman1988autoclass</bcf:citekey>
+    <bcf:citekey order="24" intorder="1">bishop2006pattern</bcf:citekey>
+    <bcf:citekey order="25" intorder="1">hastie2009elements</bcf:citekey>
+    <bcf:citekey order="26" intorder="1">jolliffe2002principal</bcf:citekey>
+    <bcf:citekey order="27" intorder="1">vandermaaten2008</bcf:citekey>
+    <bcf:citekey order="28" intorder="1">murphy2012</bcf:citekey>
+    <bcf:citekey order="29" intorder="1">buskirk2018</bcf:citekey>
+    <bcf:citekey order="30" intorder="1">bishop2006pattern</bcf:citekey>
+    <bcf:citekey order="31" intorder="1">bengio2013representation</bcf:citekey>
+    <bcf:citekey order="32" intorder="1">lecun2015deep</bcf:citekey>
+    <bcf:citekey order="33" intorder="1">zhuo2025survey</bcf:citekey>
+    <bcf:citekey order="34" intorder="1">ruff2021anomaly</bcf:citekey>
+    <bcf:citekey order="35" intorder="1">barnett1994outliers</bcf:citekey>
+    <bcf:citekey order="36" intorder="1">malaiya2018anomaly</bcf:citekey>
+    <bcf:citekey order="37" intorder="1">fisher2017anomaly</bcf:citekey>
+    <bcf:citekey order="38" intorder="1">ahmed2016survey</bcf:citekey>
+    <bcf:citekey order="39" intorder="1">baur2019fusing</bcf:citekey>
+    <bcf:citekey order="40" intorder="1">min2017deep</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">
