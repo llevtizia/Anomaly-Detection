@@ -88,15 +88,10 @@ dimensionalità" (\textit{curse of dimensionality}), fenomeno per cui la densit�
 
 I metodi principali si dividono in \textbf{lineari} e \textbf{non lineari}. Tra i primi, l'Analisi delle Componenti Principali (Principal Component Analysis, PCA) è quello più noto: proietta i dati lungo le direzioni ortogonali di massima varianza \cite{jolliffe2002principal}, permettendo una rappresentazione compatta che cattura la maggior parte dell'informazione. 
 
-Metodi non lineari come t-SNE (t-distributed Stochastic Neighbor Embedding) 
-\cite{vandermaaten2008} e autoencoder non lineari \cite[Cap.~28]{murphy2012} 
-estendono queste idee a relazioni più complesse, preservando la struttura 
-locale dei dati in spazi a bassa dimensionalità. Tali metodi sono 
-particolarmente efficaci per visualizzazione, compressione dati, e 
-preprocessing in problemi di classificazione ad alta dimensionalità 
-\cite{buskirk2018}.
+Metodi non lineari comprendono gli embedding basati su vicinanze (\textit{neigh\-bor\-hood based embeddings} come t-SNE (t-distributed Stochastic Neighbor Embedding) \cite{maaten2008visualizing} e e UMAP (Uniform Manifold Approximation and Projection) \cite{mcinnes2018umap}: preservano relazioni locali tra punti, risultando efficaci per la visualizzazione di dataset complessi. Un'alternativa tipica del deep learning sono gli autoencoder \cite{murphy2012}, reti neurali che ricostruiscono il proprio input attraverso un collo di bottiglia (bottleneck layer) che codifica una rappresentazione compressa e informativa \cite{goodfellow2016deep}.
 
-%% fino a qui
+Tali metodi sono particolarmente efficaci per l'analisi di dati ad alta dimensionalità: dall'elaborazione di immagini \cite{van2009dimensionality}, all'analisi di testi \cite{blei2003latent}, fino alla preparazione di dati per task di machine learning, dove feature di dimensionalità ridotta possono migliorare efficienza computazionale e performance dei modelli \cite{hastie2009elements}.
+
 
 \paragraph{Density Estimation.} L'obiettivo è modellare la distribuzione di probabilità sottostante ai dati osservati $p(\mathbf{x})$ \cite[p.~2]{bishop2006pattern}. Una volta appresa questa distribuzione, è possibile generare nuovi campioni, identificare regioni ad alta probabilità, o rilevare osservazioni anomale che si discostano dalla distribuzione appresa.
 
