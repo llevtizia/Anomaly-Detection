@@ -93,15 +93,46 @@ Metodi non lineari comprendono gli embedding basati su vicinanze (\textit{neigh\
 Tali metodi sono particolarmente efficaci per l'analisi di dati ad alta dimensionalità: dall'elaborazione di immagini \cite{van2009dimensionality}, all'analisi di testi \cite{blei2003latent}, fino alla preparazione di dati per task di machine learning, dove feature di dimensionalità ridotta possono migliorare efficienza computazionale e performance dei modelli \cite{hastie2009elements}.
 
 
-\paragraph{Density Estimation.} L'obiettivo è modellare la distribuzione di probabilità sottostante ai dati osservati $p(\mathbf{x})$ \cite[p.~2]{bishop2006pattern}. Una volta appresa questa distribuzione, è possibile generare nuovi campioni, identificare regioni ad alta probabilità, o rilevare osservazioni anomale che si discostano dalla distribuzione appresa.
+%\paragraph{Density Estimation.} L'obiettivo è modellare la distribuzione di probabilità sottostante ai dati osservati $p(\mathbf{x})$ \cite[p.~2]{bishop2006pattern}. Una volta appresa questa distribuzione, è possibile generare nuovi campioni, identificare regioni ad alta probabilità, o rilevare osservazioni anomale che si discostano dalla distribuzione appresa.
 
-L'apprendimento non supervisionato risulta particolarmente rilevante in contesti reali dove l'etichettatura dei dati è costosa, time-consuming o impossibile, come nel caso del rilevamento di anomalie in ambito industriale.
+%L'apprendimento non supervisionato risulta particolarmente rilevante in contesti reali dove l'etichettatura dei dati è costosa, time-consuming o impossibile, come nel caso del rilevamento di anomalie in ambito industriale.
 
 
 
 \subsubsection{Apprendimento per Rinforzo}
 
+L'apprendimento per rinforzo (reinforcement learning, RL) costituisce un terzo paradigma del machine learning, distinto sia dall'apprendimento supervisionato che da quello non supervisionato \cite{sutton2018reinforcement}. 
 
+In questo scenario, un \textit{agente} interagisce con un \textit{ambiente} dinamico atraverso una sequenza di azioni: ad ogni passo, l'agente seleziona un'azione sulla base dello stato corrente dell'ambiente. Questo determina la transizione verso un nuovo stato e la ricezione di un segnale di \textit{reward} retroattivo, che codifica il successo del compito.
+
+A differenza del \textit{supervised learning}, dove l'algoritmo apprende da esempi etichettati che indicano esplicitamente l'azione corretta e il compito del sistema è generalizzare le risposte, o dell'\textit{unsupervised learning}, dove si cercano strutture in dati statici, nel \textbf{reinforcement learning} l'agente scopre autonomamente quali azioni producono le ricompense più elevate attraverso una ricerca \textit{trial-and-error} \cite[pp.~1-6]{sutton2018reinforcement}. L'agente riceve un segnale di ricompensa (reward) che indica la qualità dell'azione intrapresa rispetto all'obiettivo finale.
+
+Matematicamente, il problema viene formalizzato come un \textit{Markov Decision Process} (MDP), caratterizzato da: \textbf{stati} ($S_t \in \mathcal{S}$), \textbf{azioni} ($A_t \in \mathcal{A}(s)$) e \textbf{ricompense} ($R_{t+1} \in \mathcal{R} \subset \mathbb{R}$). Ad ogni step \textit{t}, l'agente riceve una rappresentazione dello stato e seleziona l'azione successiva, determinando una transizione allo stato successivo dopo aver ottenuto la ricompensa. 
+La traiettoria risultante è quindi della forma:
+\begin{equation}
+S_0, A_0, R_1, S_1, A_1, R_2, S_2, A_2, R_3, \dots
+\end{equation}
+
+In un MDP finito, la dinamica è completamente specificata dalla probabilità di \textbf{transizione} $p(s' \mid s, a)$ e dalla \textbf{distribuzione delle ricompense} $p(r \mid s, a, s')$,
+spesso combinate in $p(s', r \mid s, a)$.
+L'obiettivo è apprendere una \textit{policy} $\pi: \mathcal{S} \rightarrow \mathcal{A}$ che massimizzi il return atteso, definito come la somma delle ricompense future scontate.
+
+L'integrazione del reinforcement learning con il deep learning ha dato origine al \textit{deep reinforcement learning} (DRL) \cite{arulkumaran2017, li2017deep}, che ha raggiunto risultati notevoli in domini complessi come videogiochi \cite{mnih2015}, robotica \cite{levine2016}, giochi da tavolo \cite{silver2016},guida autonoma \cite{kiran2021}. Nonostante i successi, tuttavia, il DRL presenta ancora sfide in termini di efficienza campionaria e stabilità dell'ap\-pren\-di\-men\-to \cite{wang2020deep}.
+
+
+\subsection{Limitazioni del Machine Learning Tradizionale e Rap\-pre\-sen\-ta\-zio\-ni}
+
+Nonostante i successi dei metodi di machine learning tradizionali descritti in numerosi domini applicativi, l'ap\-pli\-ca\-zio\-ne di algoritmi come SVM, decision trees o K-means a dati complessi 
+nella loro forma grezza (come immagini, audio o testo) presenta limitazioni intrinseche \cite{lecun2015deep, bengio2013representation}.
+
+La sfida principale risiede nella \textit{feature engineering}: un processo dispendioso e domain-specific, che richiede l'estrazione e la selezione manuale di feature rilevanti a partire dai dati grezzi.
+
+Questo processo è intrinsecamente limitato: features specifiche per un determinato compito raramente generalizzano ad altri domini, e la progettazione manuale non può catturare la 
+complessità dei dati naturali \cite{lecun2015deep}.
+
+Queste limitazioni hanno motivato lo sviluppo di approcci in grado di \textbf{apprendere automaticamente rappresentazioni efficaci} direttamente dai dati grezzi, eliminando la necessità di feature engineering manuale. Tale transizione ha dato origine ai modelli di \textbf{deep learning}: estendendo i principi del machine learning attraverso reti neurali con molti strati (\textit{deep}), aumenta la capacità di apprendere gerarchie di feature via via più astratte e potenti \cite{goodfellow2016deep}.
+
+%% da qui in poi devo ancora attaccare meglio i pezzi
 
 \section{Representation Learning}
 La crescente disponibilità di dati è accompagnata da un’evoluzione verso forme diverse, comprendenti immagini, video, testi, audio, grafi. Le prestazioni dei metodi sono direttamente influenzate dalla qualità della rappresentazione dei dati (o features) su cui operano: si parla di \textit{representation learning} in riferimento all’apprendimento di rappresentazioni che facilitino l’estrazione di informazione utile ai fini di classificazione o previsione \cite{bengio2013representation}.

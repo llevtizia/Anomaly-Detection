@@ -2398,17 +2398,29 @@
     <bcf:citekey order="31" intorder="1">van2009dimensionality</bcf:citekey>
     <bcf:citekey order="32" intorder="1">blei2003latent</bcf:citekey>
     <bcf:citekey order="33" intorder="1">hastie2009elements</bcf:citekey>
-    <bcf:citekey order="34" intorder="1">bishop2006pattern</bcf:citekey>
-    <bcf:citekey order="35" intorder="1">bengio2013representation</bcf:citekey>
-    <bcf:citekey order="36" intorder="1">lecun2015deep</bcf:citekey>
-    <bcf:citekey order="37" intorder="1">zhuo2025survey</bcf:citekey>
-    <bcf:citekey order="38" intorder="1">ruff2021anomaly</bcf:citekey>
-    <bcf:citekey order="39" intorder="1">barnett1994outliers</bcf:citekey>
-    <bcf:citekey order="40" intorder="1">malaiya2018anomaly</bcf:citekey>
-    <bcf:citekey order="41" intorder="1">fisher2017anomaly</bcf:citekey>
-    <bcf:citekey order="42" intorder="1">ahmed2016survey</bcf:citekey>
-    <bcf:citekey order="43" intorder="1">baur2019fusing</bcf:citekey>
-    <bcf:citekey order="44" intorder="1">min2017deep</bcf:citekey>
+    <bcf:citekey order="34" intorder="1">sutton2018reinforcement</bcf:citekey>
+    <bcf:citekey order="35" intorder="1">sutton2018reinforcement</bcf:citekey>
+    <bcf:citekey order="36" intorder="1">arulkumaran2017</bcf:citekey>
+    <bcf:citekey order="36" intorder="2">li2017deep</bcf:citekey>
+    <bcf:citekey order="37" intorder="1">mnih2015</bcf:citekey>
+    <bcf:citekey order="38" intorder="1">levine2016</bcf:citekey>
+    <bcf:citekey order="39" intorder="1">silver2016</bcf:citekey>
+    <bcf:citekey order="40" intorder="1">kiran2021</bcf:citekey>
+    <bcf:citekey order="41" intorder="1">wang2020deep</bcf:citekey>
+    <bcf:citekey order="42" intorder="1">lecun2015deep</bcf:citekey>
+    <bcf:citekey order="42" intorder="2">bengio2013representation</bcf:citekey>
+    <bcf:citekey order="43" intorder="1">lecun2015deep</bcf:citekey>
+    <bcf:citekey order="44" intorder="1">goodfellow2016deep</bcf:citekey>
+    <bcf:citekey order="45" intorder="1">bengio2013representation</bcf:citekey>
+    <bcf:citekey order="46" intorder="1">lecun2015deep</bcf:citekey>
+    <bcf:citekey order="47" intorder="1">zhuo2025survey</bcf:citekey>
+    <bcf:citekey order="48" intorder="1">ruff2021anomaly</bcf:citekey>
+    <bcf:citekey order="49" intorder="1">barnett1994outliers</bcf:citekey>
+    <bcf:citekey order="50" intorder="1">malaiya2018anomaly</bcf:citekey>
+    <bcf:citekey order="51" intorder="1">fisher2017anomaly</bcf:citekey>
+    <bcf:citekey order="52" intorder="1">ahmed2016survey</bcf:citekey>
+    <bcf:citekey order="53" intorder="1">baur2019fusing</bcf:citekey>
+    <bcf:citekey order="54" intorder="1">min2017deep</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">
