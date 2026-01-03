@@ -1,5 +1,15 @@
 \section{Machine Learning}
-Negli ultimi decenni, l'utilizzo di sistemi informatici per la risoluzone di problemi complessi ha subito una trasformazione radicale. Tradizionalmente, gli algoritmi richiedono la codifica esplicita di regole e procedure. Il Machine Learning (ML), al contrario, introduce un paradigma alternativo. 
+Negli ultimi decenni, l'utilizzo di sistemi informatici per la risoluzione di problemi complessi ha subito una trasformazione radicale. Tradizionalmente, gli algoritmi richiedono la codifica esplicita di regole e procedure. Il Machine Learning (ML), al contrario, introduce un paradigma alternativo. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{immagini/capitolo1/classical_vs_ml_chollet2021.png}
+\caption{Confronto tra programmazione classica e machine learning. Nella 
+programmazione tradizionale, regole esplicite trasformano dati in risposte. 
+Nel machine learning, il sistema apprende le regole dai dati e dalle risposte 
+fornite come esempi. Adattato da \cite{chollet2021deep}.}
+\label{fig:classical_vs_ml}
+\end{figure}
 
 Con Machine Learning, infatti, si intende la disciplina dell'intelligenza ar\-ti\-fi\-cia\-le che si occupa dello sviluppo di algoritmi e modelli statistici in grado di migliorare le proprie prestazioni in un determinato compito attraverso l'es\-pe\-rien\-za. La definizione classica proposta da Mitchell \cite{mitchell1997machine} formalizza questo concetto:
 
@@ -15,7 +25,7 @@ L'apprendimento automatico si contrappone all'approccio tradizionale, dove regol
 
 \subsection{Teoria della probabilità}
 
-L'incertezza è un concetto chiave nel riconoscimento di pattern: i dati osservati possono contenere rumore, essere incompleti o ambigui. Due regole fondamentali di probabilità determinao il ragionamento probabilistico \cite[p.~14]{bishop2006pattern}: la \textit{regola della somma}, che permette il calcolo delle distribuzioni marginali, e la \textit{regola del prodotto}, che consente di calcolare probabilità congiunte. Da queste deriva il \textit{teorema di Bayes}, che svolge un ruolo centrale nel machine learning e costituisce il fondamento dell'inferenza probabilistica:
+L'incertezza è un concetto chiave nel riconoscimento di pattern: i dati osservati possono contenere rumore, essere incompleti o ambigui. Due regole fondamentali di probabilità determinato il ragionamento probabilistico \cite[p.~14]{bishop2006pattern}: la \textit{regola della somma}, che permette il calcolo delle distribuzioni marginali, e la \textit{regola del prodotto}, che consente di calcolare probabilità congiunte. Da queste deriva il \textit{teorema di Bayes}, che svolge un ruolo centrale nel machine learning e costituisce il fondamento dell'inferenza probabilistica:
 \begin{equation}
 p(Y | X) = \frac{p(X | Y) \, p(Y)}{p(X)}
 \end{equation}
@@ -36,6 +46,13 @@ Nell'ambito del machine learning, emergono due approcci principali per l'interpr
 \subsection{Paradigmi di Apprendimento}
 
 Le metodologie di machine learning si dividono in tre approcci, quello \textbf{supervisionato}, quello \textbf{non supervisionato} e l'\textbf{apprendimento per rinforzo} \cite{murphy2012}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{immagini/capitolo1/schema_ml.png}
+\caption{Schema dei tre paradigmi fondamentali del Machine Learning.}
+\label{fig:paradigmi_ml}
+\end{figure}
 
 \subsubsection{Apprendimento Supervisionato}
 
@@ -81,14 +98,16 @@ l'obiettivo è assegnare a ciascuna un'e\-ti\-chet\-ta di cluster $z_i \in \{1, 
 
 Algoritmi classici includono: \textbf{metodi partitivi}, come K-means che minimizza la varianza intra-cluster, \textbf{metodi gerarchici} che costruiscono una gerarchia di raggruppamenti (agglomerativi o divisivi) \cite{hastie2009elements}, \textbf{model based clustering}, che modella i dati come provenienti da una miscela di distribuzioni probabilistiche, consentendo una stima probabilistica dell'appartenenza ai cluster \cite{murphy2012}. Le applicazioni spaziano dall'identificazione di sottopopolazioni cellulari in biologia \cite{lo2009automated} alla segmentazione della clientela nell'e-commerce \cite{berkhin2006survey}, fino alla scoperta di nuove classi di oggetti celesti in astronomia \cite{cheeseman1988autoclass}.
 
-\paragraph{Dimensionality Reduction.} La riduzione della dimensionalità ha come obiettivo quello di mappare dati ad alta dimensionalità in spazi di dimensioni inferiori, preservando le caratteristiche essenziali della distribuzione originale \cite[pp.~559-577]{bishop2006pattern}. 
+\paragraph{Dimensionality Reduction.} 
+\label{sec:dimensionality_reduction}
+La riduzione della dimensionalità ha come obiettivo quello di mappare dati ad alta dimensionalità in spazi di dimensioni inferiori, preservando le caratteristiche essenziali della distribuzione originale \cite[pp.~559-577]{bishop2006pattern}. 
 
 Questo processo consente di affrontare la "maledizione della 
 dimensionalità" (\textit{curse of dimensionality}), fenomeno per cui la densità dei dati decresce all'au\-men\-ta\-re della dimensionalità, rendendo difficile l'apprendimento statistico \cite{hastie2009elements}.
 
 I metodi principali si dividono in \textbf{lineari} e \textbf{non lineari}. Tra i primi, l'Analisi delle Componenti Principali (Principal Component Analysis, PCA) è quello più noto: proietta i dati lungo le direzioni ortogonali di massima varianza \cite{jolliffe2002principal}, permettendo una rappresentazione compatta che cattura la maggior parte dell'informazione. 
 
-Metodi non lineari comprendono gli embedding basati su vicinanze (\textit{neigh\-bor\-hood based embeddings} come t-SNE (t-distributed Stochastic Neighbor Embedding) \cite{maaten2008visualizing} e e UMAP (Uniform Manifold Approximation and Projection) \cite{mcinnes2018umap}: preservano relazioni locali tra punti, risultando efficaci per la visualizzazione di dataset complessi. Un'alternativa tipica del deep learning sono gli autoencoder \cite{murphy2012}, reti neurali che ricostruiscono il proprio input attraverso un collo di bottiglia (bottleneck layer) che codifica una rappresentazione compressa e informativa \cite{goodfellow2016deep}.
+Metodi non lineari comprendono gli embedding basati su vicinanze (\textit{neigh\-bor\-hood based embeddings} come t-SNE (t-distributed Stochastic Neighbor Embedding) \cite{maaten2008visualizing} e UMAP (Uniform Manifold Approximation and Projection) \cite{mcinnes2018umap}: preservano relazioni locali tra punti, risultando efficaci per la visualizzazione di dataset complessi. Un'alternativa tipica del deep learning sono gli autoencoder \cite{murphy2012}, reti neurali che ricostruiscono il proprio input attraverso un collo di bottiglia (bottleneck layer) che codifica una rappresentazione compressa e informativa \cite{goodfellow2016deep}.
 
 Tali metodi sono particolarmente efficaci per l'analisi di dati ad alta dimensionalità: dall'elaborazione di immagini \cite{van2009dimensionality}, all'analisi di testi \cite{blei2003latent}, fino alla preparazione di dati per task di machine learning, dove feature di dimensionalità ridotta possono migliorare efficienza computazionale e performance dei modelli \cite{hastie2009elements}.
 
@@ -103,7 +122,7 @@ Tali metodi sono particolarmente efficaci per l'analisi di dati ad alta dimensio
 
 L'apprendimento per rinforzo (reinforcement learning, RL) costituisce un terzo paradigma del machine learning, distinto sia dall'apprendimento supervisionato che da quello non supervisionato \cite{sutton2018reinforcement}. 
 
-In questo scenario, un \textit{agente} interagisce con un \textit{ambiente} dinamico atraverso una sequenza di azioni: ad ogni passo, l'agente seleziona un'azione sulla base dello stato corrente dell'ambiente. Questo determina la transizione verso un nuovo stato e la ricezione di un segnale di \textit{reward} retroattivo, che codifica il successo del compito.
+In questo scenario, un \textit{agente} interagisce con un \textit{ambiente} dinamico attraverso una sequenza di azioni: ad ogni passo, l'agente seleziona un'azione sulla base dello stato corrente dell'ambiente. Questo determina la transizione verso un nuovo stato e la ricezione di un segnale di \textit{reward} retroattivo, che codifica il successo del compito.
 
 A differenza del \textit{supervised learning}, dove l'algoritmo apprende da esempi etichettati che indicano esplicitamente l'azione corretta e il compito del sistema è generalizzare le risposte, o dell'\textit{unsupervised learning}, dove si cercano strutture in dati statici, nel \textbf{reinforcement learning} l'agente scopre autonomamente quali azioni producono le ricompense più elevate attraverso una ricerca \textit{trial-and-error} \cite[pp.~1-6]{sutton2018reinforcement}. L'agente riceve un segnale di ricompensa (reward) che indica la qualità dell'azione intrapresa rispetto all'obiettivo finale.
 
@@ -120,15 +139,25 @@ L'obiettivo è apprendere una \textit{policy} $\pi: \mathcal{S} \rightarrow \mat
 L'integrazione del reinforcement learning con il deep learning ha dato origine al \textit{deep reinforcement learning} (DRL) \cite{arulkumaran2017, li2017deep}, che ha raggiunto risultati notevoli in domini complessi come videogiochi \cite{mnih2015}, robotica \cite{levine2016}, giochi da tavolo \cite{silver2016},guida autonoma \cite{kiran2021}. Nonostante i successi, tuttavia, il DRL presenta ancora sfide in termini di efficienza campionaria e stabilità dell'ap\-pren\-di\-men\-to \cite{wang2020deep}.
 
 
-\subsection{Limitazioni del Machine Learning Tradizionale e Rap\-pre\-sen\-ta\-zio\-ni}
+\subsection{Limitazioni del Machine Learning Tradizionale}
 
-Nonostante i successi dei metodi di machine learning tradizionali descritti in numerosi domini applicativi, l'ap\-pli\-ca\-zio\-ne di algoritmi come SVM, decision trees o K-means a dati complessi 
-nella loro forma grezza (come immagini, audio o testo) presenta limitazioni intrinseche \cite{lecun2015deep, bengio2013representation}.
+Nonostante i successi dei metodi di machine learning tradizionali descritti in numerosi domini applicativi, l'ap\-pli\-ca\-zio\-ne di algoritmi tradizionali, sia supervisionati (SVM, decision trees) che non supervisionati (K-means, PCA), a dati complessi 
+nella loro forma grezza (come immagini, audio o testo) presenta limitazioni intrinseche legate alla modalità con cui le rappresentazioni dei dati vengono costruite \cite{lecun2015deep, bengio2013representation}.
 
-La sfida principale risiede nella \textit{feature engineering}: un processo dispendioso e domain-specific, che richiede l'estrazione e la selezione manuale di feature rilevanti a partire dai dati grezzi.
+\subsubsection{Feature Engineering}
 
-Questo processo è intrinsecamente limitato: features specifiche per un determinato compito raramente generalizzano ad altri domini, e la progettazione manuale non può catturare la 
-complessità dei dati naturali \cite{lecun2015deep}.
+La sfida principale nel machine learning tradizionale risiede nella \textit{feature engineering}: indipendentemente dal paradigma di apprendimento adottato, i dati devono essere trasformati in rappresentazioni strutturate e informative prima di essere elaborati \cite{lecun2015deep, domingos2012few}. In una prima fase, si progetta manualmente un estrattore di feature (\textit{feature extractor}) per trasformare i dati \textit{raw} in una rappresentazione strutturata e informativa. Solo in seguito, l'algoritmo di apprendimento poteva operare su queste feature per svolgere il compito desiderato (classificazione, regressione, etc.) \cite{goodfellow2016deep}.
+
+Nel riconoscimento di oggetti in immagini, ad esempio, sia approcci supervisionati che non supervisionati richiedono la progettazione manuale di feature extractors specifici per catturare proprietà rilevanti come bordi, texture, angoli. Tra questi possiamo ricordare SIFT (Scale-Invariant Feature Transform) \cite{lowe2004distinctive}, HOG (Histogram of Oriented Gradients) \cite{dalal2005histograms}, o filtri di Gabor \cite{daugman1985uncertainty}. Un classificatore supervisionato come SVM opera su queste features per separare le classi, mentre un algoritmo di clustering non supervisionato come K-means le utilizza per raggruppare immagini simili \cite{murphy2012}. In entrambi i casi, tuttavia, le features sono progettate manualmente e non adattate al compito specifico.
+
+Questo processo presenta diversi svantaggi: features progettate per un compito specifico raramente generalizzano ad altri contesti. Inoltre, la progettazione manuale porta ad una inevitabile semplificazione che potrebbe non catturare la complessità delle variazioni dei dati naturali. Come evidenziato da \cite{bengio2013representation}, \textit{"The success of machine learning algorithms generally depends on
+data representation"} e rappresentazioni inadeguate limitano le prestazioni raggiungibili.
+
+\subsubsection{Scalabilità e Separazione delle Fasi}
+Quando applicati direttamente a dati ad alta dimensionalità (come immagini rappresentate da migliaia di pixel) i metodi tradizionali richiedono quantità di dati crescenti esponenzialmente con la dimensionalità, come discusso nella Sezione~\ref{sec:dimensionality_reduction} riguardo alla \textit{curse 
+of dimensionality}. Questo problema riguarda sia metodi supervisionati che non supervisionati, rendendo l'apprendimento intrattabile senza  tecniche di riduzione della dimensionalità \cite{hastie2009elements}.
+
+Tipicamente, i metodi tradizionali separano la feature extraction e l'ap\-pren\-di\-men\-to del modello in fasi separate e indipendenti: le features vengono prima estratte (manualmente o con algoritmi non supervisionati come PCA o K-means), e solo successivamente viene applicato l'algoritmo di apprendimento, supervisionato o non \cite{lecun2015deep}. Questa separazione impedisce l'ottimizzazione del processo: le features non vengono adattate per ottimizzare la performance sul compito finale, ma rimangono fisse e generiche \cite{bengio2013representation}.
 
 Queste limitazioni hanno motivato lo sviluppo di approcci in grado di \textbf{apprendere automaticamente rappresentazioni efficaci} direttamente dai dati grezzi, eliminando la necessità di feature engineering manuale. Tale transizione ha dato origine ai modelli di \textbf{deep learning}: estendendo i principi del machine learning attraverso reti neurali con molti strati (\textit{deep}), aumenta la capacità di apprendere gerarchie di feature via via più astratte e potenti \cite{goodfellow2016deep}.
 
