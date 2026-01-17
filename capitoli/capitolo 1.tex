@@ -103,7 +103,7 @@ Tali metodi sono particolarmente efficaci per l'analisi di dati ad alta dimensio
 
 L'apprendimento per rinforzo (reinforcement learning, RL) costituisce un terzo paradigma del machine learning, distinto sia dall'apprendimento supervisionato che da quello non supervisionato \cite{sutton2018reinforcement}. 
 
-In questo scenario, un \textit{agente} interagisce con un \textit{ambiente} dinamico atraverso una sequenza di azioni: ad ogni passo, l'agente seleziona un'azione sulla base dello stato corrente dell'ambiente. Questo determina la transizione verso un nuovo stato e la ricezione di un segnale di \textit{reward} retroattivo, che codifica il successo del compito.
+In questo scenario, un \textit{agente} interagisce con un \textit{ambiente} dinamico attraverso una sequenza di azioni: ad ogni passo, l'agente seleziona un'azione sulla base dello stato corrente dell'ambiente. Questo determina la transizione verso un nuovo stato e la ricezione di un segnale di \textit{reward} retroattivo, che codifica il successo del compito.
 
 A differenza del \textit{supervised learning}, dove l'algoritmo apprende da esempi etichettati che indicano esplicitamente l'azione corretta e il compito del sistema è generalizzare le risposte, o dell'\textit{unsupervised learning}, dove si cercano strutture in dati statici, nel \textbf{reinforcement learning} l'agente scopre autonomamente quali azioni producono le ricompense più elevate attraverso una ricerca \textit{trial-and-error} \cite[pp.~1-6]{sutton2018reinforcement}. L'agente riceve un segnale di ricompensa (reward) che indica la qualità dell'azione intrapresa rispetto all'obiettivo finale.
 
@@ -117,7 +117,7 @@ In un MDP finito, la dinamica è completamente specificata dalla probabilità di
 spesso combinate in $p(s', r \mid s, a)$.
 L'obiettivo è apprendere una \textit{policy} $\pi: \mathcal{S} \rightarrow \mathcal{A}$ che massimizzi il return atteso, definito come la somma delle ricompense future scontate.
 
-L'integrazione del reinforcement learning con il deep learning ha dato origine al \textit{deep reinforcement learning} (DRL) \cite{arulkumaran2017, li2017deep}, che ha raggiunto risultati notevoli in domini complessi come videogiochi \cite{mnih2015}, robotica \cite{levine2016}, giochi da tavolo \cite{silver2016},guida autonoma \cite{kiran2021}. Nonostante i successi, tuttavia, il DRL presenta ancora sfide in termini di efficienza campionaria e stabilità dell'ap\-pren\-di\-men\-to \cite{wang2020deep}.
+L'integrazione del reinforcement learning con il deep learning ha dato origine al \textit{deep reinforcement learning} (DRL) \cite{arulkumaran2017, li2017deep}, che ha raggiunto risultati notevoli in domini complessi come videogiochi \cite{mnih2015}, robotica \cite{levine2016}, giochi da tavolo \cite{silver2016}, guida autonoma \cite{kiran2021}. Nonostante i successi, tuttavia, il DRL presenta ancora sfide in termini di efficienza campionaria e stabilità dell'ap\-pren\-di\-men\-to \cite{wang2020deep}.
 
 
 \subsection{Limitazioni del Machine Learning Tradizionale e Rap\-pre\-sen\-ta\-zio\-ni}
