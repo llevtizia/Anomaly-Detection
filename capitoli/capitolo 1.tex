@@ -4,10 +4,7 @@ Negli ultimi decenni, l'utilizzo di sistemi informatici per la risoluzione di pr
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.7\textwidth]{immagini/capitolo1/classical_vs_ml_chollet2021.png}
-\caption{Confronto tra programmazione classica e machine learning. Nella 
-programmazione tradizionale, regole esplicite trasformano dati in risposte. 
-Nel machine learning, il sistema apprende le regole dai dati e dalle risposte 
-fornite come esempi. Adattato da \cite{chollet2021deep}.}
+\caption{Confronto tra programmazione classica e machine learning. Nella programmazione tradizionale, regole esplicite trasformano dati in risposte. Nel machine learning, il sistema apprende le regole dai dati e dalle risposte fornite come esempi. Adattato da \cite{chollet2021deep}.}
 \label{fig:classical_vs_ml}
 \end{figure}
 
@@ -140,6 +137,7 @@ L'integrazione del reinforcement learning con il deep learning ha dato origine a
 
 
 \subsection{Limitazioni del Machine Learning Tradizionale}
+\label{sec:limitazioni_ml}
 
 Nonostante i successi dei metodi di machine learning tradizionali descritti in numerosi domini applicativi, l'ap\-pli\-ca\-zio\-ne di algoritmi tradizionali, sia supervisionati (SVM, decision trees) che non supervisionati (K-means, PCA), a dati complessi 
 nella loro forma grezza (come immagini, audio o testo) presenta limitazioni intrinseche legate alla modalità con cui le rappresentazioni dei dati vengono costruite \cite{lecun2015deep, bengio2013representation}.
@@ -161,25 +159,223 @@ Tipicamente, i metodi tradizionali separano la feature extraction e l'ap\-pren\-
 
 Queste limitazioni hanno motivato lo sviluppo di approcci in grado di \textbf{apprendere automaticamente rappresentazioni efficaci} direttamente dai dati grezzi, eliminando la necessità di feature engineering manuale. Tale transizione ha dato origine ai modelli di \textbf{deep learning}: estendendo i principi del machine learning attraverso reti neurali con molti strati (\textit{deep}), aumenta la capacità di apprendere gerarchie di feature via via più astratte e potenti \cite{goodfellow2016deep}.
 
-%% da qui in poi devo ancora attaccare meglio i pezzi
-
-\section{Representation Learning}
-La crescente disponibilità di dati è accompagnata da un’evoluzione verso forme diverse, comprendenti immagini, video, testi, audio, grafi. Le prestazioni dei metodi sono direttamente influenzate dalla qualità della rappresentazione dei dati (o features) su cui operano: si parla di \textit{representation learning} in riferimento all’apprendimento di rappresentazioni che facilitino l’estrazione di informazione utile ai fini di classificazione o previsione \cite{bengio2013representation}.
-
-Le metodologie tradizionali di apprendimento automatico risultavano intrinsecamente limitate nella capacità di elaborare dati naturali nella loro forma grezza. Inizialmente, la progettazione di sistemi di riconoscimento richiedeva la definizione manuale di feature extractor specifici per dominio, in grado di trasformare segnali grezzi in rappresentazioni strutturate adatte all’elaborazione \cite{lecun2015deep}.
+%%%%%% DEEP LEARNING
 
 \section{Deep Learning}
-Il representation learning è un insieme di metodi che consentono l’appren\-di\-mento automatico delle rappresentazioni necessarie per il rilevamento o la classificazione a partire dai dati grezzi. Il \textit{deep learning} si basa sull’idea di apprendere rappresentazioni efficaci direttamente dai dati stessi. L’obiettivo viene realizzato attraverso architetture composte da molteplici livelli di rappresentazione (reti neurali flessibili e multistrato, \textit{deep}): tramite trasformazioni non lineari, le rappresentazioni diventano più astratte. Con la composizione di un numero sufficiente di tali trasformazioni, possono essere apprese funzioni molto complesse. 
 
-Negli ultimi anni si è registrato un crescente interesse verso l’applicazione di tecniche di deep learning al rilevamento di anomalie per garantire la qualità dei prodotti e migliorare l’efficienza e la qualità della produzione. Tuttavia, la natura prevalentemente non supervisionata del problema rende meno immediata la definizione di obiettivi di representation learning adeguati.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{immagini/capitolo1/chollet2021_ai_ml_dl}
+\caption{Relazione tra intelligenza artificiale, machine learning e deep learning. Adattato da \cite{chollet2021deep}.}
+\label{fig:ai_ml_dl}
+\end{figure}
 
-Il rilevamento di anomalie generico si confronta con tipologie di anomalie più eterogenee, prive delle severe restrizioni tipiche delle applicazioni industriali: limitata disponibilità di campioni anomali, vincoli stringenti in termini di accuratezza e tempo di elaborazione, specifiche caratteristiche strutturali e semantiche (disallineamenti logici, micro difetti superficiali o deviazioni dimensionali di precisione).
+Come evidenziato nella Sezione \ref{sec:limitazioni_ml}, le limitazioni del machine learning tra\-di\-zio\-na\-le hanno portato allo sviluppo di metodi capaci di apprendere automaticamente rappresentazioni dai dati grezzi. Il \textbf{Deep Learning} rappresenta una classe di tecniche di machine learning basate sull’idea di apprendere rappresentazioni efficaci direttamente dai dati stessi. L’obiettivo viene realizzato attraverso architetture composte da molteplici livelli di rappresentazione (reti neurali flessibili e multistrato, \textit{deep}): tramite trasformazioni non lineari, le rappresentazioni diventano più astratte. Ogni livello della gerarchia costruisce rappresentazioni via via 
+più astratte a partire da quelle del livello precedente. Con la composizione di un numero sufficiente di tali trasformazioni, possono essere apprese funzioni molto complesse.  
 
-Il rilevamento di anomalie visive in ambito industriale, al contrario, affronta diverse sfide pratiche intrinseche agli scenari reali \cite{zhuo2025survey}. La variabilità delle condizioni di produzione (fattori ambientali, variazioni di illuminazione, angolazioni della telecamera) influenza in modo significativo l’aspetto visivo dei prodotti: i dati considerati normali possono presentare un’elevata variabilità, richiedendo ai metodi di rilevamento delle anomalie di mantenere robustezza in condizioni operative diverse per evitare classificazioni errato o mancati riconoscimenti. 
 
-In secondo luogo, i dataset presentano spesso un forte sbilanciamento: le istanze normali superano di gran lunga quelle anomale e non sono etichettate, rendendo difficile identificare cosa costituisca un’anomalia e per quali motivi. Imperfezioni dei sensori o condizioni ambientali difficili generano elevati livelli di rumore nelle immagini, che possono complicare ulteriormente il rilevamento 
+%La crescente disponibilità di dati è accompagnata da un’evoluzione verso forme diverse, comprendenti immagini, video, testi, audio, grafi. Le prestazioni dei metodi sono direttamente influenzate dalla qualità della rappresentazione dei dati (o features) su cui operano: si parla di \textit{representation learning} in riferimento all’apprendimento di rappresentazioni che 
 
-Il problema del rilevamento delle anomalie si configura quindi come un compito di apprendimento non supervisionato, con l’obiettivo di costruire un modello rappresentativo della maggioranza dei punti dati. La complessità aumenta a causa dell’elevata eterogeneità delle anomalie, rendendo difficile la definizione di un modello esaustivo per tali eventi. Di conseguenza, l’approccio comunemente adottato consiste nell’apprendere un modello dei campioni normali e considerare anomale le deviazioni rispetto ad esso.
+%Le metodologie tradizionali di apprendimento automatico risultavano intrinsecamente limitate nella capacità di elaborare dati naturali nella loro forma grezza. Inizialmente, la progettazione .
+
+\subsection{Representation Learning}
+\label{sec:representation_learning}
+Il representation learning è un insieme di metodi che consentono l’appren\-di\-mento automatico delle rappresentazioni necessarie per il rilevamento o la classificazione a partire dai dati grezzi \cite{bengio2013representation}. L'idea alla base è che una buona rappresentazione faciliti l’estrazione di informazioni utili ai fini di classificazione o previsione.
+
+Inizialmente, la progettazione di sistemi di riconoscimento richiedeva la de\-fi\-ni\-zio\-ne manuale di feature extractor specifici per dominio, in grado di trasformare segnali grezzi in rappresentazioni strutturate adatte all’elaborazione \cite{lecun2015deep}. Il representation learning, al contrario, apprende le informazioni direttamente dai dati: queste sono organizzate in maniera gerarchica, consentendo di rappresentare concetti complessi a partire da elementi più semplici \cite{goodfellow2016deep}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{immagini/capitolo1/chollet2021_classification_model_example}
+\caption{Esempio di apprendimento gerarchico di rappresentazioni in un modello di deep learning per la classificazione di cifre. Adattato da \cite{chollet2021deep}.}
+\label{fig:hierarchical_representations}
+\end{figure}
+
+Il processo di apprendimento delle rappresentazioni avviene attraverso una \textbf{gerarchia di trasformazioni}. Come illustrato nella Figura \ref{fig:hierarchical_representations}, la rete tras\-for\-ma l'immagine della cifra in rappresentazioni che diventano progressivamente più distanti dall'immagine iniziale ma più informative rispetto al risultato finale. Si può pensare ad una rete profonda come ad un processo di distillazione dell'informazione a più stadi, in cui i dati attraversano una serie successiva di filtri per emergere più utili al compito specifico \cite{chollet2021deep}.
+
+\subsection{Reti Neurali}
+Le reti neurali artificiali (Artificial Neural Networks, ANN) costituiscono il fondamento del deep learning. Sono chiamate \emph{reti} perché sono tipicamente rappresentate componendo insieme molte funzioni diverse. Il modello è associato a un grafo diretto aciclico che descrive come le funzioni sono composte insieme. Ad esempio, potremmo avere tre funzioni \( f^{(1)} \), \( f^{(2)} \) e \( f^{(3)} \) connesse in catena, per formare:
+\[
+f(x) = f^{(3)}\big(f^{(2)}(f^{(1)}(x))\big)
+\]
+Queste strutture a catena sono le più comuni nelle reti neurali. In questo caso, \( f^{(1)} \) è il primo strato della rete, \( f^{(2)} \) il secondo e così via. La lunghezza complesisva fornisce la profondità del modello, da cui il termine "deep learning" \cite{goodfellow2016deep}.
+
+Infine, queste reti sono dette neurali perché sono liberamente ispirate alle neuroscienze. \cite{haykin2009neural} offre una definizione precedente, ispirata all'analogia neurobiologica, descrivendo la rete come "un processore distribuito massivamente parallelo, composto da unità di elaborazione semplici, che possiede una propensione naturale ad immagazzinare conoscenza esperienziale e a renderla disponibile per l’uso."
+
+Per comprendere come funzionano le reti neurali, è necessario partire dall'u\-ni\-tà computazionale elementare: il percettrone (\textit{perceptron}). Successivamente, vedremo come la composizione di molteplici perceptron in architetture stratificate dia origine a sistemi capaci di apprendere funzioni arbitrariamente complesse.
+
+\subsubsection{Il Percettrone}
+Il perceptron \cite{rosenblatt1958perceptron} rappresenta il modello più semplice di neurone artificiale e costituisce l'unità computazionale fondamentale delle reti neurali. Ispirato da un modello semplificato del neurone biologico, il perceptron è un algoritmo di apprendimento supervisionato concepito per la classificazione binaria, implementando una trasformazione matematica che combina linearità e non linearità.
+
+\paragraph{Formulazione matematica.} Il perceptron corrisponde a un modello di classificazione a due classi in cui il vettore di input $\mathbf{x} = (x_1, x_2, \dots, x_n) \in \mathbb{R}^n$ viene prima trasformato usando una trasformazione non lineare fissa per ottenere un vettore di feature $\boldsymbol{\phi}(\mathbf{x})$, che viene poi utilizzato per costruire un modello lineare generalizzato dalla forma \cite{bishop2006pattern}:
+
+
+\begin{equation}
+y(\mathbf{x}) = f\left(\mathbf{w}^T \boldsymbol{\phi}(\mathbf{x})\right)
+\label{eq:perceptron}
+\end{equation}
+
+
+dove:
+\begin{itemize}
+\item $\mathbf{w} = (w_1, w_2, \dots, w_n) \in \mathbb{R}^n$ è il vettore dei \textbf{pesi}
+\item $f(\cdot)$ è la \textbf{funzione di attivazione non lineare}
+\end{itemize}
+
+Il vettore di feature $\boldsymbol{\phi}(\mathbf{x})$ include una componente di bias $\phi_0(\mathbf{x}) = 1$, consentendo di incorporare il bias (termine costante) direttamente nel vettore dei pesi, semplificando la notazione matematica.
+
+Nel perceptron originale di Rosenblatt, la funzione di attivazione è data da una funzione a gradino (step function):
+
+\begin{equation}
+f(a) = \begin{cases}
++1 & \text{se } a \geq 0 \\
+-1 & \text{se } a < 0
+\end{cases}
+\label{eq:step_function}
+\end{equation}
+
+Questa scelta di funzione di attivazione rende il perceptron un classificatore binario: l'output è $+1$ per la classe $\mathcal{C}_1$ e $-1$ per la classe $\mathcal{C}_2$.
+
+\paragraph{Interpretazione geometrica.} Nel caso della funzione di attivazione a gradino, il perceptron implementa un classificatore lineare che divide lo spazio degli input in due regioni separate da un iperpiano decisionale definito da $\mathbf{w}^T \boldsymbol{\phi}(\mathbf{x}) = 0$ \cite{bishop2006pattern}. Punti che giacciono su un lato dell'iperpiano vengono assegnati alla classe $\mathcal{C}_1$ ($y = +1$), mentre punti sull'altro lato vengono assegnati alla classe $\mathcal{C}_2$ ($y = -1$).
+
+Questa limitazione a problemi linearmente separabili venne identificata da Minsky e Papert \cite{minsky1969perceptrons} come una debolezza fondamentale del perceptron singolo. Il loro lavoro dimostrò che esistono problemi semplici, come la funzione XOR, che non possono essere risolti da un singolo percettrone. Questa limitazione può essere superata solo attraverso architetture multi-layer che combinano molteplici perceptron in strutture stratificate.
+
+\subsubsection{Dal Percettrone al Multi-Layer Perceptron}
+
+Per superare le limitazioni del perceptron singolo, è necessario organizzare mol\-te\-pli\-ci perceptron in \textbf{layer} (strati) successivi, dando origine al \textbf{Multi-Layer Perceptron} (MLP) o \textbf{rete neurale feedforward} \cite{goodfellow2016deep}. Questa architettura introduce due innovazioni fondamentali rispetto al perceptron: (1) la presenza di uno o più hidden layer tra input e output, e (2) l'utilizzo di funzioni di attivazione differenziabili al posto della step function, necessarie per consentire l'apprendimento tramite backpropagation \cite{rumelhart1986learning}.
+
+% da controllare
+\paragraph{Architettura.} Un MLP è composto da tre tipi di layer:
+
+\begin{itemize}
+\item \textbf{Input layer}: riceve i dati grezzi rappresentati come vettore $\mathbf{x} \in \mathbb{R}^{d}$, dove $d$ è la dimensionalità dell'input. Questo layer non effettua computazioni ma distribuisce semplicemente l'input ai layer successivi, eventualmente dopo una trasformazione $\boldsymbol{\phi}(\mathbf{x})$.
+\item \textbf{Hidden layers}: uno o più layer intermedi che trasformano progressivamente l'input. Ogni hidden layer apprende una rappresentazione dei dati a un diverso livello di astrazione. Come discusso nella Sezione \ref{sec:representation_learning}, i layer iniziali tendono a estrarre feature di basso livello, mentre layer più profondi costruiscono rappresentazioni sempre più astratte \cite{bengio2013representation}.
+
+\item \textbf{Output layer}: produce la predizione finale. Per problemi di classificazione con $C$ classi, tipicamente contiene $C$ neuroni con funzione di attivazione softmax che produce una distribuzione di probabilità sulle classi. Per problemi di regressione, può contenere uno o più neuroni con attivazione lineare.
+\end{itemize}
+
+\paragraph{Trasformazione layer-by-layer.} Seguendo la notazione di Bishop \cite{bishop2006pattern}, ogni unità (neurone) nel layer $j$ calcola una somma pesata delle uscite delle unità del layer precedente, trasformata da una funzione di attivazione non lineare. Per un layer generico:
+
+\begin{equation}
+a_j = \sum_{i} w_{ji} z_i
+\end{equation}
+
+dove $z_i$ è l'attivazione dell'unità $i$ nel layer precedente, e $w_{ji}$ è il peso della connessione dall'unità $i$ all'unità $j$. L'output dell'unità $j$ è quindi:
+
+\begin{equation}
+z_j = f(a_j)
+\end{equation}
+
+dove $f(\cdot)$ è la funzione di attivazione.
+
+In forma vettoriale, per un MLP con $L$ layer (escludendo l'input), la trasformazione attraverso ogni layer $l = 1, 2, \dots, L$ può essere espressa come:
+
+\begin{equation}
+\mathbf{a}^{(l)} = \mathbf{W}^{(l)} \mathbf{z}^{(l-1)}
+\end{equation}
+
+\begin{equation}
+\mathbf{z}^{(l)} = f^{(l)}(\mathbf{a}^{(l)})
+\label{eq:layer_transformation}
+\end{equation}
+
+dove $\mathbf{z}^{(l)} \in \mathbb{R}^{n_l}$ è il vettore delle attivazioni del layer $l$ (con $n_l$ unità), $\mathbf{z}^{(0)} = \boldsymbol{\phi}(\mathbf{x})$ è l'input trasformato, $\mathbf{W}^{(l)} \in \mathbb{R}^{n_l \times n_{l-1}}$ è la matrice dei pesi, e $f^{(l)}(\cdot)$ è la funzione di attivazione applicata element-wise.
+
+
+L'output finale della rete è dato da $\mathbf{y} = \mathbf{z}^{(L)}$. Questa composizione di trasformazioni affini e non lineari consente alla rete di apprendere funzioni arbitrariamente complesse, superando la limitazione del perceptron singolo ai soli problemi linearmente separabili.
+
+\paragraph{Necessità di funzioni differenziabili.} A differenza del perceptron originale che utilizza una step function, i MLP moderni richiedono funzioni di attivazione differenziabili. Questo perché l'apprendimento avviene tramite l'algoritmo di backpropagation, che calcola i gradienti della funzione di errore rispetto ai parametri della rete propagando l'errore all'indietro attraverso i layer \cite{rumelhart1986learning}. La step function, avendo gradiente zero quasi ovunque (eccetto nel punto di discontinuità), non è adatta a questo scopo. Nella sezione successiva esamineremo le principali funzioni di attivazione differenziabili utilizzate nelle reti neurali moderne.
+
+\subsubsection{Funzioni di Attivazione}
+
+La funzione di attivazione $f(\cdot)$ introduce la non linearità essenziale per consentire alle reti neurali di apprendere relazioni complesse nei dati. Senza non linearità, anche una rete con molteplici layer si ridurrebbe a una semplice trasformazione lineare, poiché la composizione di funzioni lineari rimane lineare. Formalmente, se $f^{(l)}(x) = x$ per ogni layer, allora:
+
+\begin{equation}
+f^{(L)}(\mathbf{W}^{(L)} \cdots f^{(1)}(\mathbf{W}^{(1)} \mathbf{x})) = \mathbf{W}^{(L)} \cdots \mathbf{W}^{(1)} \mathbf{x} = \tilde{\mathbf{W}} \mathbf{x}
+\end{equation}
+
+dove $\tilde{\mathbf{W}}$ è semplicemente il prodotto delle matrici dei pesi. In questo caso, la rete profonda sarebbe equivalente a un singolo layer lineare, limitando drasticamente la capacità espressiva del modello \cite{goodfellow2016deep}.
+
+Le funzioni di attivazione più utilizzate includono:
+
+\paragraph{Sigmoid.} La funzione sigmoide (o logistica) è stata storicamente una delle prime funzioni di attivazione utilizzate nelle reti neurali \cite{rumelhart1986learning}:
+
+\begin{equation}
+\sigma(a) = \frac{1}{1 + e^{-a}}
+\end{equation}
+
+Mappa l'input nell'intervallo $(0, 1)$, rendendola naturalmente adatta per interpretazioni probabilistiche, in particolare per problemi di classificazione binaria dove l'output può essere interpretato come $P(y=1|\mathbf{x})$. La sua derivata ha la forma conveniente $\sigma'(a) = \sigma(a)(1-\sigma(a))$, utile per il calcolo dei gradienti durante la backpropagation.
+
+Tuttavia, presenta il problema del \textit{vanishing gradient}: per valori di input molto grandi ($a \gg 0$) o molto piccoli ($a \ll 0$), la derivata tende a zero. Questo rallenta significativamente l'apprendimento nei layer più profondi, problema noto sin dai primi studi di Hochreiter \cite{hochreiter1991untersuchungen}.
+
+\paragraph{Tangente Iperbolica (tanh).} Simile alla sigmoid ma con output nell'intervallo $(-1, 1)$:
+
+\begin{equation}
+\tanh(a) = \frac{e^{a} - e^{-a}}{e^{a} + e^{-a}} = 2\sigma(2a) - 1
+\end{equation}
+
+Rispetto alla sigmoid, la tanh produce output centrati sullo zero, caratteristica che facilita l'ottimizzazione poiché i gradienti tendono a non saturare prematuramente \cite{glorot2010understanding}. Tuttavia, soffre anch'essa del problema del vanishing gradient per valori estremi.
+
+\paragraph{ReLU (Rectified Linear Unit).} La funzione ReLU è diventata lo standard de facto nelle reti neurali profonde \cite{nair2010rectified, glorot2011deep}:
+
+\begin{equation}
+\text{ReLU}(a) = \max(0, a) = \begin{cases}
+a & \text{se } a > 0 \\
+0 & \text{se } a \leq 0
+\end{cases}
+\end{equation}
+
+Presenta diversi vantaggi:
+\begin{itemize}
+\item \textbf{Efficienza computazionale}: richiede solo un confronto e una selezione, senza operazioni esponenziali costose
+\item \textbf{Mitigazione del vanishing gradient}: per input positivi, il gradiente è costante e uguale a 1, facilitando la propagazione del segnale di errore
+\item \textbf{Sparsità}: neuroni con input negativi vengono "spenti" (attivazione zero), inducendo rappresentazioni sparse
+\end{itemize}
+
+Tuttavia, la ReLU presenta il problema dei \textit{neuroni morti} (dying ReLU): se un neurone riceve costantemente input negativi, il gradiente è sempre zero e il neurone non si aggiorna più. Per mitigare questo problema, sono state proposte diverse varianti \cite{he2015delving}, tra cui \textbf{Leaky ReLU} ($f(a) = \max(\alpha a, a)$ con $\alpha \approx 0.01$) e \textbf{Parametric ReLU} (PReLU), dove $\alpha$ è appreso durante il training.
+
+
+%
+
+
+
+\subsubsection{Architetture di Reti Neurali}
+Le reti neurali possono essere classificate in base alla direzione del flusso dell'in\-for\-ma\-zio\-ne attraverso la rete. Le due architetture fondamentali sono le reti \textbf{feedforward} e le reti \textbf{ricorrenti} (recurrent) \cite{goodfellow2016deep}.
+
+\paragraph{Reti Feedforward.} Nelle reti feedforward (o feed-forward), l'informazione fluisce in una sola direzione, dall'input verso l'output, senza cicli o connessioni retroattive. Queste reti sono rappresentate da grafi aciclici diretti (Directed Acyclic Graphs, DAG), dove ogni layer riceve input solo dai layer precedenti e non esiste alcun feedback \cite{bishop2006pattern}. Il Multi-Layer Perceptron (MLP) e le reti convoluzionali (CNN) sono esempi di architetture feedforward. Queste reti sono particolarmente adatte per problemi in cui l'output dipende solo dall'input corrente, come la classificazione di immagini o la regressione.
+
+\paragraph{Reti Ricorrenti.} Le reti ricorrenti (Recurrent Neural Networks, RNN), al contrario, contengono connessioni cicliche che consentono all'informazione di persistere nel tempo. Le attivazioni possono propagarsi sia in avanti che all'in\-die\-tro, creando una sorta di "memoria" interna che permette alla rete di elaborare sequenze di input \cite{goodfellow2016deep}. Queste architetture sono fondamentali per task che coinvolgono dati sequenziali o temporali, come l'elaborazione del linguaggio naturale, il riconoscimento vocale o la previsione di serie temporali.
+
+
+
+
+
+
+
+\subsubsection{Funzioni di Attivazione}
+Mentre il perceptron originale utilizza una funzione a gradino, le moderne reti neurali impiegano funzioni di attivazione differenziabili. La funzione di attivazione $f(\cdot)$ introduce la non linearità essenziale per consentire alle reti neurali di apprendere relazioni complesse nei dati. Senza non linearità, anche una rete con molteplici layer si ridurrebbe a una semplice trasformazione lineare, poiché la composizione di funzioni lineari rimane lineare, limitando drasticamente la capacità espressiva del modello \cite{goodfellow2016deep}.
+
+Le funzioni di attivazione più utilizzate includono:
+\paragraph{Sigmoid.} La funzione sigmoide (o logistica) è stata storicamente una delle prime funzioni di attivazione utilizzate nelle reti neurali \cite{rumelhart1986learning}:
+
+\begin{equation}
+\sigma(a) = \frac{1}{1 + e^{-a}}
+\end{equation}
+
+Mappa l'input nell'intervallo $(0, 1)$, rendendola naturalmente adatta per interpretazioni probabilistiche, in particolare per problemi di classificazione binaria dove l'output può essere interpretato come $P(y=1|\mathbf{x})$. La sua derivata ha la forma conveniente $\sigma'(a) = \sigma(a)(1-\sigma(a))$, utile per il calcolo dei gradienti.
+
+Tuttavia, presenta il problema del \textit{vanishing gradient}: per valori di input molto grandi ($a \gg 0$) o molto piccoli ($a \ll 0$), la derivata tende a zero. Questo rallenta significativamente l'apprendimento nei layer più profondi durante la backpropagation, problema noto sin dai primi studi di Hochreiter \cite{hochreiter1991untersuchungen}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -195,6 +391,17 @@ Il problema del rilevamento delle anomalie si configura quindi come un compito d
 
 
 \section{Anomalie}
+% da sistemare
+Negli ultimi anni si è registrato un crescente interesse verso l’applicazione di tecniche di deep learning al rilevamento di anomalie per garantire la qualità dei prodotti e migliorare l’efficienza e la qualità della produzione. Tuttavia, la natura prevalentemente non supervisionata del problema rende meno immediata la definizione di obiettivi di representation learning adeguati.
+
+Il rilevamento di anomalie generico si confronta con tipologie di anomalie più eterogenee, prive delle severe restrizioni tipiche delle applicazioni industriali: limitata disponibilità di campioni anomali, vincoli stringenti in termini di accuratezza e tempo di elaborazione, specifiche caratteristiche strutturali e semantiche (disallineamenti logici, micro difetti superficiali o deviazioni dimensionali di precisione).
+
+Il rilevamento di anomalie visive in ambito industriale, al contrario, affronta diverse sfide pratiche intrinseche agli scenari reali \cite{zhuo2025survey}. La variabilità delle condizioni di produzione (fattori ambientali, variazioni di illuminazione, angolazioni della telecamera) influenza in modo significativo l’aspetto visivo dei prodotti: i dati considerati normali possono presentare un’elevata variabilità, richiedendo ai metodi di rilevamento delle anomalie di mantenere robustezza in condizioni operative diverse per evitare classificazioni errato o mancati riconoscimenti. 
+
+In secondo luogo, i dataset presentano spesso un forte sbilanciamento: le istanze normali superano di gran lunga quelle anomale e non sono etichettate, rendendo difficile identificare cosa costituisca un’anomalia e per quali motivi. Imperfezioni dei sensori o condizioni ambientali difficili generano elevati livelli di rumore nelle immagini, che possono complicare ulteriormente il rilevamento 
+
+Il problema del rilevamento delle anomalie si configura quindi come un compito di apprendimento non supervisionato, con l’obiettivo di costruire un modello rappresentativo della maggioranza dei punti dati. La complessità aumenta a causa dell’elevata eterogeneità delle anomalie, rendendo difficile la definizione di un modello esaustivo per tali eventi. Di conseguenza, l’approccio comunemente adottato consiste nell’apprendere un modello dei campioni normali e considerare anomale le deviazioni rispetto ad esso.
+%
 Un’anomalia viene definita come un oggetto che si discosta in maniera significativa dalla nozione di normalità. A seconda del contesto applicativo, tali osservazioni possono essere indicate come outlier o novelty. Ulteriori denominazioni ricorrenti includono, tra le altre, quelle di oggetto insolito, irregolare, atipico, incoerente, inaspettato, raro, errato, difettoso, fraudolento, malevolo, innaturale o anomalo \cite{ruff2021anomaly}. 
 Tra le prime formalizzazioni del concetto troviamo \cite{barnett1994outliers}, che definisce un outlier in un insieme di dati come un’osservazione (o un sottoinsieme di osservazioni) apparentemente incoerente rispetto al resto dei dati dell’insieme.
 
