@@ -366,7 +366,7 @@ La \textbf{Leaky ReLU} \cite{maas2013rectifier} introduce una pendenza minima \(
 \]
 Questa modifica garantisce che il gradiente sia sempre non nullo (\(\nabla_x = \alpha\) per \(x < 0\)), prevenendo la morte permanente dei neuroni.
 
-Una generalizzazione più flessibile è la \textbf{Parametric ReLU (PReLU)} \cite{he2015delving}, in cui il coefficiente \(\alpha\) non è fissato a priori ma viene appreso durante l'addestramento come parametro aggiuntivo della rete:
+Una generalizzazione più flessibile è la \textbf{Parametric ReLU (PReLU)} \cite{he2015delving}, in cui il coefficiente \(\alpha\) non è fissato a priori ma viene appreso durante l'ad\-des\-tra\-men\-to come parametro aggiuntivo della rete:
 \[
 \text{PReLU}(x) = \max(\alpha x, x), \quad \alpha \text{ imparabile}
 \]
@@ -434,16 +434,16 @@ Per mitigare questo problema, sono state sviluppate nuove architetture con mecca
 Le RNN e le loro varianti trovano applicazione in numerosi domini che coinvolgono dati sequenziali, tra cui: elaborazione del linguaggio naturale (NLP), riconoscimento vocale, analisi di serie temporali, e generazione di contenuti sequenziali (testo, musica, video).
 
 
-\section{Training delle Reti Neurali}
+\subsection{Training delle Reti Neurali}
 \label{sec:training}
 
 Una volta definita l'architettura di una rete neurale, è necessario determinare i valori ottimali dei parametri (pesi e bias) che minimizzano l'errore sulle predizioni. Questo processo, detto \textbf{training} o \textbf{addestramento}, si basa sull'ot\-ti\-miz\-za\-zio\-ne iterativa dei parametri attraverso algoritmi basati sul gradiente. 
 
-\subsection{Backpropagation}
+\subsubsection{Backpropagation}
 
 L'algoritmo di \textbf{backpropagation} (retropropagazione dell'errore) \cite{rumelhart1986learning}, rappresenta il metodo fondamentale per calcolare i gradienti della funzione di errore rispetto a tutti i parametri di una rete neurale. La sua formulazione ha reso possibile l'addestramento di reti profonde.
 
-\subsubsection{Formulazione matematica} Consideriamo una rete neurale feedforward in cui le unità sono organizzate in layer. Seguendo la notazione di Bishop \cite{bishop2006pattern}, per ogni unità $j$ nella rete definiamo:
+\paragraph{Formulazione matematica.} Consideriamo una rete neurale feedforward in cui le unità sono organizzate in layer. Seguendo la notazione di Bishop \cite{bishop2006pattern}, per ogni unità $j$ nella rete definiamo:
 
 \begin{itemize}
 \item $a_j$: la \textbf{pre-attivazione}, data dalla somma pesata degli input all'unità $j$
@@ -455,7 +455,7 @@ dove $h(\cdot)$ è una funzione di attivazione differenziabile (ad esempio sigmo
 
 L'obiettivo della backpropagation è calcolare efficientemente i gradienti $\frac{\partial E}{\partial w_{ji}}$ della funzione di errore $E$ rispetto a tutti i pesi della rete. 
 
-\subsubsection{Errori e gradienti} 
+\paragraph{Errori e gradienti.} 
 Definiamo l'\textbf{errore} $\delta_j$ per l'unità $j$ come la derivata parziale della funzione di errore rispetto alla sua pre-attivazione \cite{bishop2006pattern}:
 
 \begin{equation}
@@ -482,5 +482,187 @@ Questo risultato fondamentale mostra che il gradiente rispetto a un peso è dato
 \frac{\partial E}{\partial b_j} = \delta_j
 \end{equation}
 
-%%%
+%%% riparto da qui
+\paragraph{Calcolo ricorsivo degli errori.} La potenza della backpropagation risiede nel calcolo efficiente degli errori $\delta_j$ tramite una procedura ricorsiva che propaga gli errori all'indietro attraverso la rete.
+
+Per le unità di \textbf{output}, l'errore dipende dalla funzione di loss utilizzata. Per l'errore quadratico (sum-of-squares):
+
+\begin{equation}
+E = \frac{1}{2} \sum_k (y_k - t_k)^2
+\end{equation}
+
+dove $y_k$ è l'output dell'unità $k$ e $t_k$ il target, si ottiene direttamente \cite{bishop2006pattern}:
+
+\begin{equation}
+\delta_k = \frac{\partial E}{\partial a_k} = \frac{\partial E}{\partial y_k} \cdot \frac{\partial y_k}{\partial a_k} = (y_k - t_k) \, h'(a_k)
+\label{eq:delta_output}
+\end{equation}
+
+Per le unità negli \textbf{hidden layer}, si applica nuovamente la chain rule. L'errore di un'unità $j$ in un hidden layer dipende dagli errori di tutte le unità $k$ a cui $j$ è connessa nel layer successivo:
+
+\begin{equation}
+\delta_j = \frac{\partial E}{\partial a_j} = \sum_k \frac{\partial E}{\partial a_k} \cdot \frac{\partial a_k}{\partial a_j}
+\end{equation}
+
+Poiché $a_k = \sum_j w_{kj} z_j = \sum_j w_{kj} h(a_j)$, si ha $\frac{\partial a_k}{\partial a_j} = w_{kj} h'(a_j)$, da cui \cite{bishop2006pattern}:
+
+\begin{equation}
+\delta_j = h'(a_j) \sum_k w_{kj} \, \delta_k
+\label{eq:delta_hidden}
+\end{equation}
+
+Questa equazione mostra che l'errore in un hidden layer si ottiene sommando gli errori del layer successivo pesati dai corrispondenti pesi di connessione, e moltiplicando per la derivata della funzione di attivazione.
+
+\paragraph{Algoritmo di backpropagation.} L'algoritmo completo procede in due fasi distinte per ciascun esempio (o mini-batch) presentato alla rete \cite{bishop2006pattern, rumelhart1986learning}:
+
+\begin{enumerate}
+\item \textbf{Forward pass}: si applica un pattern di input alla rete e si propagano i segnali in avanti attraverso i layer, calcolando le pre-attivazioni $a_j$ e le attivazioni $z_j = h(a_j)$ di tutte le unità fino agli output. Si valuta quindi la funzione di errore $E$ confrontando gli output della rete $\mathbf{y}$ con i target desiderati $\mathbf{t}$.
+
+\item \textbf{Backward pass}: si calcolano gli errori $\delta$ propagando all'indietro attraverso la rete:
+    \begin{itemize}
+    \item Per le unità di output, si calcola $\delta_k$ usando l'Equazione \ref{eq:delta_output}
+    \item Per ciascun hidden layer, procedendo dall'ultimo verso il primo, si calcolano i $\delta_j$ usando l'Equazione \ref{eq:delta_hidden}
+    \item Una volta noti tutti i $\delta_j$, si calcolano i gradienti dei pesi tramite l'Equazione \ref{eq:gradient_weight}
+    \end{itemize}
+\end{enumerate}
+
+Questi gradienti, accumulati su un mini-batch, vengono infine utilizzati da un algoritmo di ottimizzazione basato sulla discesa del gradiente per aggiornare tutti i parametri della rete. L'intero processo (forward pass, backward pass, aggiornamento dei pesi) viene iterato per molte epoche su tutto il dataset di addestramento, guidando la rete verso un minimo della funzione di errore.
+
+\paragraph{Efficienza computazionale.}
+La backpropagation è molto efficiente: richiede circa il doppio delle operazioni della forward propagation. Per ogni connessione nella rete, l'algoritmo esegue una moltiplicazione nel forward pass e una nel backward pass, più un'addizione. Questa efficienza è fondamentale per rendere praticabile l'addestramento di reti con milioni di parametri.
+
+\paragraph{Importanza della differenziabilità.} 
+L'algoritmo richiede che le funzioni di attivazione siano differenziabili, poiché la backpropagation si basa sul calcolo delle derivate $h'(a_j)$. Questo spiega perché la funzione a gradino del perceptron originale, avendo derivata zero quasi ovunque, impedisce l'uso della backpropagation. Le funzioni moderne come sigmoid, tanh e ReLU, essendo differenziabili (o sub-differenziabili nel caso della ReLU nel punto zero), permettono il calcolo efficiente dei gradienti.
+
+\paragraph{Estensione a reti profonde.} 
+Sebbene abbiamo descritto l'algoritmo senza esplicitare i layer con notazione indicizzata, l'estensione a reti con molti layer è immediata: si applica ricorsivamente l'Equazione \ref{eq:delta_hidden} procedendo all'indietro dal layer di output fino al primo hidden layer. Questa applicazione ricorsiva della chain rule attraverso i layer è ciò che rende possibile l'apprendimento in reti profonde \cite{goodfellow2016deep}.
+
+% funzione di errore
+\subsubsection{Funzioni di Errore}
+
+La scelta della \textbf{funzione di errore} (o \textit{loss function}) è importante per l'ad\-des\-tra\-men\-to di una rete neurale perché definisce l'obiettivo che l'ottimizzazione cerca di minimizzare. La funzione di errore deve essere differenziabile per permettere il calcolo dei gradienti tramite backpropagation e deve riflettere il tipo di problema affrontato \cite{bishop2006pattern}.
+
+\paragraph{Errore Quadratico Medio.} Per problemi di \textbf{regressione}, dove l'obiettivo è predire valori continui, la funzione di errore più comune è l'\textbf{errore quadratico} (sum-of-squares error) o la sua media, il \textit{Mean Squared Error} (MSE) \cite{hastie2009elements}. Data una rete con $K$ output e $N$ esempi di training, l'errore totale è definito come \cite{bishop2006pattern}:
+
+\begin{equation}
+E = \frac{1}{2N} \sum_{n=1}^{N} \sum_{k=1}^{K} (y_{nk} - t_{nk})^2
+\label{eq:mse}
+\end{equation}
+
+dove $y_{nk}$ è l'output della rete per l'esempio $n$ e l'unità di output $k$, e $t_{nk}$ è il corrispondente valore target. Il fattore $\frac{1}{2}$ è una convenzione che semplifica la derivata.
+
+Sotto l'assunzione che i target siano corrotti da rumore gaussiano, minimizzare l'MSE equivale a massimizzare la log-likelihood dei dati, fornendo una giustificazione probabilistica per questa scelta \cite{bishop2006pattern}. Il gradiente dell'MSE rispetto all'output è:
+
+\begin{equation}
+\frac{\partial E}{\partial y_{nk}} = y_{nk} - t_{nk}
+\end{equation}
+
+che si combina con la derivata della funzione di attivazione durante la backpropagation.
+
+\paragraph{Cross-Entropy per Classificazione.} Per problemi di classificazione, la funzione di errore standard è la \textbf{cross-entropy}, che misura la divergenza tra la distribuzione di probabilità predetta dalla rete e la distribuzione reale dei target \cite{bishop2006pattern, goodfellow2016deep}.
+
+\subparagraph{Classificazione Binaria.} 
+Con target $t_n \in \{0,1\}$ e output sigmoid $y_n \in (0,1)$, la binary cross-entropy è:
+\[
+E = -\sum_{n=1}^{N} \left[ t_n \log y_n + (1-t_n) \log(1-y_n) \right]
+\]
+
+\subparagraph{Classificazione Multi-Classe.} 
+Con target one-hot $\mathbf{t}_n \in \{0,1\}^C$ e output softmax $\mathbf{y}_n \in (0,1)^C$ (dove $\sum_k y_{nk}=1$), la categorical cross-entropy è:
+\[
+E = -\sum_{n=1}^{N} \sum_{k=1}^{C} t_{nk} \log y_{nk}
+\]
+
+In entrambi i casi, il gradiente rispetto alle pre-attivazioni dello strato di output si semplifica in $\frac{\partial E}{\partial a_k} = y_k - t_k$, facilitando l'implementazione della backpropagation \cite{goodfellow2016deep}.
+
+\paragraph{Scelta della Funzione di Errore.} La scelta della funzione di errore deve riflettere la natura del problema:
+
+\begin{itemize}
+\item \textbf{Regressione}: MSE (o varianti come Mean Absolute Error per robustezza agli outlier)
+\item \textbf{Classificazione binaria}: Binary cross-entropy con sigmoid
+\item \textbf{Classificazione multi-classe}: Categorical cross-entropy con softmax
+\item \textbf{Multi-label classification}: Binary cross-entropy per ciascuna label (le classi non sono mutualmente esclusive)
+\end{itemize}
+
+La cross-entropy è generalmente preferita all'MSE per problemi di classificazione perché:
+\begin{itemize}
+\item Fornisce gradienti più informativi quando l'output è lontano dal target
+\item Ha una giustificazione probabilistica diretta (massimizzazione della likelihood)
+\item Evita problemi di saturazione che possono verificarsi con MSE e funzioni di attivazione sigmoidali
+\end{itemize}
+
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{4cm}p{6cm}p{4cm}}
+\toprule
+\textbf{Tipo} & \textbf{Formula} & \textbf{Attivazione output} \\
+\midrule
+Regressione & $\displaystyle \frac{1}{2}\sum (y-t)^2$ & Identità \\
+Classificazione binaria & $\displaystyle -\sum [t\log y + (1-t)\log(1-y)]$ & Sigmoid \\
+Classificazione multi-classe & $\displaystyle -\sum \sum_k t_k \log y_k$ & Softmax \\
+\bottomrule
+\end{tabular}
+\caption{Funzioni di errore per diversi tipi di problema.}
+\label{tab:loss_functions}
+\end{table}
+
+
+\subsubsection{Ottimizzazione basata sul Gradiente}
+
+Una volta calcolati i gradienti tramite backpropagation, è necessario utilizzarli per aggiornare i parametri della rete. Gli algoritmi di ottimizzazione determinano come modificare i pesi in funzione dei gradienti per minimizzare la funzione di errore \cite{goodfellow2016deep}.
+
+
+\paragraph{Mini-batch Stochastic Gradient Descent (SGD).}
+Il gradient descent classico \cite{bishop2006pattern} aggiorna i parametri nella direzione opposta al gradiente calcolato sull'intero dataset. Per dataset di grandi dimensioni, questa operazione è computazionalmente proibitiva. Lo \textbf{Stochastic Gradient Descent (SGD)} \cite{bottou2010large} utilizza invece il gradiente calcolato su un singolo esempio o, più comunemente, su un \textbf{mini-batch} di dimensione ridotta (tipicamente 32-256 esempi). Questo approccio permette aggiornamenti più frequenti e sfrutta efficientemente l'elaborazione parallela delle GPU.
+
+\paragraph{SGD con Momentum.}
+Per mitigare le oscillazioni di SGD in funzioni di errore con geometrie complesse (come valli strette o plateau), si introduce il \textbf{momentum} \cite{polyak1964some, sutskever2013importance}. Questo concetto, ispirato alla fisica, mantiene una "velocità" di aggiornamento che accumula il contributo dei gradienti passati, permettendo di accelerare la convergenza lungo direzioni con gradiente costante e riducendo le oscillazioni nelle direzioni ortogonali.
+
+\paragraph{Adam (Adaptive Moment Estimation).}
+L'ottimizzatore \textbf{Adam} \cite{kingma2014adam} combina i vantaggi del momentum con l'adattività del learning rate per ciascun parametro. Mantiene due statistiche in esecuzione: una media mobile esponenziale dei gradienti (primo momento) e dei loro quadrati (secondo momento). Questa stima permette di adattare dinamicamente la dimensione del passo di aggiornamento, risultando robusto alla scelta del learning rate iniziale e convergendo rapidamente in molti scenari pratici. Adam è diventato uno degli ottimizzatori più utilizzati nel deep learning.
+
+\paragraph{Learning Rate Scheduling.} Indipendentemente dall'ottimizzatore scelto, la performance è spesso migliorata riducendo strategicamente il learning rate durante il training. 
+Strategie comuni includono \textbf{step decay} (riduzione periodica), l'\textbf{exponential decay} e il \textbf{cosine annealing} \cite{goodfellow2016deep}. Tecniche come il \textbf{warmup} (aumento graduale del learning rate all'inizio) possono anche stabilizzare le fasi iniziali dell'addestramento.
+
+%Regolarizzazione
+
+\subsubsection{Regolarizzazione}
+
+Le tecniche di regolarizzazione sono fondamentali per prevenire l'overfitting e migliorare la capacità di generalizzazione delle reti a dati non visti. L'overfitting si verifica quando il modello si adatta eccessivamente ai dati di training, catturando anche il rumore anziché solo i pattern rilevanti, risultando in prestazioni scarse sul test set.
+
+\paragraph{L2 Regularization (Weight Decay).} 
+La regolarizzazione L2, o weight decay, aggiunge alla funzione di errore un termine di penalizzazione proporzionale al quadrato dei pesi \cite{bishop2006pattern}:
+\[
+\tilde{E}(\mathbf{w}) = E(\mathbf{w}) + \frac{\lambda}{2} \|\mathbf{w}\|^2
+\]
+
+dove $\lambda > 0$ è il coefficiente di regolarizzazione che controlla l'intensità della penalizzazione. Questa penalizzazione favorisce pesi di piccola magnitudine, promuovendo mo\-del\-li più semplici e meno inclini a sovradattarsi.
+
+\paragraph{Dropout.} 
+Il dropout \cite{srivastava2014dropout} è una tecnica stocastica che, durante il training, "disattiva" casualmente una frazione dei neuroni (tipicamente il 50\%). Questo obbliga la rete a sviluppare rappresentazioni ridondanti e robuste, migliorando la generalizzazione. Concettualmente, il dropout può essere visto come il training di un ensemble di reti diverse che vengono combinate a test time.
+
+\paragraph{Batch Normalization.} 
+La batch normalization \cite{ioffe2015batch} normalizza le attivazioni di ciascun layer per avere media zero e varianza unitaria su ogni mini-batch. Questo stabilizza la distribuzione degli input ai layer successivi, permettendo learning rate più alti, accelerando la convergenza e fornendo anche un leggero effetto regolarizzante.
+
+\paragraph{Early Stopping.} 
+L'early stopping \cite{prechelt1998early} interrompe il training quando la performance su un validation set smette di migliorare, prevenendo così l'overfitting. È una forma di regolarizzazione semplice ma efficace, particolarmente utile quando la capacità del modello è elevata rispetto alla complessità del problema.
+
+%Problemi
+\subsubsection{Problemi Comuni e Soluzioni}
+
+\paragraph{Vanishing e Exploding Gradients.} 
+Nelle reti profonde, i gradienti possono diventare estremamente piccoli (vanishing) o grandi (exploding) durante la backpropagation \cite{hochreiter1991untersuchungen, bengio1994learning}. Questo fenomeno, legato alla moltiplicazione ripetuta di derivate attraverso molti layer, può impedire l'apprendimento efficace.
+
+Soluzioni principali includono:
+\begin{itemize}
+\item \textbf{Funzioni di attivazione} come ReLU, che hanno derivata non nulla per input positivi.
+\item \textbf{Inizializzazioni appropriate} dei pesi (es., Xavier \cite{glorot2010understanding} o He \cite{he2015delving}).
+\item \textbf{Batch Normalization}, che stabilizza la distribuzione delle attivazioni.
+\item \textbf{Skip connections} come nelle ResNet \cite{he2016deep}, che permettono ai gradienti di fluire più facilmente.
+\end{itemize}
+
+\paragraph{Scelta degli Iperparametri.}
+Il training efficace richiede la sintonizzazione di numerosi iperparametri (learning rate, dimensione del batch, coefficienti di regolarizzazione, ecc.). Pratiche comuni includono la \textbf{grid search} o \textbf{random search} \cite{bergstra2012random} sullo spazio degli iperparametri, validate tramite \textbf{cross-validation}. Il monitoraggio delle \textbf{learning curves} (loss su training e validation set) è essenziale per diagnosticare overfitting o underfitting e guidare le regolazioni.
+
 
