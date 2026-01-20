@@ -241,60 +241,84 @@ Questa scelta di funzione di attivazione rende il perceptron un classificatore b
 Questa limitazione a problemi linearmente separabili venne identificata da Minsky e Papert \cite{minsky1969perceptrons} come una debolezza fondamentale del perceptron singolo. Il loro lavoro dimostrò che esistono problemi semplici, come la funzione XOR, che non possono essere risolti da un singolo percettrone. Questa limitazione può essere superata solo attraverso architetture multi-layer che combinano molteplici perceptron in strutture stratificate.
 
 \subsubsection{Dal Percettrone al Multi-Layer Perceptron}
+\label{sec:MLP}
 
 Per superare le limitazioni del perceptron singolo, è necessario organizzare mol\-te\-pli\-ci perceptron in \textbf{layer} (strati) successivi, dando origine al \textbf{Multi-Layer Perceptron} (MLP) o \textbf{rete neurale feedforward} \cite{goodfellow2016deep}. Questa architettura introduce due innovazioni fondamentali rispetto al perceptron: (1) la presenza di uno o più hidden layer tra input e output, e (2) l'utilizzo di funzioni di attivazione differenziabili al posto della step function, necessarie per consentire l'apprendimento tramite backpropagation \cite{rumelhart1986learning}.
 
-% da controllare
-\paragraph{Architettura.} Un MLP è composto da tre tipi di layer:
+
+\paragraph{Architettura.} Un MLP è composto da tre tipi di layer \cite{bishop2006pattern, goodfellow2016deep}:
 
 \begin{itemize}
 \item \textbf{Input layer}: riceve i dati grezzi rappresentati come vettore $\mathbf{x} \in \mathbb{R}^{d}$, dove $d$ è la dimensionalità dell'input. Questo layer non effettua computazioni ma distribuisce semplicemente l'input ai layer successivi, eventualmente dopo una trasformazione $\boldsymbol{\phi}(\mathbf{x})$.
 \item \textbf{Hidden layers}: uno o più layer intermedi che trasformano progressivamente l'input. Ogni hidden layer apprende una rappresentazione dei dati a un diverso livello di astrazione. Come discusso nella Sezione \ref{sec:representation_learning}, i layer iniziali tendono a estrarre feature di basso livello, mentre layer più profondi costruiscono rappresentazioni sempre più astratte \cite{bengio2013representation}.
-
 \item \textbf{Output layer}: produce la predizione finale. Per problemi di classificazione con $C$ classi, tipicamente contiene $C$ neuroni con funzione di attivazione softmax che produce una distribuzione di probabilità sulle classi. Per problemi di regressione, può contenere uno o più neuroni con attivazione lineare.
 \end{itemize}
 
-\paragraph{Trasformazione layer-by-layer.} Seguendo la notazione di Bishop \cite{bishop2006pattern}, ogni unità (neurone) nel layer $j$ calcola una somma pesata delle uscite delle unità del layer precedente, trasformata da una funzione di attivazione non lineare. Per un layer generico:
+
+
+\paragraph{Formulazione Matematica di una Rete Neurale a Due Layer} Seguendo la notazione di Bishop \cite{bishop2006pattern}, le reti neurali possono essere interpretate come un'estensione parametrica dei modelli lineari per regressione e classificazione. Nei modelli lineari tradizionali, l'output è ottenuto come combinazione lineare di funzioni base fisse $\phi_j(\mathbf{x})$:
 
 \begin{equation}
-a_j = \sum_{i} w_{ji} z_i
+y(\mathbf{x}, \mathbf{w}) = f\left(\sum_{j=1}^{M} w_j \phi_j(\mathbf{x})\right)
+\label{eq:linear_model}
 \end{equation}
 
-dove $z_i$ è l'attivazione dell'unità $i$ nel layer precedente, e $w_{ji}$ è il peso della connessione dall'unità $i$ all'unità $j$. L'output dell'unità $j$ è quindi:
+dove $f(\cdot)$ è una funzione di attivazione non lineare (identità per la regressione, sigmoide per la classificazione). La rivoluzione introdotta dalle reti neurali consiste nel rendere anche le funzioni base $\phi_j(\mathbf{x})$ stesse parametriche e adattabili durante l'addestramento, costruendo così rappresentazioni gerarchiche dei dati.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{immagini/capitolo1/bishop2006_neural_diagram.png}
+    \caption{Architettura di una rete neurale feedforward a due layer con un singolo strato nascosto. I nodi di input \(x_0, x_1, \dots, x_D\) sono collegati alle unità nascoste \(z_1, \dots, z_M\) attraverso pesi \(w_{ji}^{(1)}\). L'unità \(x_0\) rappresenta il bias per lo strato nascosto. Le unità nascoste sono poi collegate alle unità di output \(y_1, \dots, y_K\) attraverso pesi \(w_{kj}^{(2)}\), con \(z_0\) come bias per lo strato di output. Adattato da \cite[Fig.~5.1]{bishop2006pattern}.}
+    \label{fig:two_layer_nn}
+\end{figure}
+
+
+Consideriamo una rete neurale feedforward con un singolo layer nascosto. Il primo layer computa $M$ combinazioni lineari delle variabili di input $x_1, \dots, x_D$:
 
 \begin{equation}
-z_j = f(a_j)
+a_j = \sum_{i=1}^{D} w_{ji}^{(1)} x_i + w_{j0}^{(1)}, \quad j = 1,\dots,M
+\label{eq:first_layer}
 \end{equation}
 
-dove $f(\cdot)$ è la funzione di attivazione.
-
-In forma vettoriale, per un MLP con $L$ layer (escludendo l'input), la trasformazione attraverso ogni layer $l = 1, 2, \dots, L$ può essere espressa come:
+dove $w_{ji}^{(1)}$ sono i pesi del primo layer, $w_{j0}^{(1)}$ sono i bias, e $a_j$ sono le attivazioni lineari. Queste vengono poi trasformate attraverso una funzione di attivazione differenziabile e non lineare $h(\cdot)$:
 
 \begin{equation}
-\mathbf{a}^{(l)} = \mathbf{W}^{(l)} \mathbf{z}^{(l-1)}
+z_j = h(a_j)
+\label{eq:activation}
 \end{equation}
+
+Le quantità $z_j$ sono dette \emph{unità nascoste} e corrispondono alle funzioni base adattive della rete. Infine, le unità nascoste sono combinate linearmente per produrre le attivazioni di output:
 
 \begin{equation}
-\mathbf{z}^{(l)} = f^{(l)}(\mathbf{a}^{(l)})
-\label{eq:layer_transformation}
+a_k = \sum_{j=1}^{M} w_{kj}^{(2)} z_j + w_{k0}^{(2)}, \quad k = 1,\dots,K
+\label{eq:output_layer}
 \end{equation}
 
-dove $\mathbf{z}^{(l)} \in \mathbb{R}^{n_l}$ è il vettore delle attivazioni del layer $l$ (con $n_l$ unità), $\mathbf{z}^{(0)} = \boldsymbol{\phi}(\mathbf{x})$ è l'input trasformato, $\mathbf{W}^{(l)} \in \mathbb{R}^{n_l \times n_{l-1}}$ è la matrice dei pesi, e $f^{(l)}(\cdot)$ è la funzione di attivazione applicata element-wise.
+dove $K$ è il numero di output. L'output finale della rete si ottiene applicando un'ulteriore funzione di attivazione appropriata al compito (es. softmax per classificazione multiclasse):
 
+\begin{equation}
+y_k = g(a_k)
+\label{eq:final_output}
+\end{equation}
 
-L'output finale della rete è dato da $\mathbf{y} = \mathbf{z}^{(L)}$. Questa composizione di trasformazioni affini e non lineari consente alla rete di apprendere funzioni arbitrariamente complesse, superando la limitazione del perceptron singolo ai soli problemi linearmente separabili.
+Questa composizione di trasformazioni affini e non lineari consente alla rete di apprendere funzioni arbitrariamente complesse, superando la limitazione del perceptron singolo ai soli problemi linearmente separabili.
+
 
 \paragraph{Necessità di funzioni differenziabili.} A differenza del perceptron originale che utilizza una step function, i MLP moderni richiedono funzioni di attivazione differenziabili. Questo perché l'apprendimento avviene tramite l'algoritmo di backpropagation, che calcola i gradienti della funzione di errore rispetto ai parametri della rete propagando l'errore all'indietro attraverso i layer \cite{rumelhart1986learning}. La step function, avendo gradiente zero quasi ovunque (eccetto nel punto di discontinuità), non è adatta a questo scopo. Nella sezione successiva esamineremo le principali funzioni di attivazione differenziabili utilizzate nelle reti neurali moderne.
 
 \subsubsection{Funzioni di Attivazione}
+\label{sec:funzioni_attivazione}
 
-La funzione di attivazione $f(\cdot)$ introduce la non linearità essenziale per consentire alle reti neurali di apprendere relazioni complesse nei dati. Senza non linearità, anche una rete con molteplici layer si ridurrebbe a una semplice trasformazione lineare, poiché la composizione di funzioni lineari rimane lineare. Formalmente, se $f^{(l)}(x) = x$ per ogni layer, allora:
+Come anticipato, la scelta della funzione di attivazione $h(\cdot)$ negli strati nascosti e $g(\cdot)$ nello strato di output è cruciale per il successo dell'addestramento di una rete neurale. Essa deve soddisfare due requisiti fondamentali \cite{goodfellow2016deep}: 
 
-\begin{equation}
-f^{(L)}(\mathbf{W}^{(L)} \cdots f^{(1)}(\mathbf{W}^{(1)} \mathbf{x})) = \mathbf{W}^{(L)} \cdots \mathbf{W}^{(1)} \mathbf{x} = \tilde{\mathbf{W}} \mathbf{x}
-\end{equation}
+\begin{itemize}
+    \item introdurre \textbf{non linearità} per consentire l'approssimazione di funzioni complesse (senza non linearità, anche una rete con molteplici layer si ri\-dur\-reb\-be a una semplice trasformazione lineare)
+    \item essere \textbf{differenziabile} (o almeno avere gradiente ben definito quasi o\-vun\-que) per permettere l'ottimizzazione tramite discesa del gradiente e back\-pro\-pa\-ga\-tion
+\end{itemize}
 
-dove $\tilde{\mathbf{W}}$ è semplicemente il prodotto delle matrici dei pesi. In questo caso, la rete profonda sarebbe equivalente a un singolo layer lineare, limitando drasticamente la capacità espressiva del modello \cite{goodfellow2016deep}.
+La ricerca di funzioni che bilanciano espressività, stabilità nell'apprendimento e efficienza computazionale ha portato all'adozione di diverse famiglie di fun\-zio\-ni.
+
+
 
 Le funzioni di attivazione più utilizzate includono:
 
@@ -304,11 +328,11 @@ Le funzioni di attivazione più utilizzate includono:
 \sigma(a) = \frac{1}{1 + e^{-a}}
 \end{equation}
 
-Mappa l'input nell'intervallo $(0, 1)$, rendendola naturalmente adatta per interpretazioni probabilistiche, in particolare per problemi di classificazione binaria dove l'output può essere interpretato come $P(y=1|\mathbf{x})$. La sua derivata ha la forma conveniente $\sigma'(a) = \sigma(a)(1-\sigma(a))$, utile per il calcolo dei gradienti durante la backpropagation.
+Mappa l'input nell'intervallo $(0, 1)$, rendendola naturalmente adatta per interpretazioni probabilistiche. La sua derivata ha la forma $\sigma'(a) = \sigma(a)(1-\sigma(a))$, utile per il calcolo dei gradienti durante la backpropagation.
 
-Tuttavia, presenta il problema del \textit{vanishing gradient}: per valori di input molto grandi ($a \gg 0$) o molto piccoli ($a \ll 0$), la derivata tende a zero. Questo rallenta significativamente l'apprendimento nei layer più profondi, problema noto sin dai primi studi di Hochreiter \cite{hochreiter1991untersuchungen}.
+Tuttavia, presenta il problema del \textit{vanishing gradient}: per valori di input molto grandi ($a \gg 0$) o molto piccoli ($a \ll 0$), la derivata tende a zero e il gradiente si annulla, rallentando significativamente l'apprendimento nei layer più profondi \cite{hochreiter1991untersuchungen,bengio1994learning}.
 
-\paragraph{Tangente Iperbolica (tanh).} Simile alla sigmoid ma con output nell'intervallo $(-1, 1)$:
+\paragraph{Tangente Iperbolica (tanh).} Simile alla sigmoid ma con output nell'in\-ter\-val\-lo $(-1, 1)$:
 
 \begin{equation}
 \tanh(a) = \frac{e^{a} - e^{-a}}{e^{a} + e^{-a}} = 2\sigma(2a) - 1
@@ -328,85 +352,135 @@ a & \text{se } a > 0 \\
 Presenta diversi vantaggi:
 \begin{itemize}
 \item \textbf{Efficienza computazionale}: richiede solo un confronto e una selezione, senza operazioni esponenziali costose
-\item \textbf{Mitigazione del vanishing gradient}: per input positivi, il gradiente è costante e uguale a 1, facilitando la propagazione del segnale di errore
-\item \textbf{Sparsità}: neuroni con input negativi vengono "spenti" (attivazione zero), inducendo rappresentazioni sparse
-\end{itemize}
-
-Tuttavia, la ReLU presenta il problema dei \textit{neuroni morti} (dying ReLU): se un neurone riceve costantemente input negativi, il gradiente è sempre zero e il neurone non si aggiorna più. Per mitigare questo problema, sono state proposte diverse varianti \cite{he2015delving}, tra cui \textbf{Leaky ReLU} ($f(a) = \max(\alpha a, a)$ con $\alpha \approx 0.01$) e \textbf{Parametric ReLU} (PReLU), dove $\alpha$ è appreso durante il training.
+\item \textbf{Mitigazione del vanishing gradient}: per input positivi, il gradiente è costante e uguale a 1, facilitando la propagazione del segnale di errore \cite{glorot2011deep}
+\item \textbf{Sparsità}: neuroni con input negativi vengono "spenti" (attivazione zero), inducendo rappresentazioni sparse. Questa sparsità può migliorare l'ef\-fi\-cien\-za computazionale e potenzialmente la capacità di generalizzazione della rete \cite{glorot2011deep}
+\end{itemize} 
 
 
-%
+\paragraph{Varianti di ReLU.}
+Tuttavia, la ReLU presenta il problema dei \textit{neuroni morti} (dying ReLU): se un neurone riceve costantemente input negativi, il gradiente è sempre zero e il neurone non si aggiorna più, diventando permanentemente inattivo \cite{he2015delving}. Per mitigare questo problema, sono state proposte diverse varianti della funzione.
 
+La \textbf{Leaky ReLU} \cite{maas2013rectifier} introduce una pendenza minima \(\alpha\) (tipicamente \(0.01\)) per gli input negativi:
+\[
+\text{LeakyReLU}(x) = \max(\alpha x, x), \quad \alpha \in (0,1)
+\]
+Questa modifica garantisce che il gradiente sia sempre non nullo (\(\nabla_x = \alpha\) per \(x < 0\)), prevenendo la morte permanente dei neuroni.
+
+Una generalizzazione più flessibile è la \textbf{Parametric ReLU (PReLU)} \cite{he2015delving}, in cui il coefficiente \(\alpha\) non è fissato a priori ma viene appreso durante l'addestramento come parametro aggiuntivo della rete:
+\[
+\text{PReLU}(x) = \max(\alpha x, x), \quad \alpha \text{ imparabile}
+\]
+PReLU permette a ciascun layer (o addirittura a ciascun neurone) di adattare autonomamente la risposta agli input negativi, bilanciando l'azione di attivazione e regolarizzazione in base alle specificità dei dati. In pratica, la rete può decidere se comportarsi più come una ReLU standard (\(\alpha \approx 0\)) o come una Leaky ReLU con pendenza significativa (\(\alpha > 0\)), ottimizzando questo trade-off per il task specifico.
+
+La scelta della funzione di attivazione può avere un impatto significativo sulle prestazioni della rete. In generale, la ReLU e le sue varianti sono preferite per i layer nascosti nelle architetture profonde moderne, mentre la scelta per il layer di output dipende dal task specifico: softmax per classificazione multi-classe, sigmoid per classificazione binaria, e identità (lineare) per regressione.
 
 
 \subsubsection{Architetture di Reti Neurali}
 Le reti neurali possono essere classificate in base alla direzione del flusso dell'in\-for\-ma\-zio\-ne attraverso la rete. Le due architetture fondamentali sono le reti \textbf{feedforward} e le reti \textbf{ricorrenti} (recurrent) \cite{goodfellow2016deep}.
 
-\paragraph{Reti Feedforward.} Nelle reti feedforward (o feed-forward), l'informazione fluisce in una sola direzione, dall'input verso l'output, senza cicli o connessioni retroattive. Queste reti sono rappresentate da grafi aciclici diretti (Directed Acyclic Graphs, DAG), dove ogni layer riceve input solo dai layer precedenti e non esiste alcun feedback \cite{bishop2006pattern}. Il Multi-Layer Perceptron (MLP) e le reti convoluzionali (CNN) sono esempi di architetture feedforward. Queste reti sono particolarmente adatte per problemi in cui l'output dipende solo dall'input corrente, come la classificazione di immagini o la regressione.
+\paragraph{Reti Feedforward.} Nelle reti feedforward, l'informazione fluisce in una sola direzione, dall'input verso l'output, senza cicli o connessioni retroattive. Queste reti sono rappresentate da grafi aciclici diretti (Directed Acyclic Graphs, DAG), dove ogni layer riceve input solo dai layer precedenti e non esiste alcun feedback \cite{bishop2006pattern}. 
 
-\paragraph{Reti Ricorrenti.} Le reti ricorrenti (Recurrent Neural Networks, RNN), al contrario, contengono connessioni cicliche che consentono all'informazione di persistere nel tempo. Le attivazioni possono propagarsi sia in avanti che all'in\-die\-tro, creando una sorta di "memoria" interna che permette alla rete di elaborare sequenze di input \cite{goodfellow2016deep}. Queste architetture sono fondamentali per task che coinvolgono dati sequenziali o temporali, come l'elaborazione del linguaggio naturale, il riconoscimento vocale o la previsione di serie temporali.
+Il Multi-Layer Perceptron (MLP) discusso in \ref{sec:MLP} è l'esempio fondamentale di architettura feedforward, in cui ogni layer è completamente connesso (\textit{fully-connected} o \textit{dense}) al layer successivo. In un MLP, ogni neurone in un layer riceve input da tutti i neuroni del layer precedente, risultando in un numero di parametri pari a $n_{l-1} \times n_l$ per la connessione tra due layer consecutivi con $n_{l-1}$ e $n_l$ neuroni rispettivamente.
 
+Altre importanti architetture feedforward includono le \textbf{reti convoluzionali} (Convolutional Neural Networks, CNN), che introducono due principi fondamentali:
 
+\begin{itemize}
+\item \textbf{Connettività locale}: ogni neurone è connesso solo a una regione locale dell'input, riducendo drasticamente il numero di parametri.
+\item \textbf{Condivisione dei pesi}: gli stessi pesi (filtri) sono applicati a diverse posizioni spaziali, sfruttando l'invarianza traslazionale dei dati visivi.
+\end{itemize}
 
+Queste caratteristiche rendono le CNN particolarmente efficaci per dati con struttura spaziale, come immagini, dove pattern locali (bordi, texture) e gerarchie spaziali sono fondamentali. Le CNN saranno discusse in dettaglio nella sezione successiva.
 
+Le reti feedforward sono particolarmente adatte per problemi in cui l'output dipende solo dall'input corrente, senza necessità di mantenere informazioni su input precedenti. Esempi tipici includono:
 
+\begin{itemize}
+\item Classificazione di immagini statiche
+\item Regressione su dati tabulari
+\item Riconoscimento di pattern in cui non è presente una struttura temporale o sequenziale
+\end{itemize}
 
-
-\subsubsection{Funzioni di Attivazione}
-Mentre il perceptron originale utilizza una funzione a gradino, le moderne reti neurali impiegano funzioni di attivazione differenziabili. La funzione di attivazione $f(\cdot)$ introduce la non linearità essenziale per consentire alle reti neurali di apprendere relazioni complesse nei dati. Senza non linearità, anche una rete con molteplici layer si ridurrebbe a una semplice trasformazione lineare, poiché la composizione di funzioni lineari rimane lineare, limitando drasticamente la capacità espressiva del modello \cite{goodfellow2016deep}.
-
-Le funzioni di attivazione più utilizzate includono:
-\paragraph{Sigmoid.} La funzione sigmoide (o logistica) è stata storicamente una delle prime funzioni di attivazione utilizzate nelle reti neurali \cite{rumelhart1986learning}:
+\paragraph{Reti Ricorrenti.} Le reti ricorrenti (Recurrent Neural Networks, RNN), al contrario, contengono connessioni cicliche che consentono all'informazione di persistere nel tempo. Le attivazioni possono propagarsi sia in avanti che all'in\-die\-tro, creando una sorta di "memoria" interna che permette alla rete di elaborare sequenze di input \cite{goodfellow2016deep}. Formalmente, lo stato nascosto $\mathbf{h}^{(t)}$ al tempo $t$ è funzione sia dell'input corrente $\mathbf{x}^{(t)}$ sia dello stato precedente $\mathbf{h}^{(t-1)}$:
 
 \begin{equation}
-\sigma(a) = \frac{1}{1 + e^{-a}}
+\mathbf{h}^{(t)} = f(\mathbf{h}^{(t-1)}, \mathbf{x}^{(t)}; \theta)
+\label{eq:rnn_compact}
 \end{equation}
 
-Mappa l'input nell'intervallo $(0, 1)$, rendendola naturalmente adatta per interpretazioni probabilistiche, in particolare per problemi di classificazione binaria dove l'output può essere interpretato come $P(y=1|\mathbf{x})$. La sua derivata ha la forma conveniente $\sigma'(a) = \sigma(a)(1-\sigma(a))$, utile per il calcolo dei gradienti.
+dove $f$ è una trasformazione non lineare e $\theta$ rappresenta l'insieme dei pa\-ra\-me\-tri della rete. Nella sua forma più comune, detta RNN "vanilla" o "Elman network" \cite{elman1990finding}, questa trasformazione si realizza come combinazione lineare seguita da una non-linearità:
 
-Tuttavia, presenta il problema del \textit{vanishing gradient}: per valori di input molto grandi ($a \gg 0$) o molto piccoli ($a \ll 0$), la derivata tende a zero. Questo rallenta significativamente l'apprendimento nei layer più profondi durante la backpropagation, problema noto sin dai primi studi di Hochreiter \cite{hochreiter1991untersuchungen}
+\begin{equation}
+\mathbf{h}^{(t)} = \tanh(\mathbf{W}_{hh} \mathbf{h}^{(t-1)} + \mathbf{W}_{xh} \mathbf{x}^{(t)} + \mathbf{b}_h)
+\label{eq:rnn_explicit}
+\end{equation}
 
+dove $\mathbf{W}_{hh}$ e $\mathbf{W}_{xh}$ sono matrici di pesi e $\mathbf{b}_h$ è un vettore bias. L'output al tempo $t$ si ottiene trasformando lo stato nascosto:
 
+\begin{equation}
+\mathbf{y}^{(t)} = g(\mathbf{W}_{hy} \mathbf{h}^{(t)} + \mathbf{b}_y)
+\end{equation}
 
+dove $g(\cdot)$ è la funzione di attivazione dell'output.
 
+Questa architettura permette alla rete di catturare dipendenze temporali, poiché lo stato $\mathbf{h}^{(t)}$ funge da memoria compressa della sequenza osservata fino al tempo $t$. Tuttavia, le RNN standard soffrono del \textit{vanishing gradient problem} \cite{bengio1994learning}, che rende difficile apprendere dipendenze a lungo termine: durante la backpropagation attraverso il tempo (BPTT), i gradienti tendono a svanire (o esplodere) quando retro-propagati attraverso molti step temporali.
 
+Per mitigare questo problema, sono state sviluppate nuove architetture con meccanismi di \textit{gating}:
 
+\begin{itemize}
+\item \textbf{LSTM (Long Short-Term Memory)} \cite{hochreiter1997long}: Introduce tre gate (input, forget, output) e una cell state che permettono un controllo preciso del flusso di informazione, facilitando la memorizzazione a lungo termine.
 
+\item \textbf{GRU (Gated Recurrent Unit)} \cite{cho2014learning}: Variante semplificata con due gate (reset e update), che offre prestazioni simili alle LSTM con meno parametri.
+\end{itemize}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\section{Anomalie}
-% da sistemare
-Negli ultimi anni si è registrato un crescente interesse verso l’applicazione di tecniche di deep learning al rilevamento di anomalie per garantire la qualità dei prodotti e migliorare l’efficienza e la qualità della produzione. Tuttavia, la natura prevalentemente non supervisionata del problema rende meno immediata la definizione di obiettivi di representation learning adeguati.
-
-Il rilevamento di anomalie generico si confronta con tipologie di anomalie più eterogenee, prive delle severe restrizioni tipiche delle applicazioni industriali: limitata disponibilità di campioni anomali, vincoli stringenti in termini di accuratezza e tempo di elaborazione, specifiche caratteristiche strutturali e semantiche (disallineamenti logici, micro difetti superficiali o deviazioni dimensionali di precisione).
-
-Il rilevamento di anomalie visive in ambito industriale, al contrario, affronta diverse sfide pratiche intrinseche agli scenari reali \cite{zhuo2025survey}. La variabilità delle condizioni di produzione (fattori ambientali, variazioni di illuminazione, angolazioni della telecamera) influenza in modo significativo l’aspetto visivo dei prodotti: i dati considerati normali possono presentare un’elevata variabilità, richiedendo ai metodi di rilevamento delle anomalie di mantenere robustezza in condizioni operative diverse per evitare classificazioni errato o mancati riconoscimenti. 
-
-In secondo luogo, i dataset presentano spesso un forte sbilanciamento: le istanze normali superano di gran lunga quelle anomale e non sono etichettate, rendendo difficile identificare cosa costituisca un’anomalia e per quali motivi. Imperfezioni dei sensori o condizioni ambientali difficili generano elevati livelli di rumore nelle immagini, che possono complicare ulteriormente il rilevamento 
-
-Il problema del rilevamento delle anomalie si configura quindi come un compito di apprendimento non supervisionato, con l’obiettivo di costruire un modello rappresentativo della maggioranza dei punti dati. La complessità aumenta a causa dell’elevata eterogeneità delle anomalie, rendendo difficile la definizione di un modello esaustivo per tali eventi. Di conseguenza, l’approccio comunemente adottato consiste nell’apprendere un modello dei campioni normali e considerare anomale le deviazioni rispetto ad esso.
-%
-Un’anomalia viene definita come un oggetto che si discosta in maniera significativa dalla nozione di normalità. A seconda del contesto applicativo, tali osservazioni possono essere indicate come outlier o novelty. Ulteriori denominazioni ricorrenti includono, tra le altre, quelle di oggetto insolito, irregolare, atipico, incoerente, inaspettato, raro, errato, difettoso, fraudolento, malevolo, innaturale o anomalo \cite{ruff2021anomaly}. 
-Tra le prime formalizzazioni del concetto troviamo \cite{barnett1994outliers}, che definisce un outlier in un insieme di dati come un’osservazione (o un sottoinsieme di osservazioni) apparentemente incoerente rispetto al resto dei dati dell’insieme.
-
-L’approccio predominante nell’anomaly detection è l’adozione di strategie non supervisionate: la ragione risiede nella frequente assenza, o comunque marcata scarsità, di dati etichettati relativi ad anomalie. Anche quando presenti, infatti, tali dati risultano insufficienti per caratterizzare in modo esaustivo le diverse manifestazioni possibili di anomalie, limitando l’efficacia degli approcci supervisionati. Una delle idee centrali nell’anomaly detection consiste quindi nell’apprendere un modello normale a partire da dati normali, in modo non supervisionato, per  rilevare le anomalie come deviazioni dal modello appreso. Attualmente, l’anomaly detection trova impiego in una vasta gamma di settori: ad esempio, dalla cybersecurity \cite{malaiya2018anomaly} alle scienze della terra \cite{fisher2017anomaly}, in ambiti finanziari \cite{ahmed2016survey}, per la diagnosi medica \cite{baur2019fusing} o nella bioinformatica \cite{min2017deep}.
+Le RNN e le loro varianti trovano applicazione in numerosi domini che coinvolgono dati sequenziali, tra cui: elaborazione del linguaggio naturale (NLP), riconoscimento vocale, analisi di serie temporali, e generazione di contenuti sequenziali (testo, musica, video).
 
 
+\section{Training delle Reti Neurali}
+\label{sec:training}
 
-\section{Depth Estimation}
+Una volta definita l'architettura di una rete neurale, è necessario determinare i valori ottimali dei parametri (pesi e bias) che minimizzano l'errore sulle predizioni. Questo processo, detto \textbf{training} o \textbf{addestramento}, si basa sull'ot\-ti\-miz\-za\-zio\-ne iterativa dei parametri attraverso algoritmi basati sul gradiente. 
+
+\subsection{Backpropagation}
+
+L'algoritmo di \textbf{backpropagation} (retropropagazione dell'errore) \cite{rumelhart1986learning}, rappresenta il metodo fondamentale per calcolare i gradienti della funzione di errore rispetto a tutti i parametri di una rete neurale. La sua formulazione ha reso possibile l'addestramento di reti profonde.
+
+\subsubsection{Formulazione matematica} Consideriamo una rete neurale feedforward in cui le unità sono organizzate in layer. Seguendo la notazione di Bishop \cite{bishop2006pattern}, per ogni unità $j$ nella rete definiamo:
+
+\begin{itemize}
+\item $a_j$: la \textbf{pre-attivazione}, data dalla somma pesata degli input all'unità $j$
+\item $z_j$: l'\textbf{attivazione}, ottenuta applicando la funzione di attivazione: $z_j = h(a_j)$
+\item $w_{ji}$: il peso della connessione dall'unità $i$ all'unità $j$
+\end{itemize}
+
+dove $h(\cdot)$ è una funzione di attivazione differenziabile (ad esempio sigmoid, tanh, o ReLU).
+
+L'obiettivo della backpropagation è calcolare efficientemente i gradienti $\frac{\partial E}{\partial w_{ji}}$ della funzione di errore $E$ rispetto a tutti i pesi della rete. 
+
+\subsubsection{Errori e gradienti} 
+Definiamo l'\textbf{errore} $\delta_j$ per l'unità $j$ come la derivata parziale della funzione di errore rispetto alla sua pre-attivazione \cite{bishop2006pattern}:
+
+\begin{equation}
+\delta_j \equiv \frac{\partial E}{\partial a_j}
+\label{eq:delta}
+\end{equation}
+
+Applicando la regola della catena (\textit{chain rule}), il gradiente rispetto al peso $w_{ji}$ può essere espresso come:
+
+\begin{equation}
+\frac{\partial E}{\partial w_{ji}} = \frac{\partial E}{\partial a_j} \cdot \frac{\partial a_j}{\partial w_{ji}}
+\end{equation}
+
+Poiché $a_j = \sum_i w_{ji} z_i$, si ha $\frac{\partial a_j}{\partial w_{ji}} = z_i$, da cui:
+
+\begin{equation}
+\frac{\partial E}{\partial w_{ji}} = \delta_j \, z_i
+\label{eq:gradient_weight}
+\end{equation}
+
+Questo risultato fondamentale mostra che il gradiente rispetto a un peso è dato dal prodotto dell'errore $\delta_j$ dell'unità di destinazione e dell'attivazione $z_i$ dell'unità di origine. Analogamente, per i bias si ottiene:
+
+\begin{equation}
+\frac{\partial E}{\partial b_j} = \delta_j
+\end{equation}
+
+%%%
+
