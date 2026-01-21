@@ -256,7 +256,7 @@ Per superare le limitazioni del perceptron singolo, è necessario organizzare mo
 
 
 
-\paragraph{Formulazione Matematica di una Rete Neurale a Due Layer} Seguendo la notazione di Bishop \cite{bishop2006pattern}, le reti neurali possono essere interpretate come un'estensione parametrica dei modelli lineari per regressione e classificazione. Nei modelli lineari tradizionali, l'output è ottenuto come combinazione lineare di funzioni base fisse $\phi_j(\mathbf{x})$:
+\paragraph{Formulazione Matematica di una Rete Neurale a Due Layer.} Seguendo la notazione di Bishop \cite{bishop2006pattern}, le reti neurali possono essere interpretate come un'estensione parametrica dei modelli lineari per regressione e classificazione. Nei modelli lineari tradizionali, l'output è ottenuto come combinazione lineare di funzioni base fisse $\phi_j(\mathbf{x})$:
 
 \begin{equation}
 y(\mathbf{x}, \mathbf{w}) = f\left(\sum_{j=1}^{M} w_j \phi_j(\mathbf{x})\right)
@@ -665,4 +665,125 @@ Soluzioni principali includono:
 \paragraph{Scelta degli Iperparametri.}
 Il training efficace richiede la sintonizzazione di numerosi iperparametri (learning rate, dimensione del batch, coefficienti di regolarizzazione, ecc.). Pratiche comuni includono la \textbf{grid search} o \textbf{random search} \cite{bergstra2012random} sullo spazio degli iperparametri, validate tramite \textbf{cross-validation}. Il monitoraggio delle \textbf{learning curves} (loss su training e validation set) è essenziale per diagnosticare overfitting o underfitting e guidare le regolazioni.
 
+%%%%%%%%%%%%
+% CNN
+%%%%%%%%%%%%
 
+\section{Convolutional Neural Networks}
+\label{sec:cnn}
+
+Le \textbf{Convolutional Neural Networks} (CNN, reti neurali convoluzionali) rappresentano una classe specializzata di reti neurali feedforward progettata per processare dati con struttura a griglia, come le immagini. Introdotte da LeCun et al. \cite{lecun1998gradient} e rese popolari dal successo su ImageNet di Krizhevsky et al. \cite{krizhevsky2012imagenet}, le CNN hanno rivoluzionato il campo della visione artificiale sfruttando le proprietà intrinseche dei dati visivi -- connettività locale, invarianza traslazionale, e struttura gerarchica.
+
+\subsubsection{Motivazione: Limitazioni degli MLP per le Immagini}
+
+Applicare un Multi-Layer Perceptron fully-connected direttamente alle immagini presenta problemi fondamentali che rendono questo approccio impraticabile:
+
+\paragraph{Esplosione dei parametri.} Consideriamo un'immagine RGB di dimensione modesta, $224 \times 224$ pixels. Questa contiene $224 \times 224 \times 3 = 150,528$ valori di input. Connettere questo input a un primo hidden layer di appena 1000 neuroni in un MLP fully-connected richiederebbe oltre 150 milioni di parametri solo per il primo layer. Le conseguenze sono molteplici:
+
+\begin{itemize}
+\item Costo computazionale proibitivo per training e inferenza
+\item Rischio elevato di overfitting data l'enorme quantità di parametri da stimare
+\item Necessità di dataset estremamente grandi per l'addestramento efficace
+\end{itemize}
+
+\paragraph{Mancanza di invarianza spaziale.} In un MLP, un pattern visivo (ad esempio un bordo verticale o una texture) che appare in posizioni diverse dell'immagine viene trattato come feature completamente indipendenti. La rete deve quindi imparare separatamente a riconoscere lo stesso pattern in ogni possibile posizione, uno spreco di capacità rappresentativa. Questa mancanza di \textit{weight sharing} impedisce alla rete di generalizzare pattern appresi da una regione dell'immagine ad altre regioni.
+
+\paragraph{Perdita della struttura spaziale.} Trasformare un'immagine bidimensionale in un vettore unidimensionale per l'input all'MLP elimina completamente le relazioni spaziali tra pixel vicini. Tuttavia, nelle immagini naturali, la vicinanza spaziale è fortemente informativa: pixel adiacenti sono tipicamente correlati, e la composizione locale di pixel forma pattern significativi come bordi, angoli e texture. Questa struttura topologica, fondamentale per la comprensione visiva, viene ignorata dagli MLP fully-connected.
+
+Le CNN risolvono sistematicamente questi problemi attraverso tre principi architetturali chiave \cite{lecun2015deep}: \textbf{connettività locale}, \textbf{condivisione dei pesi}, e \textbf{pooling}.
+
+\subsubsection{Principi Fondamentali delle CNN}
+
+\paragraph{Connettività locale.} Invece di connettere ogni neurone a tutti i pixel dell'immagine, le CNN sfruttano la \textbf{connettività locale}: ciascuna unità in un layer convoluzionale riceve input solo da una piccola regione spaziale del layer precedente, detta \textit{receptive field} locale. Ad esempio, un filtro $3 \times 3$ connette ogni neurone a sole 9 posizioni spaziali. 
+
+Questo riflette la natura locale delle correlazioni nelle immagini naturali: per comprendere cosa rappresenta un pixel, è tipicamente sufficiente esaminare i suoi vicini immediati. La connettività locale riduce drasticamente il numero di parametri, rendendo le CNN scalabili a immagini ad alta risoluzione.
+
+\paragraph{Condivisione dei pesi (Weight Sharing).} Un aspetto rivoluzionario delle CNN è che lo stesso filtro -- quindi gli stessi pesi -- viene applicato a tutte le posizioni spaziali dell'input. Questo meccanismo, detto \textbf{weight sharing} o \textit{parameter tying}, ha conseguenze profonde:
+
+\begin{itemize}
+\item Un filtro di dimensione $3 \times 3$ applicato a un'immagine $224 \times 224$ ha solo 9 parametri, indipendentemente dalla dimensione dell'input
+\item La rete può riconoscere lo stesso pattern (ad esempio un bordo verticale) indipendentemente dalla sua posizione nell'immagine, una proprietà detta \textit{invarianza traslazionale}
+\item Il numero totale di parametri è drasticamente ridotto: applicare 64 filtri $3 \times 3$ richiede solo $64 \times 3 \times 3 = 576$ parametri, contro i milioni di un layer fully-connected equivalente
+\end{itemize}
+
+Concettualmente, ciascun filtro impara a rilevare una specifica caratteristica visiva (un tipo di bordo, una texture, un pattern di colore), e la condivisione dei pesi garantisce che questa caratteristica possa essere rilevata ovunque appaia nell'immagine.
+
+\paragraph{Operazione di convoluzione.} L'operazione di convoluzione consiste nell'applicare un filtro (o \textit{kernel}) di piccole dimensioni che scorre sull'immagine di input. In ogni posizione, il filtro calcola il prodotto elemento per elemento con la regione sottostante, seguito da una somma. Il risultato è una \textit{feature map} che indica quanto il pattern cercato dal filtro è presente in ciascuna posizione.
+
+Un layer convoluzionale applica tipicamente molteplici filtri in parallelo, producendo diverse feature map. Se l'input ha $C_{in}$ canali (ad esempio 3 per un'immagine RGB) e si applicano $C_{out}$ filtri, ciascuno di dimensione $h \times w \times C_{in}$, si ottengono $C_{out}$ feature map di output.
+
+\paragraph{Pooling.} Il \textbf{pooling} (o \textit{subsampling}) è un'operazione che riduce progressivamente le dimensioni spaziali delle feature map, diminuendo il numero di parametri nei layer successivi e la complessità computazionale. L'operazione più comune è il \textbf{max pooling}, che divide l'input in regioni non sovrapposte (tipicamente $2 \times 2$) e seleziona il valore massimo in ciascuna regione. Un max pooling $2 \times 2$ con stride 2 riduce le dimensioni spaziali della metà, riducendo la dimensionalità complessiva di un fattore 4.
+
+Il pooling offre diversi vantaggi: introduce una forma di invarianza a piccole traslazioni, aumenta il receptive field effettivo dei layer successivi, e aiuta a prevenire overfitting riducendo la complessità del modello \cite{goodfellow2016deep}.
+
+\subsubsection{Architettura di una CNN}
+
+Una CNN tipica è composta da una sequenza di layer che alternano operazioni di convoluzione, attivazione non lineare (tipicamente ReLU), e pooling, seguite da layer fully-connected finali per la classificazione.
+
+\paragraph{Struttura generale.} Un'architettura CNN standard segue il pattern:
+
+\begin{center}
+INPUT $\rightarrow$ [CONV $\rightarrow$ ReLU $\rightarrow$ POOL]$^*$ $\rightarrow$ [FC $\rightarrow$ ReLU]$^*$ $\rightarrow$ OUTPUT
+\end{center}
+
+dove il blocco [CONV $\rightarrow$ ReLU $\rightarrow$ POOL] viene ripetuto più volte. Una caratteristica ricorrente nelle architetture CNN è che, procedendo in profondità:
+
+\begin{itemize}
+\item Le dimensioni spaziali diminuiscono gradualmente (da $224 \times 224$ a $7 \times 7$)
+\item Il numero di canali (feature map) aumenta gradualmente (da 3 a 512 o più)
+\item I layer iniziali catturano feature di basso livello (bordi, colori, texture semplici)
+\item I layer profondi catturano feature di alto livello sempre più astratte (parti di oggetti, pattern complessi)
+\end{itemize}
+
+Questa progressione riflette la gerarchia naturale della percezione visiva: da componenti elementari si costruiscono rappresentazioni sempre più complesse e semantiche.
+
+\paragraph{Evoluzione storica.} LeNet-5 \cite{lecun1998gradient}, una delle prime CNN di successo, fu progettata per il riconoscimento di cifre manoscritte e conteneva 2 layer convoluzionali seguiti da layer fully-connected. AlexNet \cite{krizhevsky2012imagenet}, che vinse la competizione ImageNet nel 2012 con un margine sorprendente, segnò l'inizio dell'era moderna del deep learning per la visione artificiale, introducendo l'uso intensivo di ReLU, dropout per regolarizzazione, e training su GPU.
+
+Successivamente, architetture come VGGNet \cite{simonyan2014very} dimostrarono l'efficacia di reti molto profonde ($16-19$ layer) con filtri piccoli ($3 \times 3$), mentre ResNet \cite{he2016deep} introdusse le \textbf{residual connections} (skip connections) che permettono di addestrare reti estremamente profonde (fino a 152 layer) mitigando il problema del vanishing gradient. Le skip connections permettono al gradiente di fluire direttamente attraverso la rete, facilitando l'ottimizzazione di architetture molto profonde.
+
+\subsubsection{Transfer Learning}
+
+Il \textbf{transfer learning} è una tecnica fondamentale nelle applicazioni pratiche di CNN e riveste particolare importanza per l'anomaly detection industriale, dove i dati di training sono tipicamente limitati e costosi da acquisire \cite{pan2009survey}.
+
+\paragraph{Principio.} L'idea alla base del transfer learning è semplice ma potente: invece di addestrare una CNN da zero con inizializzazione casuale dei pesi, si parte da una rete pre-addestrata su un dataset molto grande -- tipicamente ImageNet, che contiene 1.4 milioni di immagini annotate in 1000 classi -- e si adatta la rete al nuovo task specifico.
+
+Questo approccio si basa sull'osservazione empirica che le feature apprese dai layer convoluzionali su dataset generici di immagini naturali (ImageNet) sono sorprendentemente trasferibili ad altri domini visivi. I primi layer di una CNN pre-addestrata su ImageNet imparano a rilevare feature generiche come bordi, angoli, blob di colore, e texture, che sono utili per virtualmente qualsiasi task di visione artificiale. Anche i layer più profondi, che catturano pattern più astratti e specifici del task, possono essere adattati con relativa facilità a nuovi domini correlati.
+
+\paragraph{Modalità di utilizzo.} Esistono due approcci principali al transfer learning:
+
+\textbf{1. Feature Extraction:} Nel modo più semplice, si utilizzano i layer convoluzionali pre-addestrati come feature extractor fisso. La procedura è:
+
+\begin{itemize}
+\item Si rimuove il layer di classificazione finale (fully-connected) della rete pre-addestrata
+\item Si congelano (freeze) i pesi dei layer convoluzionali, impedendone l'aggiornamento durante il training
+\item Si aggiunge un nuovo classificatore (tipicamente uno o più layer fully-connected) inizializzato casualmente
+\item Si addestra solo il nuovo classificatore sul dataset target
+\end{itemize}
+
+Questo sfrutta le rappresentazioni gerarchiche apprese dalla CNN pre-addestrata come feature general-purpose, e richiede il training di un numero molto ridotto di parametri (solo il nuovo classificatore).
+
+\textbf{2. Fine-Tuning:} Per prestazioni ottimali, dopo il feature extraction, si può eseguire il \textit{fine-tuning}:
+
+\begin{itemize}
+\item Si "scongelano" alcuni o tutti i layer convoluzionali
+\item Si continua l'addestramento con un learning rate molto basso (tipicamente 10-100 volte inferiore a quello usato per training da zero)
+\item I layer più profondi si adattano gradualmente alle specificità del task target, mentre i layer iniziali (che catturano feature generiche) tendono a cambiare meno
+\end{itemize}
+
+La scelta di quali layer scongelare dipende dalla dimensione del dataset target e dalla similarità con ImageNet: con dataset molto piccoli, è preferibile congelare più layer per evitare overfitting; con dataset più grandi o domini molto diversi, si possono scongelare anche i layer iniziali.
+
+\paragraph{Vantaggi per l'anomaly detection.} Nel contesto dell'anomaly detection industriale, il transfer learning offre vantaggi cruciali:
+
+\begin{itemize}
+\item \textbf{Migliori prestazioni con dati limitati}: le CNN pre-addestrate permettono di ottenere risultati competitivi anche con poche centinaia o migliaia di immagini, quantità tipiche nei dataset industriali
+
+\item \textbf{Convergenza più rapida}: partendo da rappresentazioni già significative, il training converge più velocemente e richiede meno epoch
+
+\item \textbf{Ridotto rischio di overfitting}: le feature pre-apprese forniscono una regolarizzazione implicita, riducendo la tendenza del modello a memorizzare il rumore del training set
+
+\item \textbf{Trasferibilità cross-domain}: anche quando le immagini industriali (ad esempio circuiti stampati, texture metalliche) differiscono significativamente dalle immagini naturali di ImageNet, le feature di basso livello (bordi, texture) rimangono utili e trasferibili
+\end{itemize}
+
+Studi empirici su dataset di anomaly detection industriale, come MVTec AD \cite{bergmann2019mvtec}, hanno dimostrato che modelli basati su transfer learning da ImageNet superano sistematicamente approcci addestrati da zero, confermando l'efficacia di questa strategia anche in domini visivamente distanti dalle immagini naturali.
+
+In sintesi, il transfer learning permette di sfruttare la vasta conoscenza visiva codificata in reti addestrate su milioni di immagini, adattandola con costi computazionali e di annotazione ridotti a task specializzati come il rilevamento di anomalie in contesti industriali. Questa tecnica è diventata la pratica standard nell'anomaly detection visiva e costituirà un componente fondamentale dei metodi che esamineremo nel capitolo successivo.
