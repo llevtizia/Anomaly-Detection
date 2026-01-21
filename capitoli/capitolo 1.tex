@@ -672,7 +672,7 @@ Il training efficace richiede la sintonizzazione di numerosi iperparametri (lear
 \section{Convolutional Neural Networks}
 \label{sec:cnn}
 
-Le \textbf{Convolutional Neural Networks} (CNN, reti neurali convoluzionali) rappresentano una classe specializzata di reti neurali feedforward progettata per processare dati con struttura a griglia, come le immagini. Introdotte da LeCun et al. \cite{lecun1998gradient} e rese popolari dal successo su ImageNet di Krizhevsky et al. \cite{krizhevsky2012imagenet}, le CNN hanno rivoluzionato il campo della visione artificiale sfruttando le proprietà intrinseche dei dati visivi -- connettività locale, invarianza traslazionale, e struttura gerarchica.
+Le \textbf{Convolutional Neural Networks} (CNN, reti neurali convoluzionali) rappresentano una classe specializzata di reti neurali feedforward progettata per processare dati con struttura a griglia, come le immagini. Introdotte da LeCun et al. \cite{lecun1998gradient} e rese popolari dal successo su ImageNet di Krizhevsky et al. \cite{krizhevsky2012imagenet}, le CNN hanno rivoluzionato il campo della visione artificiale sfruttando le proprietà caratteristiche dei dati visivi: connettività locale, invarianza traslazionale, e struttura gerarchica.
 
 \subsubsection{Motivazione: Limitazioni degli MLP per le Immagini}
 
@@ -698,7 +698,7 @@ Le CNN risolvono sistematicamente questi problemi attraverso tre principi archit
 
 Questo riflette la natura locale delle correlazioni nelle immagini naturali: per comprendere cosa rappresenta un pixel, è tipicamente sufficiente esaminare i suoi vicini immediati. La connettività locale riduce drasticamente il numero di parametri, rendendo le CNN scalabili a immagini ad alta risoluzione.
 
-\paragraph{Condivisione dei pesi (Weight Sharing).} Un aspetto rivoluzionario delle CNN è che lo stesso filtro -- quindi gli stessi pesi -- viene applicato a tutte le posizioni spaziali dell'input. Questo meccanismo, detto \textbf{weight sharing} o \textit{parameter tying}, ha conseguenze profonde:
+\paragraph{Condivisione dei pesi (Weight Sharing).} Un aspetto rivoluzionario delle CNN è che lo stesso filtro (quindi gli stessi pesi) viene applicato a tutte le posizioni spaziali dell'input. Questo meccanismo, detto \textbf{weight sharing} o \textit{parameter tying}, ha conseguenze profonde:
 
 \begin{itemize}
 \item Un filtro di dimensione $3 \times 3$ applicato a un'immagine $224 \times 224$ ha solo 9 parametri, indipendentemente dalla dimensione dell'input
@@ -745,7 +745,7 @@ Successivamente, architetture come VGGNet \cite{simonyan2014very} dimostrarono l
 
 Il \textbf{transfer learning} è una tecnica fondamentale nelle applicazioni pratiche di CNN e riveste particolare importanza per l'anomaly detection industriale, dove i dati di training sono tipicamente limitati e costosi da acquisire \cite{pan2009survey}.
 
-\paragraph{Principio.} L'idea alla base del transfer learning è semplice ma potente: invece di addestrare una CNN da zero con inizializzazione casuale dei pesi, si parte da una rete pre-addestrata su un dataset molto grande -- tipicamente ImageNet, che contiene 1.4 milioni di immagini annotate in 1000 classi -- e si adatta la rete al nuovo task specifico.
+\paragraph{Principio.} L'idea alla base del transfer learning è semplice ma potente: invece di addestrare una CNN da zero con inizializzazione casuale dei pesi, si parte da una rete pre-addestrata su un dataset molto grande (tipicamente ImageNet, che contiene 1.4 milioni di immagini annotate in 1000 classi) e si adatta la rete al nuovo task specifico.
 
 Questo approccio si basa sull'osservazione empirica che le feature apprese dai layer convoluzionali su dataset generici di immagini naturali (ImageNet) sono sorprendentemente trasferibili ad altri domini visivi. I primi layer di una CNN pre-addestrata su ImageNet imparano a rilevare feature generiche come bordi, angoli, blob di colore, e texture, che sono utili per virtualmente qualsiasi task di visione artificiale. Anche i layer più profondi, che catturano pattern più astratti e specifici del task, possono essere adattati con relativa facilità a nuovi domini correlati.
 
