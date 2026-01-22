@@ -2543,12 +2543,14 @@
     <bcf:citekey order="164" intorder="1">bergmann2020uninformed</bcf:citekey>
     <bcf:citekey order="165" intorder="1">zhuo2025survey</bcf:citekey>
     <bcf:citekey order="165" intorder="2">bergmann2019mvtec</bcf:citekey>
-    <bcf:citekey order="166" intorder="1">bergmann2020uninformed</bcf:citekey>
-    <bcf:citekey order="167" intorder="1">bergmann2019mvtec</bcf:citekey>
-    <bcf:citekey order="167" intorder="2">roth2022towards</bcf:citekey>
-    <bcf:citekey order="167" intorder="3">defard2021padim</bcf:citekey>
-    <bcf:citekey order="168" intorder="1">tax2004support</bcf:citekey>
-    <bcf:citekey order="169" intorder="1">chandola2009anomaly</bcf:citekey>
+    <bcf:citekey order="166" intorder="1">ruff2021anomaly</bcf:citekey>
+    <bcf:citekey order="166" intorder="2">chalapathy2019deep</bcf:citekey>
+    <bcf:citekey order="167" intorder="1">bergmann2020uninformed</bcf:citekey>
+    <bcf:citekey order="168" intorder="1">bergmann2019mvtec</bcf:citekey>
+    <bcf:citekey order="168" intorder="2">roth2022towards</bcf:citekey>
+    <bcf:citekey order="168" intorder="3">defard2021padim</bcf:citekey>
+    <bcf:citekey order="169" intorder="1">tax2004support</bcf:citekey>
+    <bcf:citekey order="170" intorder="1">chandola2009anomaly</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

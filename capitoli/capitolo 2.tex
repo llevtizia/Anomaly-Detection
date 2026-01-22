@@ -41,21 +41,23 @@ I metodi di anomaly detection basati su deep learning promettono di automatizzar
 Queste sfide motivano lo sviluppo di metodi specializzati che vadano oltre il rilevamento di anomalie generico, incorporando conoscenze specifiche del dominio industriale.
 
 \subsection{Approcci all'Anomaly Detection}
+La letteratura distingue tradizionalmente tre paradigmi principali per l'anomaly detection, basati sulla disponibilità e natura dei dati di training \cite{ruff2021anomaly, chalapathy2019deep}.
 
 \paragraph{Supervised Anomaly Detection.}
-Richiede esempi etichettati sia di campioni normali che anomali durante il training. Sebbene concettualmente più semplice, questo approccio è raramente applicabile in contesti industriali per due ragioni principali: (1) la difficoltà di raccogliere campioni rappresentativi di tutte le possibili tipologie di difetti, e (2) il fatto che le anomalie sono per natura rare e imprevedibili, rendendo impossibile definire a priori tutte le loro manifestazioni \cite{bergmann2020uninformed}.
+Richiede un dataset di training completo, contenente esempi etichettati sia di campioni normali che anomali. Sebbene concettualmente più semplice, questo approccio è raramente applicabile in contesti industriali per due ragioni principali: (1) la difficoltà di raccogliere campioni rappresentativi di tutte le possibili tipologie di difetti, e (2) il fatto che le anomalie sono per natura rare e imprevedibili, rendendo impossibile definire a priori tutte le loro manifestazioni \cite{bergmann2020uninformed}.
 
-\paragraph{Unsupervised Anomaly Detection (One-Class Learning).}
-L'approccio predominante\cite{bergmann2019mvtec, roth2022towards, defard2021padim}. In questo paradigma, il modello viene addestrato esclusivamente su immagini normali (anomaly-free) durante la fase di training, senza mai osservare esempi di anomalie. Al momento del test, il sistema deve identificare deviazioni dalla distribuzione normale appresa.
+\paragraph{Semi-Supervised Anomaly Detection (One-Class Learning).}
+L'ap\-proc\-cio predominante nell'ispezione industriale moderna \cite{bergmann2019mvtec, roth2022towards, defard2021padim}. Il modello viene addestrato esclusivamente su immagini normali (anomaly-free) durante la fase di training, senza mai osservare esempi di anomalie. Al momento del test, il sistema deve identificare deviazioni dalla distribuzione normale appresa
 
-Questo approccio viene chiamato "unsupervised" perché:
+Questo paradigma, noto anche come \textbf{one-class classification} \cite{tax2004support} o \textbf{no\-vel\-ty detection}, riflette realisticamente gli scenari produttivi dove:
+
 \begin{itemize}
-\item Non richiede etichettatura delle anomalie (che sono assenti nel training set)
-\item Non richiede supervisione esplicita durante il training su cosa costituisca un'anomalia
-\item Il modello apprende autonomamente la distribuzione normale e identifica deviazioni da essa
+\item I campioni difettosi sono rari, difficili da raccogliere ed estremamente variabili
+\item Si può garantire la qualità dei dati di training (solo prodotti certificati come non difettosi)
+\item L'obiettivo è apprendere una rappresentazione compatta della "normalità" e rilevare qualsiasi deviazione
 \end{itemize}
 
-Tecnicamente, questo corrisponde al paradigma del \textbf{one-class classification} o \textbf{one-class learning} \cite{tax2004support}: l'obiettivo è apprendere un modello che descriva la classe normale e classificare come anomalie tutti i campioni che si discostano significativamente da essa. Questo riflette realisticamente gli scenari produttivi dove campioni difettosi sono rari, costosi da raccogliere, ed estremamente variabili nelle loro manifestazioni.
+La maggior parte dei metodi deep learning per anomaly detection industriale segue questo paradigma, sfruttando reti pre-addestrate e tecniche di transfer learning per apprendere robuste rappresentazioni della classe normale.
 
 \paragraph{Fully Unsupervised Anomaly Detection.}
-Un paradigma meno comune, dove si assume che l'insieme di training contenga una frazione sconosciuta di anomalie mescolate ai campioni normali \cite{chandola2009anomaly}. L'obiettivo è identificare i campioni che deviano dalla distribuzione maggioritaria senza alcuna supervisione. Questo scenario è raro nell'ispezione industriale, dove tipicamente si ha controllo sulla qualità dei dati di training e si garantisce che contengano solo campioni normali.
+In questo scenario meno comune, si assume che l'insieme di training contenga una frazione sconosciuta di anomalie mescolate ai campioni normali, senza alcuna informazione di etichetta \cite{chandola2009anomaly}. L'obiettivo è identificare i campioni che deviano dalla distribuzione maggioritaria utilizzando tecniche come clustering, stima di densità, o autoencoder. Questo approccio è raro nell'ispezione industriale, dove tipicamente si ha controllo sulla qualità dei dati di training e si garantisce che contengano solo campioni normali.
