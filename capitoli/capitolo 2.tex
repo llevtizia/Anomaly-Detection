@@ -1,20 +1,61 @@
-\section{Anomalie}
-% da sistemare
-Negli ultimi anni si è registrato un crescente interesse verso l’applicazione di tecniche di deep learning al rilevamento di anomalie per garantire la qualità dei prodotti e migliorare l’efficienza e la qualità della produzione. Tuttavia, la natura prevalentemente non supervisionata del problema rende meno immediata la definizione di obiettivi di representation learning adeguati.
+\section{Anomaly Detection}
+\label{sec:anomaly_detection}
 
-Il rilevamento di anomalie generico si confronta con tipologie di anomalie più eterogenee, prive delle severe restrizioni tipiche delle applicazioni industriali: limitata disponibilità di campioni anomali, vincoli stringenti in termini di accuratezza e tempo di elaborazione, specifiche caratteristiche strutturali e semantiche (disallineamenti logici, micro difetti superficiali o deviazioni dimensionali di precisione).
+Negli ultimi anni si è registrato un crescente interesse verso l'applicazione di tecniche di deep learning al rilevamento di anomalie per garantire la qualità dei prodotti e migliorare l'efficienza della produzione industriale \cite{zhuo2025survey}. L'anomaly detection (rilevamento di anomalie) è un task fondamentale nel machine learning che consiste nell'identificare pattern nei dati che deviano significativamente dal comportamento atteso o normale \cite{chandola2009anomaly}. 
 
-Il rilevamento di anomalie visive in ambito industriale, al contrario, affronta diverse sfide pratiche intrinseche agli scenari reali \cite{zhuo2025survey}. La variabilità delle condizioni di produzione (fattori ambientali, variazioni di illuminazione, angolazioni della telecamera) influenza in modo significativo l’aspetto visivo dei prodotti: i dati considerati normali possono presentare un’elevata variabilità, richiedendo ai metodi di rilevamento delle anomalie di mantenere robustezza in condizioni operative diverse per evitare classificazioni errato o mancati riconoscimenti. 
+Un'\textbf{anomalia} viene definita come un'osservazione (o un sottoinsieme di osservazioni) apparentemente incoerente rispetto al resto dei dati \cite{barnett1994outliers}. A seconda del contesto applicativo, tali osservazioni possono essere indicate come outlier, novelty, o con denominazioni quali oggetto insolito, irregolare, atipico, raro, difettoso o fraudolento \cite{ruff2021anomaly}. L'anomaly detection trova oggi impiego in una vasta gamma di settori, dalla cybersecurity \cite{malaiya2018anomaly} alle scienze della terra \cite{fisher2017anomaly}, in ambiti finanziari \cite{ahmed2016survey}, per la diagnosi medica \cite{baur2019fusing} e nella bioinformatica \cite{min2017deep}.
 
-In secondo luogo, i dataset presentano spesso un forte sbilanciamento: le istanze normali superano di gran lunga quelle anomale e non sono etichettate, rendendo difficile identificare cosa costituisca un’anomalia e per quali motivi. Imperfezioni dei sensori o condizioni ambientali difficili generano elevati livelli di rumore nelle immagini, che possono complicare ulteriormente il rilevamento 
+\subsection{Definizione e Contesto Applicativo}
 
-Il problema del rilevamento delle anomalie si configura quindi come un compito di apprendimento non supervisionato, con l’obiettivo di costruire un modello rappresentativo della maggioranza dei punti dati. La complessità aumenta a causa dell’elevata eterogeneità delle anomalie, rendendo difficile la definizione di un modello esaustivo per tali eventi. Di conseguenza, l’approccio comunemente adottato consiste nell’apprendere un modello dei campioni normali e considerare anomale le deviazioni rispetto ad esso.
-%
-Un’anomalia viene definita come un oggetto che si discosta in maniera significativa dalla nozione di normalità. A seconda del contesto applicativo, tali osservazioni possono essere indicate come outlier o novelty. Ulteriori denominazioni ricorrenti includono, tra le altre, quelle di oggetto insolito, irregolare, atipico, incoerente, inaspettato, raro, errato, difettoso, fraudolento, malevolo, innaturale o anomalo \cite{ruff2021anomaly}. 
-Tra le prime formalizzazioni del concetto troviamo \cite{barnett1994outliers}, che definisce un outlier in un insieme di dati come un’osservazione (o un sottoinsieme di osservazioni) apparentemente incoerente rispetto al resto dei dati dell’insieme.
+Formalmente, dato un insieme di osservazioni $\mathcal{D} = \{\mathbf{x}_1, \mathbf{x}_2, \dots, \mathbf{x}_N\}$, l'obiettivo dell'anomaly detection è identificare un sottoinsieme $\mathcal{D}_{anomaly} \subset \mathcal{D}$ i cui elementi sono statisticamente diversi dalla maggioranza dei dati \cite{chandola2009anomaly}. 
 
-L’approccio predominante nell’anomaly detection è l’adozione di strategie non supervisionate: la ragione risiede nella frequente assenza, o comunque marcata scarsità, di dati etichettati relativi ad anomalie. Anche quando presenti, infatti, tali dati risultano insufficienti per caratterizzare in modo esaustivo le diverse manifestazioni possibili di anomalie, limitando l’efficacia degli approcci supervisionati. Una delle idee centrali nell’anomaly detection consiste quindi nell’apprendere un modello normale a partire da dati normali, in modo non supervisionato, per  rilevare le anomalie come deviazioni dal modello appreso. Attualmente, l’anomaly detection trova impiego in una vasta gamma di settori: ad esempio, dalla cybersecurity \cite{malaiya2018anomaly} alle scienze della terra \cite{fisher2017anomaly}, in ambiti finanziari \cite{ahmed2016survey}, per la diagnosi medica \cite{baur2019fusing} o nella bioinformatica \cite{min2017deep}.
+A differenza della classificazione tradizionale, dove si dispone di esempi etichettati per ciascuna classe, nell'anomaly detection si assume tipicamente la disponibilità di soli campioni normali durante la fase di training \cite{pimentel2014review}. La natura prevalentemente non supervisionata del problema rende meno immediata la definizione di obiettivi di representation learning adeguati. L'approccio comunemente adottato consiste quindi nell'apprendere un modello dei campioni normali e considerare anomale le deviazioni rispetto ad esso.
+
+Questo approccio si distingue dalla classificazione supervisionata per diverse caratteristiche fondamentali:
 
 
+\begin{itemize}
+\item \textbf{Classificazione one-class}: durante il training, il modello ha accesso principalmente (o esclusivamente) a esempi della classe normale. Le a\-no\-ma\-lie sono assenti, rare o troppo diverse tra loro per essere modellate efficacemente \cite{pimentel2014review, tax2004support}.
 
-\section{Depth Estimation}
+\item \textbf{Natura sbilanciata e variabilità}: nei contesti reali, le anomalie costituiscono una frazione minima dei dati (spesso $<1\%$), \cite{he2008adasyn} e possono manifestarsi in forme altamente variabili e imprevedibili \cite{bergmann2019mvtec}.
+\end{itemize}
+
+\paragraph{Anomaly Detection nell'Industria.}
+
+Nel contesto industriale, l'anomaly de\-tec\-tion riveste un ruolo cruciale per il controllo qualità automatico e l'ispezione visiva \cite{bergmann2020uninformed}. Tradizionalmente, l'ispezione di prodotti richiedeva intervento manuale, risultando costosa, lenta e difficilmente scalabile a pro\-du\-zio\-ni ad alto volume.
+
+I metodi di anomaly detection basati su deep learning promettono di automatizzare questo processo, consentendo ispezione in tempo reale, consistente e scalabile. Tuttavia, il rilevamento di anomalie visive in ambito industriale affronta diverse sfide pratiche intrinseche agli scenari reali \cite{zhuo2025survey, bergmann2019mvtec}:
+
+\begin{itemize}
+\item \textbf{Variabilità delle condizioni di produzione}: fattori ambientali, variazioni di illuminazione e angolazioni della telecamera influenzano significativamente l'aspetto visivo dei prodotti. I dati considerati normali possono presentare un'elevata variabilità intra-classe, richiedendo ai metodi di rilevamento di mantenere robustezza in condizioni operative diverse per evitare falsi positivi.
+
+\item \textbf{Forte sbilanciamento dei dati}: le istanze normali superano di gran lunga quelle anomale, che spesso non sono etichettate. Questo rende difficile sia la raccolta di un training set rappresentativo che la definizione esatta di cosa costituisca un'anomalia.
+
+\item \textbf{Eterogeneità delle anomalie}: i difetti industriali possono manifestarsi in forme altamente variabili (graffi, crepe, contaminazioni, disallineamenti logici, parti mancanti, deviazioni dimensionali). A differenza di applicazioni generiche, il contesto industriale richiede il rilevamento di anomalie con caratteristiche strutturali e semantiche specifiche, inclusi micro-difetti superficiali che possono essere estremamente sottili.
+
+\item \textbf{Rumore e artefatti}: imperfezioni dei sensori o condizioni ambientali difficili generano elevati livelli di rumore nelle immagini, che possono complicare ulteriormente il rilevamento e portare a falsi allarmi.
+
+\item \textbf{Necessità di localizzazione precisa}: è necessario non solo classificare un'immagine come anomala ma anche identificare precisamente la regione difettosa (segmentazione pixel-level) per guidare eventuali interventi correttivi.
+\end{itemize}
+
+Queste sfide motivano lo sviluppo di metodi specializzati che vadano oltre il rilevamento di anomalie generico, incorporando conoscenze specifiche del dominio industriale.
+
+\subsection{Approcci all'Anomaly Detection}
+
+\paragraph{Supervised Anomaly Detection.}
+Richiede esempi etichettati sia di campioni normali che anomali durante il training. Sebbene concettualmente più semplice, questo approccio è raramente applicabile in contesti industriali per due ragioni principali: (1) la difficoltà di raccogliere campioni rappresentativi di tutte le possibili tipologie di difetti, e (2) il fatto che le anomalie sono per natura rare e imprevedibili, rendendo impossibile definire a priori tutte le loro manifestazioni \cite{bergmann2020uninformed}.
+
+\paragraph{Unsupervised Anomaly Detection (One-Class Learning).}
+L'approccio predominante\cite{bergmann2019mvtec, roth2022towards, defard2021padim}. In questo paradigma, il modello viene addestrato esclusivamente su immagini normali (anomaly-free) durante la fase di training, senza mai osservare esempi di anomalie. Al momento del test, il sistema deve identificare deviazioni dalla distribuzione normale appresa.
+
+Questo approccio viene chiamato "unsupervised" perché:
+\begin{itemize}
+\item Non richiede etichettatura delle anomalie (che sono assenti nel training set)
+\item Non richiede supervisione esplicita durante il training su cosa costituisca un'anomalia
+\item Il modello apprende autonomamente la distribuzione normale e identifica deviazioni da essa
+\end{itemize}
+
+Tecnicamente, questo corrisponde al paradigma del \textbf{one-class classification} o \textbf{one-class learning} \cite{tax2004support}: l'obiettivo è apprendere un modello che descriva la classe normale e classificare come anomalie tutti i campioni che si discostano significativamente da essa. Questo riflette realisticamente gli scenari produttivi dove campioni difettosi sono rari, costosi da raccogliere, ed estremamente variabili nelle loro manifestazioni.
+
+\paragraph{Fully Unsupervised Anomaly Detection.}
+Un paradigma meno comune, dove si assume che l'insieme di training contenga una frazione sconosciuta di anomalie mescolate ai campioni normali \cite{chandola2009anomaly}. L'obiettivo è identificare i campioni che deviano dalla distribuzione maggioritaria senza alcuna supervisione. Questo scenario è raro nell'ispezione industriale, dove tipicamente si ha controllo sulla qualità dei dati di training e si garantisce che contengano solo campioni normali.
