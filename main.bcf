@@ -2551,6 +2551,29 @@
     <bcf:citekey order="168" intorder="3">defard2021padim</bcf:citekey>
     <bcf:citekey order="169" intorder="1">tax2004support</bcf:citekey>
     <bcf:citekey order="170" intorder="1">chandola2009anomaly</bcf:citekey>
+    <bcf:citekey order="171" intorder="1">goodfellow2014generative</bcf:citekey>
+    <bcf:citekey order="172" intorder="1">schlegl2017unsupervised</bcf:citekey>
+    <bcf:citekey order="173" intorder="1">akcay2018ganomaly</bcf:citekey>
+    <bcf:citekey order="174" intorder="1">schlegl2019f</bcf:citekey>
+    <bcf:citekey order="175" intorder="1">akcay2019skip</bcf:citekey>
+    <bcf:citekey order="176" intorder="1">bergmann2025mvtecad2</bcf:citekey>
+    <bcf:citekey order="176" intorder="2">roth2022towards</bcf:citekey>
+    <bcf:citekey order="177" intorder="1">chalapathy2019deep</bcf:citekey>
+    <bcf:citekey order="178" intorder="1">bergmann2019mvtec</bcf:citekey>
+    <bcf:citekey order="179" intorder="1">kingma2014auto</bcf:citekey>
+    <bcf:citekey order="179" intorder="2">kingma2019introduction</bcf:citekey>
+    <bcf:citekey order="180" intorder="1">gong2019memorizing</bcf:citekey>
+    <bcf:citekey order="181" intorder="1">park2020learning</bcf:citekey>
+    <bcf:citekey order="182" intorder="1">bergmann2022beyond</bcf:citekey>
+    <bcf:citekey order="183" intorder="1">bergmann2019mvtec</bcf:citekey>
+    <bcf:citekey order="184" intorder="1">defard2021padim</bcf:citekey>
+    <bcf:citekey order="185" intorder="1">bergmann2020uninformed</bcf:citekey>
+    <bcf:citekey order="186" intorder="1">cohen2021sub</bcf:citekey>
+    <bcf:citekey order="187" intorder="1">gudovskiy2022cflow</bcf:citekey>
+    <bcf:citekey order="188" intorder="1">yu2021fastflow</bcf:citekey>
+    <bcf:citekey order="189" intorder="1">rudolph2022fully</bcf:citekey>
+    <bcf:citekey order="190" intorder="1">li2021cutpaste</bcf:citekey>
+    <bcf:citekey order="191" intorder="1">zavrtanik2021draem</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

@@ -47,7 +47,7 @@ La letteratura distingue tradizionalmente tre paradigmi principali per l'anomaly
 Richiede un dataset di training completo, contenente esempi etichettati sia di campioni normali che anomali. Sebbene concettualmente più semplice, questo approccio è raramente applicabile in contesti industriali per due ragioni principali: (1) la difficoltà di raccogliere campioni rappresentativi di tutte le possibili tipologie di difetti, e (2) il fatto che le anomalie sono per natura rare e imprevedibili, rendendo impossibile definire a priori tutte le loro manifestazioni \cite{bergmann2020uninformed}.
 
 \paragraph{Semi-Supervised Anomaly Detection (One-Class Learning).}
-L'ap\-proc\-cio predominante nell'ispezione industriale moderna \cite{bergmann2019mvtec, roth2022towards, defard2021padim}. Il modello viene addestrato esclusivamente su immagini normali (anomaly-free) durante la fase di training, senza mai osservare esempi di anomalie. Al momento del test, il sistema deve identificare deviazioni dalla distribuzione normale appresa
+L'ap\-proc\-cio predominante nell'ispezione industriale moderna \cite{bergmann2019mvtec, roth2022towards, defard2021padim}. Il mo\-del\-lo viene addestrato esclusivamente su immagini normali (anomaly-free) durante la fase di training, senza mai osservare esempi di anomalie. Al tempo di test, il sistema deve identificare le deviazioni dalla distribuzione normale appresa
 
 Questo paradigma, noto anche come \textbf{one-class classification} \cite{tax2004support} o \textbf{no\-vel\-ty detection}, riflette realisticamente gli scenari produttivi dove:
 
@@ -61,3 +61,130 @@ La maggior parte dei metodi deep learning per anomaly detection industriale segu
 
 \paragraph{Fully Unsupervised Anomaly Detection.}
 In questo scenario meno comune, si assume che l'insieme di training contenga una frazione sconosciuta di anomalie mescolate ai campioni normali, senza alcuna informazione di etichetta \cite{chandola2009anomaly}. L'obiettivo è identificare i campioni che deviano dalla distribuzione maggioritaria utilizzando tecniche come clustering, stima di densità, o autoencoder. Questo approccio è raro nell'ispezione industriale, dove tipicamente si ha controllo sulla qualità dei dati di training e si garantisce che contengano solo campioni normali.
+
+% ----------------------
+% METODI 
+% ----------------------
+\subsection{Evoluzione dei Metodi di Anomaly Detection}
+
+Lo sviluppo di metodi di deep learning per l'anomaly detection ha seguito un'evoluzione rapida negli ultimi anni. Presentiamo qui i principali approcci in ordine cronologico, con attenzione ai metodi moderni che rappresentano lo stato dell'arte attuale.
+
+\subsubsection{Era dei Metodi GAN-based (2017-2019)}
+
+I primi tentativi di applicare il deep learning all'anomaly detection sfruttarono le Generative Adversarial Networks (GAN) \cite{goodfellow2014generative}. L'idea fondamentale era addestrare un generatore a sintetizzare immagini realistiche utilizzando esclusivamente campioni normali, per poi rilevare anomalie misurando la difficoltà di ricostruzione o la distanza dalla distribuzione appresa.
+
+\paragraph{AnoGAN} 
+AnoGAN \cite{schlegl2017unsupervised} è stato tra i primi, introducendo un approccio basato su mapping nello spazio latente: data un'immagine di test, si cerca iterativamente il vettore latente $\mathbf{z}^*$ che genera l'immagine più simile, combinando \textit{residual loss} (distanza pixel-wise) e \textit{discrimination loss} (similarità nelle feature del discriminatore). L'anomaly score finale è dato dalla loss ottimizzata. Limitazione principale: ottimizzazione iterativa lenta al test time.
+
+\paragraph{GANomaly} 
+Per ovviare a questa inefficenza, GANomaly \cite{akcay2018ganomaly} introdusse un'ar\-chi\-tet\-tu\-ra encoder-decoder-encoder più efficiente, eliminando l'ot\-ti\-miz\-za\-zio\-ne iterativa. L'anomaly score si basava sulla distanza tra rappresentazioni latenti prima e dopo la ricostruzione.
+
+\paragraph{f-AnoGAN e Skip-GANomaly}
+f-AnoGAN \cite{schlegl2019f} risolse ulteriormente il problema di efficienza addestrando un encoder che mappava direttamente immagini nel latent space, riducendo i tempi di inferenza da minuti a millisecondi. Skip-GANomaly \cite{akcay2019skip} migliorò la qualità delle ricostruzioni aggiungendo skip connections U-Net-style per preservare dettagli spaziali.
+
+\paragraph{Limitazioni dei metodi GAN.} Sebbene pionieristici, i metodi GAN-based sono stati progressivamente abbandonati per diverse ragioni: (1) training instabile tipico delle GAN, (2) difficoltà di convergenza e bilanciamento delle loss multiple , (3) performance inferiori ai metodi successivi più semplici. I benchmark recenti dimostrano che approcci più semplici superano consistentemente i metodi GAN \cite{bergmann2025mvtecad2, roth2022towards}.
+
+\subsubsection{Autoencoder-based Methods (2016-2021)}
+
+Gli autoencoder rappresentano un paradigma intuitivo per l'anomaly detection \cite{chalapathy2019deep}: addestrati a ricostruire immagini normali minimizzando l'errore $\mathcal{L} = \|\mathbf{x} - D(E(\mathbf{x}))\|^2$, si ipotizza che falliscano nel ricostruire accuratamente anomalie mai viste, poiché queste ultime si discostano dai pattern appresi. Di conseguenza, un valore elevato della loss di ricostruzione su un'immagine di test segnala una potenziale anomalia. L'anomaly score è dato appunto dall'errore di ricostruzione. Questo approccio dominò la letteratura tra il 2016 e il 2020, con diverse varianti.
+
+\paragraph{Autoencoder Deterministici.}
+Gli Autoencoder Deterministici utilizzano en\-co\-der-decoder standard con funzioni di perdita basate sull'errore di ricostruzione, come l'Errore Quadratico Medio (MSE) o l'indice SSIM (Structural Similarity Index Measure). Il benchmark MVTec AD \cite{bergmann2019mvtec} valutò autoencoder con entrambe le loss, riscontrando in tutti i casi performance modeste rispetto agli standard attuali.
+
+\paragraph{Variational Autoencoder (VAE).}
+Variational Autoencoder (VAE) \cite{kingma2014auto, kingma2019introduction} introducono un framework probabilistico, modellando il latent space come distribuzione Gaussiana. Il VAE viene addestrato massimizzando l'ELBO (Evidence Lower BOund), equivalente a minimizzare la seguente loss:
+
+\begin{equation}
+\mathcal{L}_{VAE} = \underbrace{\|\mathbf{x} - D(\mathbf{z})\|^2}_{\text{Reconstruction}} + \underbrace{\text{KL}(q(\mathbf{z}|\mathbf{x}) \| p(\mathbf{z}))}_{\text{Regularization}}
+\end{equation}
+
+dove il termine KL regolarizza il latent space verso una Gaussiana $p(\mathbf{z}) = \mathcal{N}(0, I)$. L'anomaly score combina errore di ricostruzione e distanza dalla prior. Tuttavia, le performance rimasero comparabili o inferiori agli AE standard per anomaly detection industriale.
+
+
+
+\paragraph{Memory-Augmented Autoencoder.} 
+Per risolvere il problema del \textit{reconstruction bias} (autoencoder che ricostruiscono bene anche anomalie), MemAE \cite{gong2019memorizing} introduce un modulo di memoria tra encoder e decoder: feature dell'encoder vengono recuperate dal memory module di prototipi normali tramite attention, forzando la ricostruzione attraverso pattern normali memorizzati. MNAD \cite{park2020learning} estese questo approccio con predizione multi-frame. Entrambi furono valutati in MVTec LOCO AD \cite{bergmann2022beyond} con risultati modesti.
+
+\paragraph{Limitazioni e Declino.}
+
+Nonostante l'intuizione semplice, gli autoencoder presentano limitazioni intrinseche che ne hanno causato l'abbandono:
+
+\begin{itemize}
+\item \textbf{Reconstruction Bias}: non ci sono garanzie che le anomalie siano ricostruite peggio. L'autoencoder impara rappresentazioni generiche che possono ricostruire anche pattern mai visti \cite{bergmann2019mvtec}.
+
+\item \textbf{Information Loss}: il bottleneck comprime informazione, ma questa compressione non è discriminativa per anomalie. Dettagli cruciali possono essere persi, sia normali che anomali.
+
+\item \textbf{Training Difficulty}: bilanciare la capacità del modello è critico. Troppa capacità ricostruisce anche anomalie, mentre troppo poca produce falsi positivi su normali.
+
+\item \textbf{Performance Inferiori}: benchmark come MVTec AD e MVTec LOCO AD mostrarono che autoencoder venivano consistentemente superati da metodi feature-based e student-teacher.
+\end{itemize}
+
+Tra il 2020 e 2021, divenne chiaro che feature pre-addestrate da reti come ResNet catturavano pattern normali meglio di encoder addestrati da zero, e metodi non parametrici come k-NN evitavano il reconstruction bias. Questo portò al graduale abbandono degli autoencoder come metodo primario. Varianti moderne sopravvivono solo come componenti di architetture ibride (es. DRAEM, EfficientAD).
+
+\subsubsection{Primi Metodi Feature-based (2020-2021)}
+
+Un cambio di paradigma avvenne con metodi che sfruttarono feature estratte da reti pre-addestrate, evitando training di generatori complessi. Questi metodi condividevano l'intuizione che le feature estratte da reti pre-addestrate contenessero informazioni sufficienti per modellare la normalità, senza necessità di complessi meccanismi generativi. La differenza principale risiedeva in \textit{come} queste feature venivano modellate: PaDiM utilizzava distribuzioni parametriche (Gaussiane), Uninformed Students sfruttava un paradigma teacher-student, e SPADE adottava un approccio non-parametrico basato su nearest neighbors.
+
+\paragraph{PaDiM (2020).}
+PaDiM (Patch Distribution Modeling) \cite{defard2021padim} modella la distribuzione normale tramite feature multi-scala da CNN pre-addestrate (tipicamente ResNet/WideResNet su ImageNet). Per ogni posizione spaziale $(i,j)$, concatena feature da layer a diverse profondità:
+\begin{equation}
+x_{ij} = [\mathbf{f}_1^{(i,j)}, \mathbf{f}_2^{(i,j)}, \mathbf{f}_3^{(i,j)}]
+\end{equation}
+
+Per ogni posizione, modella la distribuzione come Gaussiana multivariata $\mathcal{N}(\mu_{ij}, \Sigma_{ij})$ stimata dal training set. Al test, l'anomaly score è dato dalla distanza di Mahalanobis:
+\begin{equation}
+M_{ij} = \sqrt{(x_{ij} - \mu_{ij})^T \Sigma_{ij}^{-1} (x_{ij} - \mu_{ij})}
+\end{equation}
+
+PaDiM applica random dimensionality reduction per efficienza. Vantaggi: no training, localizzazione precisa, robustezza. Limitazioni: memoria per matrici di covarianza.
+
+\paragraph{Uninformed Students (2020).}
+Bergmann et al. \cite{bergmann2020uninformed} introdussero un approccio student-teacher: un teacher network pre-addestrato fornisce supervisione a un insieme di student networks addestrati solo su dati normali. 
+Gli studenti imparano a replicare l'output del teacher per immagini normali ma non sono in grado di farlo per anomalie non viste durante l'addestramento. L'anomaly score misura la discrepanza tra l'output del teacher e la media degli output degli studenti: regioni con alta discrepanza indicano potenziali anomalie.
+
+\paragraph{SPADE (2021).}
+SPADE (Sub-image Anomaly Detection) \cite{cohen2021sub} utilizza k-nearest neighbors (k-NN) nello spazio delle feature profonde. Costruisce una gallery $\mathcal{G}$ memorizzando tutte le feature di tutte le posizioni spaziali delle immagini normali. Al test, per ogni posizione $p$, recupera i $\kappa$ nearest neighbors dalla gallery e calcola:
+\begin{equation}
+d(\mathbf{y}, p) = \frac{1}{\kappa} \sum_{f \in \mathcal{N}_\kappa(F(\mathbf{y}, p))} \|f - F(\mathbf{y}, p)\|_2
+\end{equation}
+
+Per gestire efficientemente la gallery — che può contenere milioni di feature — SPADE utilizza strutture dati ottimizzate per la ricerca approssimata dei vicini più prossimi (Approximate Nearest Neighbor search).
+
+
+\subsubsection{Normalizing Flow-based Methods (2021-2022)}
+
+Un'ulteriore evoluzione nei metodi di anomaly detection fu l'introduzione dei normalizing flows, modelli probabilistici in grado di modellare esplicitamente distribuzioni complesse. A differenza dei metodi precedenti che si basavano su distanze o confronti diretti, i flow permettono di calcolare esattamente la probabilità (likelihood) dei dati, offrendo una modellazione più espressiva della normalità
+
+\paragraph{CFLOW-AD (2021).}
+CFLOW-AD \cite{gudovskiy2022cflow} utilizza conditional normalizing flows per modellare la distribuzione delle feature estratte da reti pre-addestrate. Il flow trasforma la distribuzione complessa delle feature normali in una Gaussiana standard, permettendo di calcolare direttamente la likelihood. L'anomaly score è dato dalla negative log-likelihood: campioni anomali, avendo bassa probabilità sotto il modello appreso, ricevono punteggi elevati.
+
+\paragraph{FastFlow (2021).}
+FastFlow \cite{yu2021fastflow} introduce un'architettura 2D normalizing flow estremamente efficiente basata su 2D coupling layers, preservando la struttura spaziale delle feature. A differenza di CFLOW-AD che opera su vettori appiattiti di feature, FastFlow mantiene la struttura 2D, risultando più veloce e accurato. Il metodo raggiunse performance competitive con tempi di inferenza ridotti, rendendo i flow pratici per applicazioni in tempo reale.
+
+\paragraph{CS-Flow (2022).}
+CS-Flow (Cross-Scale Flow) \cite{rudolph2022fully} estende l'approccio flow-based a feature multi-scala. Utilizza normalizing flows separati su feature estratte da layer diversi di una rete pre-addestrata, catturando anomalie sia a livello locale (texture, dettagli) che globale (struttura, forma). L'anomaly score aggrega likelihood da tutte le scale. CS-Flow è ancora competitivo nei benchmark recenti.
+
+
+\subsubsection{Synthetic Anomaly Generation (2021)}
+
+Un approccio innovativo alla sfida della scarsità di dati anomali consiste nel generare sinteticamente anomalie durante il training, trasformando il problema da puramente unsupervised in una forma di apprendimento supervisionato con etichette generate automaticamente. L'idea fondamentale è che, sebbene non si disponga di esempi reali di difetti, sia possibile creare simulazioni plausibili che insegnino al modello a distinguere tra normale e anomalo.
+
+\paragraph{CutPaste (2021).}
+CutPaste \cite{li2021cutpaste} adotta una strategia molto semplice: genera anomalie sintetiche tagliando una patch rettangolare da un'immagine normale e incollandola in una posizione casuale della stessa immagine, eventualmente applicando trasformazioni aggiuntive (rotazione, variazione di colore). Una CNN viene poi addestrata come classificatore binario a distinguere tra immagini originali (classe normale) e immagini manipolate (classe anomalia sintetica). Vantaggi principali: implementazione semplice, training veloce, nessuna dipendenza da feature pre-addestrate. Tuttavia, le anomalie generate sono limitate a difetti di tipo "oggetto dislocato" e non generalizzano a tutti i tipi di difetti.
+
+\paragraph{DRAEM (2021).}
+DRAEM (Discriminatively Trained Reconstruction Embedding) \cite{zavrtanik2021draem} combina generazione di anomalie realistiche con un meccanismo di ricostruzione. Utilizza texture di difetti reali provenienti da dataset esterni per creare anomalie visivamente plausibili. 
+L'architettura comprende:
+\begin{itemize}
+    \item Un network di ricostruzione (tipicamente un autoencoder) addestrato a ripristinare l'immagine originale dall'input alterato
+    \item Un discriminatore che localizza pixel-level le regioni anomale (differenza tra input e output)
+\end{itemize}
+Durante il training, il ricostruttore impara a ricostruire le anomalie sintetiche, mentre il discriminatore impara a identificarle. Al test time, le deviazioni nella ricostruzione e l'output del discriminatore vengono combinati per produrre mappe di anomalia dettagliate. DRAEM eccelle nella localizzazione precisa dei difetti e può gestire un'ampia varietà di texture anomale, ma richiede l'accesso a dataset di texture esterne e un training più complesso.
+
+
+
+
+
+
+
+
