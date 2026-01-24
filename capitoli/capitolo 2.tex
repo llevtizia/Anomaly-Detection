@@ -150,7 +150,6 @@ d(\mathbf{y}, p) = \frac{1}{\kappa} \sum_{f \in \mathcal{N}_\kappa(F(\mathbf{y},
 
 Per gestire efficientemente la gallery — che può contenere milioni di feature — SPADE utilizza strutture dati ottimizzate per la ricerca approssimata dei vicini più prossimi (Approximate Nearest Neighbor search).
 
-
 \subsubsection{Normalizing Flow-based Methods (2021-2022)}
 
 Un'ulteriore evoluzione nei metodi di anomaly detection fu l'introduzione dei normalizing flows, modelli probabilistici in grado di modellare esplicitamente distribuzioni complesse. A differenza dei metodi precedenti che si basavano su distanze o confronti diretti, i flow permettono di calcolare esattamente la probabilità (likelihood) dei dati, offrendo una modellazione più espressiva della normalità
@@ -163,7 +162,6 @@ FastFlow \cite{yu2021fastflow} introduce un'architettura 2D normalizing flow est
 
 \paragraph{CS-Flow (2022).}
 CS-Flow (Cross-Scale Flow) \cite{rudolph2022fully} estende l'approccio flow-based a feature multi-scala. Utilizza normalizing flows separati su feature estratte da layer diversi di una rete pre-addestrata, catturando anomalie sia a livello locale (texture, dettagli) che globale (struttura, forma). L'anomaly score aggrega likelihood da tutte le scale. CS-Flow è ancora competitivo nei benchmark recenti.
-
 
 \subsubsection{Synthetic Anomaly Generation (2021)}
 
@@ -181,10 +179,365 @@ L'architettura comprende:
 \end{itemize}
 Durante il training, il ricostruttore impara a ricostruire le anomalie sintetiche, mentre il discriminatore impara a identificarle. Al test time, le deviazioni nella ricostruzione e l'output del discriminatore vengono combinati per produrre mappe di anomalia dettagliate. DRAEM eccelle nella localizzazione precisa dei difetti e può gestire un'ampia varietà di texture anomale, ma richiede l'accesso a dataset di texture esterne e un training più complesso.
 
+%%% riparte da qui
+
+\subsubsection{Memory-based Methods (2022)}
+
+Un'evoluzione dei metodi feature-based è rappresentata dai \textbf{memory-based methods}, che esplicitano e ottimizzano il concetto di "memoria" dei pat\-tern normali. Mentre approcci come PaDiM modellano statisticamente la dis\-tri\-bu\-zio\-ne normale e SPADE utilizza l'intero training set come gallery, i memory-based methods costruiscono attivamente una \textit{memory bank} di prototipi rappresentativi. Questo supera le limitazioni di approcci precedenti: metodi non parametrici (SPADE) soffrono di elevato uso di memoria e tempi di ricerca, mentre metodi parametrici (autoencoders, GAN) tendono a generalizzare eccessivamente, perdendo la capacità di rilevare anomalie sottili.
+
+\paragraph{PatchCore (2022).}
+
+PatchCore \cite{roth2022towards} è rapidamente divenuto uno dei baseline di riferimento per l'anomaly detection industriale, combinando accuratezza ed efficienza operativa e rimanendo competitivo anche nei benchmark più recenti.
+
+\subparagraph{Locally Aware Patch Features.}
+
+Per rilevare difetti sottili (micro-graffi, piccole contaminazioni, variazioni texture) è necessario preservare informazione spaziale ad alta risoluzione. Il metodo estrae \textbf{locally aware patch features} da layer intermedi di una rete convoluzionale pre-addestrata su ImageNet, tipicamente WideResNet50.
+
+PatchCore estrae activation maps da due layer a risoluzioni diverse:
+\begin{itemize}
+\item \textbf{Layer 2}: risoluzione maggiore, cattura pattern locali e texture dettagliate
+\item \textbf{Layer 3}: risoluzione intermedia, codifica informazioni semantiche più astratte
+\end{itemize}
+
+Per ogni posizione spaziale $(i,j)$, le feature dai due layer vengono concatenate e aggregate attraverso adaptive average pooling, per catturare sia anomalie a grana fine (layer superficiale) che deviazioni strutturali (layer profondo). 
+
+Preservando la risoluzione spaziale, tuttavia, ogni immagine di training genera centinaia o migliaia di patch features. 
+
+\subparagraph{Coreset Subsampling.}
+
+La soluzione innovativa di PatchCore è l'uso del \textbf{coreset subsampling}, un algoritmo greedy che seleziona un sottoinsieme rappresentativo minimizzando la massima distanza da qualsiasi punto al coreset.
+
+Formalmente, dato l'insieme completo di patch features $\mathcal{M} = \{m_1, \dots, m_N\}$ estratte dal training set, l'algoritmo costruisce iterativamente una memory bank $\mathcal{M_C} \subset \mathcal{M}$ selezionando iterativamente patch fino a raggiungere una dimensione target $N$, tipicamente stabilita come una piccola percentuale del memory bank originale $M$.
+
+\begin{algorithm}[H]
+\caption{Greedy Minimax Facility Location Coreset Selection for PatchCore}
+\label{alg:patchcore_coreset}
+\begin{algorithmic}[1]
+\Require Memory bank originale $M$ (insieme di patch-feature), dimensione target del coreset $N$
+\Ensure Coreset ottimizzato $M_C \subset M$
+\State Inizializza $M_C = \{m_{\text{random}}\}$ con una patch-feature casuale da $M$
+\While{$|M_C| < N$}
+    \State Per ogni $m \in M \setminus M_C$, calcola la distanza dal vicino più prossimo in $M_C$:
+    \State \quad $d(m, M_C) = \min_{n \in M_C} \|m - n\|_2$
+    \State Trova la patch-feature $m^*$ più distante:
+    \State \quad $\displaystyle m^* = \arg\max_{m \in M \setminus M_C} d(m, M_C)$
+    \State Aggiorna il coreset: $M_C \leftarrow M_C \cup \{m^*\}$
+\EndWhile
+\State \Return $M_C$
+\end{algorithmic}
+\end{algorithm}
+
+Questo algoritmo garantisce che la memory bank copra efficacemente lo spazio delle feature normali: ogni iterazione aggiunge il punto che migliora maggiormente la copertura delle regioni sotto-rappresentate. La dimensione tipica della memory bank è l'$1-10\%$ delle feature originali (es. $2,500-25,000$ patches invece di $250,000$), riducendo drasticamente memoria e tempi di ricerca mantenendo accuratezza elevata.
+
+\subparagraph{Anomaly Scoring e Re-weighting.}
+
+Al test time, data un'immagine di test $\mathbf{x}_{\text{test}}$, PatchCore estrae l'insieme di patch-feature $P(\mathbf{x}_{\text{test}}) = P_{s,p}(\phi_j(\mathbf{x}_{\text{test}}))$. Per ogni patch-feature di test $m_{\text{test}} \in P(\mathbf{x}_{\text{test}})$, si calcola la distanza dal suo vicino più prossimo (nearest neighbour) nella memory bank $M$:
+
+\begin{equation}
+d(m_{\text{test}}) = \min_{m \in M} \| m_{\text{test}} - m \|_2 .
+\end{equation}
+
+Lo \textbf{score di anomalia a livello patch} è quindi $d(m_{\text{test}})$. Per ottenere uno \textbf{score di anomalia a livello immagine} robusto, prima si identifica prima la coppia critica $(m_{\text{test}}^*, m^*)$ che massimizza la distanza:
+
+\begin{equation}
+m_{\text{test}}^*, m^* = \arg\max_{m_{\text{test}} \in P(\mathbf{x}_{\text{test}})} \arg\min_{m \in M} \| m_{\text{test}} - m \|_2,
+\end{equation}
+
+e si definisce lo score grezzo $s^* = \| m_{\text{test}}^* - m^* \|_2$. Successivamente, viene applicato un \textbf{meccanismo di re-weighting} che tiene conto della rarità del vicino $m^*$ all'interno della memory bank $M$. L'idea è che se $m^*$ è esso stesso un pattern raro (cioè lontano dai suoi $b$ vicini in $M$), allora la deviazione $m_{\text{test}}^*$ è meno sorprendente e il punteggio viene attenuato. Lo score finale a livello immagine $s$ è:
+
+\begin{equation}
+s = \left(1 - \frac{\exp(\| m_{\text{test}}^* - m^* \|_2)}{\sum_{m \in \text{Nb}(m^*)} \exp(\| m_{\text{test}}^* - m \|_2)} \right) \cdot s^*,
+\end{equation}
+
+dove $\text{Nb}(m^*)$ denota l'insieme dei $b$ patch-feature più vicini a $m^*$ in $M$. La \textbf{mappa di segmentazione} (anomalia a livello pixel) viene ottenuta ri\-al\-li\-ne\-an\-do spazialmente gli score a livello patch $d(m_{\text{test}})$ per ogni posizione, seguita da un'upscaling tramite interpolazione bilineare e uno smoothing gaussiano ($\sigma=4$) per rifinire il risultato.
+
+\subparagraph{Impatto e Limitazioni.}
+
+PatchCore ha avuto un impatto significativo sulla ricerca e pratica industriale:
+\begin{itemize}
+\item \textbf{State-of-the-art su MVTec AD}: $99.1\%$ image AUROC medio, $98.1\%$ pixel AUROC. Baseline standard, utilizzato come confronto in praticamente tutti i paper successivi
+\item \textbf{Efficienza e semplicità}: inferenza rapida, nessun training richiesto, facile da implementare 
+\end{itemize}
+
+Le limitazioni principali sono:
+\begin{itemize}
+\item \textbf{Memoria}: la memory bank, sebbene compressa, richiede comunque diversi GB per dataset grandi
+\item \textbf{Tempo di costruzione}: il coreset subsampling può richiedere ore per dataset molto ampi
+\item \textbf{Nessuna adattazione}: essendo non-parametrico, non può adattarsi a nuove distribuzioni senza ricostruire la memory bank
+\end{itemize}
+
+Nonostante queste limitazioni, PatchCore rimane uno dei metodi più pratici e affidabili, particolarmente quando l'accuratezza è prioritaria e il setup può essere fatto offline.
+
+\paragraph{MemSeg (2022).}
+
+MemSeg (Memory-guided Segmentation) \cite{yang2022memseg} adotta un approccio diverso: invece di confrontare feature o ricostruire immagini, trasforma l'anomaly detection in un task di segmentazione semantica end-to-end. Sulla base dell'idea di una ridotta varianza intra-classe tra prodotti della stessa linea produttiva:
+\begin{itemize}
+    \item introducendo anomalie simulate durante il training, il modello impara esplicitamente a discriminare normale da non-normale
+    \item l'uso di un memory module consente di memorizzare pattern normali tipici per confrontare l'input
+\end{itemize}
+
+\subparagraph{Architettura U-Net Based.}
+
+MemSeg usa U-Net \cite{ronneberger2015u} come architettura base. L'architettura si compone di:
+
+\begin{enumerate}
+\item \textbf{Encoder}: ResNet18 pre-addestrato su ImageNet che estrae feature a diverse risoluzioni
+
+\item \textbf{Memory Module}: Memorizza feature di $N$ campioni normali selezionati casualmente e calcola "difference information"
+
+\item \textbf{MSFF Module}: Multi-Scale Feature Fusion module che fonde feature dell'input con difference information
+
+\item \textbf{Decoder}: genera una mappa di segmentazione binaria (normale/anomalo) invece di ricostruire l'immagine
+\end{enumerate}
+
+\subparagraph{Memory Module e Difference Information.}
+
+Si selezionano casualmente $N$ immagini normali dal training set come "memory samples" e si estraggono feature che andranno a costituire la \textit{memory information} $MI$.
+
+Data un'immagine di input (normale o simulata anomala), si estraggono le sue feature $II$ (\textit{input information}) e si calcola la distanza L2 tra $II$ e \textit{ogni} memory sample $MI_i$:
+\begin{equation}
+DI_i = \|II - MI_i\|_2 \quad \text{per} \quad i = 1, \dots, N
+\end{equation}
+
+Questo produce $N$ "difference information" $DI_1, \dots, DI_N$. Si seleziona la \textit{best difference information} $DI^*$ come quella con somma minima su tutti gli elementi:
+\begin{equation}
+DI^* = \arg\min_{DI_i} \sum_{\text{elementi}} DI_i
+\end{equation}
+
+Intuitivamente, $DI^*$ rappresenta le differenze rispetto al memory sample più simile all'input.
+
+Da $DI^*$ si generano tre \textbf{spatial attention maps} $M_1, M_2, M_3$ che enfatizzano regioni potenzialmente anomale:
+
+\begin{equation}
+M_3 = \frac{1}{C_3} \sum_{i=1}^{C_3} DI^*_{3i}
+\end{equation}
+
+\begin{equation}
+M_2 = \frac{1}{C_2} \left(\sum_{i=1}^{C_2} DI^*_{2i}\right) \odot M_3^U
+\end{equation}
+
+\begin{equation}
+M_1 = \frac{1}{C_1} \left(\sum_{i=1}^{C_1} DI^*_{1i}\right) \odot M_2^U
+\end{equation}
+
+dove $C_n$ è il numero di canali di $DI^*_n$ e $M^U$ denota upsampling. 
+
+\subparagraph{Multi-Scale Feature Fusion Module (MSFF).}
+
+$DI^*$ viene concatenato con $II$ nella dimensione dei canali per ottenere la concatenated information $CI_n$ ($n=1,2,3$ per le tre risoluzioni). Queste contengono ridondanza (concatenazione di due sorgenti diverse) e vengono elaborate da MSFF
+
+\begin{enumerate}
+\item Convoluzione iniziale 3×3 che mantiene il numero di canali
+\item Coordinate Attention (CA) \cite{hou2021coordinate} per catturare relazioni tra canali considerando informazioni spaziali
+\item Multi-scale fusion: Feature da diverse risoluzioni vengono allineate (upsampling + conv) e sommate element-wise
+\end{enumerate}
+
+Le feature fuse vengono poi pesate dalle spatial attention maps $M_n$ e passate al decoder.
+
+\subparagraph{Loss Functions.}
+
+La funzione di perdita complessiva combina L1 loss e Focal loss \cite{lin2017focal}:
+\begin{align}
+\mathcal{L}_{l1} &= \|S - P\|_1 \tag{8} \\
+\mathcal{L}_{fl} &= -(1-p_t)^\gamma \log(p_t) \tag{9}
+\end{align}
+
+dove $S$ è il ground truth delle regioni anomale nell'immagine simulata, $P$ è il valore predetto dal modello, e $p_t$ è definito come:
+\begin{itemize}
+\item $p_t = p$ quando il ground truth del pixel corrispondente in $S$ è 1
+\item $p_t = 1 - p$ quando il ground truth del pixel in $S$ è 0
+\end{itemize}
+con $p$ la probabilità predetta della categoria del pixel.
+
+La funzione obiettivo finale combina questi vincoli:
+\begin{equation}
+\mathcal{L} = \lambda_1 \cdot \mathcal{L}_{l1} + \lambda_2 \cdot \mathcal{L}_{fl} \tag{10}
+\end{equation}
+dove $\lambda_1$ e $\lambda_2$ sono iperparametri di bilanciamento.
+
+
+
+\subparagraph{Vantaggi e Limitazioni.}
+MemSeg offre vantaggi significativi rispetto ad approcci precedenti: la segmentazione end-to-end evita sia la ricostruzione (autoencoders/GAN) sia il feature matching complesso (embedding-based methods), risultando in velocità di inferenza molto superiori. Il modello si adatta alle specifiche anomalie del dominio, mentre la supervision diretta produce boundary di segmentazione molto accurati.
+
+Tuttavia, il metodo presenta alcune limitazioni. MemSeg è sensibile all'al\-li\-nea\-men\-to spaziale degli oggetti: performance degradano quando gli oggetti nel test set hanno orientamenti casuali o posizioni molto variabili. A differenza di PatchCore, richiede un training completo del decoder e del MSFF module. Infine, la qualità della detection dipende fortemente da quanto le anomalie simulate durante training approssimano le anomalie reali, rendendo la strategia di simulation un componente critico del successo del metodo.
+
+
+\paragraph{Confronto: PatchCore vs MemSeg.}
+
+
+PatchCore e MemSeg rappresentano due filosofie complementari nell'uso della memoria per anomaly detection:
+
+\begin{table}[h]
+\centering
+\caption{Confronto tra approcci memory-based}
+\begin{tabular}{lcc}
+\toprule
+Aspetto & PatchCore & MemSeg \\
+\midrule
+Paradigma & Non-parametrico & Semantic segmentation \\
+Training & No (solo coreset) & Sì (end-to-end) \\
+Anomaly simulation & No & Sì  \\
+Memoria & Coreset di patch features & N immagini normali intere \\
+Scoring & Nearest-neighbor distance & Segmentation diretta \\
+Output & Distance map & Binary segmentation \\
+Velocità inferenza & Veloce & Molto veloce  \\
+Allineamento spaziale & Robusto & Più sensibile \\
+Accuratezza & Molto alta (99.1\%) & Molto alta (99.56\%) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{itemize}
+\item \textbf{PatchCore}: Deployment rapido senza training, massima robustezza a variazioni spaziali, accuratezza eccellente. Ideale quando non si può/vuole addestrare e gli oggetti possono essere disallineati o ruotati.
+
+\item \textbf{MemSeg}: Velocità massima per real-time, segmentazione end-to-end, boundary precisi. Ideale per scenari industriali con oggetti spazialmente consistenti.
+\end{itemize}
+
+Entrambi i metodi superano significativamente approcci precedenti (PaDiM, SPADE) e hanno influenzato profondamente lo sviluppo successivo, stabilendo la memoria esplicita come componente chiave per l'anomaly detection ad alte prestazioni.
 
 
 
 
 
+\subsubsection{Student-Teacher Avanzati (2022-2023)}
+
+Il paradigma student-teacher, introdotto inizialmente con metodi come Uninformed Students (2020), ha subito un'evoluzione significativa tra il 2022 e il 2023, producendo metodi più performanti e efficienti. 
+
+\paragraph{Reverse Distillation (2022).}
+
+Reverse Distillation (RD) \cite{deng2022anomaly} modifica il pa\-ra\-dig\-ma student-teacher invertendo il flusso dell'informazione. Invece di teacher e student entrambi encoder con architetture simili, in RD il \textbf{teacher} è un \textit{encoder} pre-addestrato e congelato (down-sampling), mentre lo \textbf{student} è un \textit{decoder} (up-sampling) che deve ricostruire le feature estratte dal teacher partendo da una rappresentazione compressa.
+
+\subparagraph{Architettura e Inversione del Paradigma.}
+
+Oltre all'inversione dei ruoli, si ha anche l'inversione del flusso dei dati: l'immagine va al teacher mentre lo student riceve solo un embedding compatto. La distillazione avviene trasferendo la conoscenza da rappresentazioni high-level (astratte) a low-level (dettagli), in\-ver\-ten\-do l'ordine naturale.
+
+\begin{enumerate}
+\item \textbf{Teacher Encoder $E_T$} (pre-trained, fixed): Una rete pre-addestrata su ImageNet (es. ResNet) che estrae feature multi-scala $\{F_1^T, F_2^T, F_3^T\}$ da un'immagine di input $x$.
+
+\item \textbf{One-Class Bottleneck Embedding (OCBE)}: Modulo addestrabile che riceve le feature multi-scala dal teacher, le fonde tramite Multi-scale Feature Fusion (MFF) e le comprime in un \textbf{embedding compatto} $z \in \mathbb{R}^d$ con $d \ll C \times H \times W$. Questo crea un \textit{collo di bottiglia informativo} ($d$ piccolo) che forza la rete a estrarre solo l'informazione essenziale dei dati normali.
+
+\item \textbf{Student Decoder $D_S$} (trainable): Una rete simmetrica ma inversa ris\-pet\-to al teacher, che riceve l'embedding $z$ e tenta di \textit{ricostruire le feature o\-ri\-gi\-na\-li} del teacher a ciascun livello: $\{\hat{F}_1^S, \hat{F}_2^S, \hat{F}_3^S\} = D_S(z)$.
+\end{enumerate}
+
+Il bottleneck è cruciale: formula le anomalie come "perturbazioni sui pattern normali", e l'embedding compatto \textit{filtra} queste perturbazioni, impedendo loro di propagarsi allo student.
+
+\subparagraph{Training e Loss.}
+Addestrato solo su immagini normali, il sistema minimizza la dissimilarità tra feature del teacher e ricostruzioni dello student. La loss totale è la somma su tre livelli di una \textbf{cosine similarity loss negativa} (rende il modello più robusto alle variazioni delle feature, concentrandosi sulla \textit{direzione}):
+
+\begin{equation}
+\mathcal{L}_{RD} = \sum_{k=1}^{3} \left[ 1 - \frac{1}{H_k W_k} \sum_{i,j} \text{cosine-sim}\left(F_k^T(i,j), \hat{F}_k^S(i,j)\right) \right]
+\end{equation}
+
+dove $\text{cosine-sim}(a,b) = \frac{a^T b}{\|a\|\|b\|}$. 
 
 
+\subparagraph{Rilevamento anomalie.}
+\begin{itemize}
+\item \textbf{Per immagini normali}: Le feature $F_k^T$ rientrano nella distribuzione appresa. L'OCBE le comprime bene, il decoder le ricostruisce fedelmente, determinando una bassa loss $\mathcal{L}_{RD}$
+
+\item \textbf{Per immagini anomale}: Le feature $F_k^T$ sono "fuori distribuzione". L'embedding $\phi$ risulta distorto, portando a una ricostruzione scadente e ad una alta loss $\mathcal{L}_{RD}$
+\end{itemize}
+
+L'anomaly score pixel-level è la mappa di discrepanza:
+\begin{equation}
+A(\mathbf{x}) = \sum_{k=1}^{3} \text{Upsample}\left(1 - \frac{\mathbf{F}_k^T \cdot \mathbf{F}_k^S}{\|\mathbf{F}_k^T\| \|\mathbf{F}_k^S\|}\right)
+\end{equation}
+
+\subparagraph{Innovazioni e Vantaggi.}
+
+\begin{itemize}
+    \item \textbf{Non-similarity}: mentre il teacher (encoder) agisce da \textit{filtro down-sam\-pling}, estraendo feature sempre più astratte, lo student (decoder) ri\-co\-strui\-sce da astratto a concreto (\textit{filtro up-sampling}). Questa eterogeneità evita il problema dei "non-distinguishing filters" dove teacher e student, se troppo simili, tendono a convergere anche su anomalie
+    \item \textbf{Bottleneck come filtro}: La bassa dimensionalità $d$ dell'embedding a\-gi\-sce da \textit{filtro informativo}. Informazioni anomale (rumore, anomalie) tendono a essere perse nella compressione.
+    \item \textbf{Efficienza}: Il teacher è congelato. Si addestrano solo l'OCBE (pochi parametri) e il decoder.
+\end{itemize}
+
+
+\subparagraph{Limitazioni.}
+
+La performance di RD dipende fortemente dalla scelta della dimensione del bottleneck $d$ e dalla capacità del teacher pre-addestrato di estrarre feature discriminative. 
+
+%% RD++
+
+\paragraph{Reverse Distillation Revisited (RD++, 2023).}
+
+Tien et al. \cite{tien2023revisiting} identificano alcune limitazioni critiche nell'originale Reverse Distillation (RD) e propongono RD++, un'architettura migliorata che le affronta attraverso meccanismi espliciti di supervisione.
+
+\subparagraph{Limitazioni di RD Originale.}
+
+Analizzando l'output del modulo OCBE (input allo student), gli autori scoprono due problemi critici:
+
+\textbf{Feature Compactness Insufficiente}: L'embedding prodotto per immagini normali presenta un'elevata varianza, indicando che il bottleneck non concentra efficacemente le feature nella regione normale dello spazio latente
+
+\textbf{Nessun Meccanismo Esplicito per Soppressione Anomalie}: RD assume implicitamente che il bottleneck filtri le anomalie, ma manca un meccanismo di supervisione diretta che penalizzi la propagazione di feature anomale.
+
+\subparagraph{Architettura e Training Migliorati.}
+
+RD++ introduce:
+\begin{enumerate}
+    \item \textbf{Projection Layers Multi-Scala}: Strati convoluzionali leggeri inseriti dopo ogni blocco intermedio del teacher encoder, prima del modulo OCBE. Questi layers proiettano le feature in uno spazio più adatto prima della compressione nel bottleneck, permettendo di processare informazioni a diverse scale spaziali.
+    \item \textbf{Self-Supervised Optimal Transport Loss ($\mathcal{L}_{SSOT}$)}: Una nuova loss che forza le feature di diversi campioni normali ad essere vicine nello spazio latente, migliorando esplicitamente la compattezza della rappresentazione.
+    \item \textbf{Reconstruction Loss ($\mathcal{L}_{Recon}$)}: Durante l'addestramento, vengono generate immagini sintetiche corrotte con rumore strutturato (Simplex noise). La loss incoraggia projection layers a mappare feature normali e pseudo-anomale \textit{vicine}, insegnando ai projection layer a "ricostruire" feature normali anche da input alterati, sviluppando robustezza contro anomalie.
+    \item \textbf{Contrast Loss ($\mathcal{L}_{Con}$)}: Loss margin-based che crea una separazione esplicita nello spazio latente tra feature normali (proiettate) e feature anomale (non proiettate). Impedisce al modello di collassare tutte le feature in un'unica regione, mantenendo una distinzione tra pattern normali e anomali.
+\end{enumerate}
+
+La loss totale combina questi termini con la distillation loss originale:
+\begin{equation}
+\mathcal{L}_{totale} = \mathcal{L}_{KD} + \alpha\mathcal{L}_{SSOT} + \beta\mathcal{L}_{Recon} + \gamma\mathcal{L}_{Con}
+\end{equation}
+
+
+\subparagraph{Risultati e Analisi.}
+
+RD++ ottiene miglioramenti significativi rispetto a RD:
+\begin{itemize}
+\item \textbf{MVTec AD}: 99.44\% image AUROC (+0.98\% vs RD), 98.25\% pixel AUROC.
+\item \textbf{Compattezza migliorata}: La varianza intra-classe delle feature normali si riduce. 
+\item \textbf{Soppressione migliorata}: La separazione tra feature normali e anomale migliora.
+\end{itemize}
+
+L'ablation study dimostra che il guadagno principale (circa +0.87\%) deriva dalla loss di compattezza (SSOT), mentre il contributo del training con pseudo-anomalie è più marginale ma complementare.
+
+\subparagraph{Contributo Principale.}
+
+RD++ dimostra che la supervisione esplicita per la compattezza delle feature normali è cruciale per performance elevate nell'anomaly detection. Il metodo mantiene l'efficienza computazionale di RD e stabilì un nuovo state-of-the-art nel 2023.
+
+
+%% EfficientAD
+\paragraph{EfficientAD (2024).}
+
+EfficientAD \cite{batzner2024efficientad} rappresenta l'ultima evoluzione del paradigma student-teacher per l'anomaly detection industriale. Il suo contributo principale è dimostrare che un \textit{ensemble di approcci complementari semplici}  può superare in accuratezza ed efficienza architetture singole più complesse, diventando il nuovo state-of-the-art sia nei benchmark che in scenari reali.
+
+\subparagraph{Architettura Tripartita.}
+
+EfficientAD combina \textbf{tre componenti in\-di\-pen\-den\-ti} con ruoli complementari:
+
+\begin{enumerate}
+    \item \textbf{Student-Teacher con PDN Teacher}: inizialmente, un \textbf{Patch Description Network (PDN)} leggero (tra 1M e 2M di parametri) viene "distillato" da un encoder pre-addestrato grande (WideResNet-101 su ImageNet). Questo processo di distillazione comprime la conoscenza della rete grande nel PDN piccolo. Poi, il PDN distillato diventa il \textbf{teacher} fisso, e uno \textbf{student} ancora più piccolo viene addestrato a replicarne l'output solo su dati normali.
+    Al test, un'alta discrepanza tra student e PDN teacher indica una potenziale anomalia. Questo componente è particolarmente efficace nel rilevare \textit{anomalie strutturali e semantiche}
+
+    \item \textbf{Autoencoder Compatto}: Un autoencoder con bottleneck molto stretto (64 canali) è addestrato a ricostruire immagini normali. La forte compressione impedisce la ricostruzione fedele di patterm mai visti durante il training (anomalie): la ricostruzione fallisce su anomalie ma riesce su normali. Al test, un elevato errore di ricostruzione segnala un'anomalia. Questo componente è specializzato nel catturare \textit{anomalie di texture e apparenza locale}.
+    
+    \item \textbf{Normalizzazione delle Mappe di Anomalia}: Meccanismo di post-processing che combina e calibra gli output dei primi due componenti. Prende le mappe di anomalia grezze prodotte dallo Student-Teacher (\(A_{ST}\)) e dall'Autoencoder (\(A_{AE}\)), le normalizza statisticamente e le combina per produrre una mappa finale più robusta e meno sensibile a falsi positivi. Il processo include un passo di penalizzazione che riduce gli score in regioni dove i due componenti sono in disaccordo, migliorando la calibrazione dello score finale.
+\end{enumerate}
+
+
+\subparagraph{Ensemble Finale.}
+La mappa di anomalia finale viene ottenuta attraverso una combinazione pesata delle mappe normalizzate prodotte dai due componenti principali. I pesi di questa combinazione vengono ottimizzati empiricamente su un set di validazione. 
+
+\subparagraph{Ottimizzazioni Efficienza.}
+
+\begin{itemize}
+    \item \textbf{Elaborazione Parallela}: I tre componenti (ST, AE, normalizzazione) sono indipendenti e possono essere eseguiti in parallelo sulla GPU.
+    \item \textbf{Elaborazione a Bassa Risoluzione}: Le immagini vengono elaborate a risoluzioni ridotte (es. 256x256) senza penalizzare le performance, grazie alla progettazione efficiente delle reti.
+\end{itemize}
+
+\subparagraph{Perché EfficientAD è Efficace.}
+\begin{itemize}
+    \item \textbf{Complementarità dei Segnali}: Lo Student-Teacher è sensibile a cambiamenti semantici e strutturali, mentre l'Autoencoder è sensibile a variazioni di texture e aspetto locale. La loro combinazione copre un ampio spettro di possibili difetti.
+    \item \textbf{Efficienza Radicale}: L'attenzione alla leggerezza dei modelli (pochissimi parametri, quantizzazione) lo rende adatto al deployment in tempo reale anche su hardware limitato.
+    \item \textbf{Semplicità Concettuale}: Non richiede la generazione di dati sintetici né complessi meccanismi di training addizionali, semplificando l'implementazione e la riproducibilità.
+\end{itemize}
+
+EfficientAD rappresenta un punto di arrivo significativo, dimostrando che l'intelligenza del sistema risiede più nell'architettura dell'ensemble e nell'ottimizzazione dell'efficienza che nella complessità di un singolo modello.
