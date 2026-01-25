@@ -1,0 +1,106 @@
+\section{Il Ruolo dei Dataset}
+\label{sec:dataset}
+
+Lo sviluppo e il progresso di qualsiasi campo del \textit{deep learning} sono strettamente legati alla disponibilità di \textbf{dataset} di alta qualità, diversificati e rappresentativi della complessità degli scenari reali. I dataset non costituiscono semplici collezioni di immagini o campioni, ma rappresentano la base per definire problemi, formulare ipotesi scientifiche, addestrare e validare gli algoritmi, misurare i progressi ottenuti. L'efficiacia dei metodi può essere valutata solo grazie a benchmark condivisi e rigorosi. 
+
+Nel contesto specifico dell'\textbf{anomaly detection} per applicazioni industriali, i dataset assumono un'importanza ancora più critica. A differenza di altri domini dove i dati possono essere raccolti in modo relativamente scalabile (ad esempio, attraverso il \textit{web scraping} o l'acquisizione da sensori diffusi), le immagini di prodotti industriali, specialmente quelle che riportano difetti difficili da riprodurre, richiedono acquisizione controllata e spesso condotta in am\-bien\-ti produttivi reali. Inoltre, la natura stessa dei difetti industriali (variabili da micro-graffi superficiali a difetti strutturali complessi, da anomalie di texture ad anomalie logiche) impone che i dataset siano progettati con cura per coprire uno spettro ampio e realistico di possibili scenari.
+
+% ci sta?
+Un dataset di qualità per l'anomaly detection industriale deve soddisfare alcuni requisiti fondamentali \cite{bergmann2019mvtec, bergmann2022beyond}:
+
+\begin{itemize}
+\item \textbf{Immagini ad alta risoluzione}: La rilevazione di micro-difetti (graffi sottili, piccole contaminazioni) richiede immagini con sufficiente dettaglio spaziale per preservare le caratteristiche distintive delle anomalie.
+
+\item \textbf{Annotazioni pixel-precise}: Per applicazioni industriali che richiedono localizzazione accurata dei difetti, sono necessarie maschere di \textit{ground truth} con segmentazioni precise dei confini delle anomalie.
+
+\item \textbf{Variabilità controllata}: I dati normali devono presentare variabilità intra-classe sufficiente (variazioni di illuminazione, pose, texture) per addestrare modelli robusti, senza compromettere la definizione di normalità.
+
+\item \textbf{Diversità di anomalie}: Le tipologie di difetti devono coprire un ampio spettro di manifestazioni visive: difetti strutturali (crepe, denti), difetti superficiali (graffi, macchie), anomalie logiche (componenti mancanti o disallineati).
+
+\item \textbf{Scalabilità}: I dataset devono essere sufficientemente grandi per permettere l'addestramento di modelli \emph{deep learning} e una validazione statistica robusta dei risultati.
+\end{itemize}
+
+%
+
+L'evoluzione dei metodi di anomaly detection, illustrata in \ref{subsec:metodi}, è andata di pari passo con l'evoluzione dei dataset a disposizione. I primi approcci, spesso basati su \textbf{autoencoder} o \textbf{GAN}, sono stati valutati su dataset relativamente piccoli e omogenei (ad esempio, immagini in scala di grigi di singole componenti). La pubblicazione di dataset come \textbf{MVTec AD} ha segnato una svolta, offrendo una varietà di oggetti e texture, annotazioni pixel-precise e una chiara separazione tra training (solo esempi normali) e test (con anomalie). Questo ha permesso la nascita e il confronto di metodi più sofisticati, basati su \textit{feature pre-addestrate}, \textit{memory bank} e \textit{normalizing flows}. 
+
+
+Più recentemente, la necessità di affrontare scenari industriali sempre più complessi (ispezioni 3D, illuminazione variabile, oggetti multi-vista) ha portato verso la creazione di dataset \textbf{multimodali} (RGB, depth, point cloud) e \textbf{large-scale}, spesso acquisiti in ambienti reali o generati sinteticamente con alto realismo. Questi dataset consentono di testare la robustezza e la generalizzazione dei metodi esistenti, ma portano anche verso lo sviluppo di nuove architetture in grado di elaborare informazioni visive e geometriche in modo integrato.
+
+In questo capitolo, presenteremo una panoramica strutturata dei principali dataset utilizzati nella letteratura di \emph{anomaly detection} industriale. Dopo averne analizzato le caratteristiche distintive e le metriche di valutazione associate, discuteremo come l'evoluzione dei dataset abbia influenzato lo sviluppo di algoritmi sempre più accurati, robusti e pronti per il deployment in scenari industriali reali.
+
+%% 3.2 Evoluzione
+\section{Evoluzione dei Dataset (2018–2025)}
+\label{sec:evoluzione_dataset}
+
+L'evoluzione dei dataset per l'anomaly detection industriale riflette la crescente complessità delle applicazioni industriali e l'emergere di nuove esigenze. Possiamo identificare tre fasi principali, ciascuna caratterizzata da un salto in termini di modalità di acquisizione, tipologia di anomalie e scenario valutativo.
+
+\subsection{Prima generazione (2018–2020): Benchmark 2D e definizione del task.}
+I primi dataset, come \textbf{Magnetic Tile Defects} (2018) \cite{huang2018surface} e \textbf{MVTec AD} (2019) \cite{bergmann2019mvtec} si concentrarono su immagini 2D (scala di grigi o RGB) di oggetti isolati o texture, con annotazioni pixel-precise per difetti superficiali (graffi, crepe, macchie). MVTec AD in particolare stabilì lo standard per dataset 2D RGB con annotazioni pixel-level, diventando il benchmark di riferimento universale.
+
+
+\subsection{Seconda generazione (2021–2022): Espansione mul\-ti\-mo\-da\-le e anomalie complesse.}
+Per testare modelli più avanzati e affrontare limiti dei dati puramente visivi, emersero dataset che incorporano informazioni 3D e anomalie di tipo logico\-strutturale. \textbf{MVTec 3D-AD} (2021) \cite{bergmann2021mvtec3d} introdusse depth map e point cloud insieme alle immagini RGB. \textbf{MVTec LOCO AD} (2022) \cite{bergmann2022beyond} focalizzò l'at\-ten\-zio\-ne sulle \textit{logical anomalies} (componenti mancanti, assemblaggi errati), ri\-chie\-den\-do ai modelli di ragionare sulla struttura globale dell'oggetto. Parallelamente, dataset sintetici come \textbf{Eyecandies} (2022) \cite{bonfiglioli2022eyecandies} permisero un controllo fine su illuminazione, materiali e geometrie, facilitando la validazione in condizioni perfettamente controllate.
+
+\subsection{Terza generazione (2023–2025): Scenari realistici, multi-vista e large-scale.}
+I dataset più recenti hanno spostao l'attenzione verso condizioni realistiche. Dataset come \textbf{Real-IAD} (2024) \cite{ding2024realiad} e \textbf{RAD} (2024)  \cite{liu2024rad} offrono migliaia di immagini acquisite da più viewpoint, con oggetti riflettenti, trasparenti e in condizioni di illuminazione variabile. \textbf{MVTec AD 2} (2025) \cite{bergmann2025mvtecad2} introduce sfide aggiuntive come difetti ai bordi dell'immagine e variazione nel numero di oggetti per scena. L'obiettivo è ridurre il gap tra performance su benchmark controllati e deployment industriale reale.
+
+La Tabella \ref{tab:dataset_evolution} sintetizza questa progressione temporale, evidenziando l'in\-cre\-men\-to di complessità e realismo.
+
+\begin{table}[h]
+\centering
+\caption{Evoluzione dei dataset per anomaly detection industriale (2018-2025). La suddivisione in tre generazioni riflette l'espansione dalle basi 2D alla multimodalità, fino agli scenari realistici e multi-vista.}
+\label{tab:dataset_evolution}
+\small
+\begin{tabular}{clp{7cm}}
+\toprule
+\textbf{Anno} & \textbf{Dataset} & \textbf{Contributi Principali / Innovazioni} \
+\midrule
+\multicolumn{3}{c}{\textit{\textbf{Prima Generazione: Benchmark 2D e definizione del task (2018–2020)}}} \
+\midrule
+2018 & Magnetic Tile Defects & Dataset pionieristico per difetti industriali; immagini in scala di grigi; valutazione di modelli di saliency detection. \
+2019 & \textbf{MVTec AD} & \textbf{Benchmark di riferimento universale}; 15 categorie (oggetti e texture); annotazioni pixel-precise; separazione chiara training/test; standardizzazione di metriche (AUROC, PRO). \
+2021 & MPDD & Focus su parti metalliche; scenari tipici dell'industria metallurgica (graffi, fori, ruggine). \
+2022 & VisA & Oggetti con strutture complesse e multiple istanze; introduce protocolli few-shot e high-shot per valutare la sensibilità locale dei metodi self-supervised. \
+\midrule
+\multicolumn{3}{c}{\textit{\textbf{Seconda Generazione: Espansione multimodale e anomalie complesse (2021–2022)}}} \
+\midrule
+2021 & MVTec 3D-AD & Primo dataset 3D industriale; unisce RGB, depth map e point cloud; anomalie geometriche (graffi, ammaccature, contaminazioni). \
+2022 & MVTec LOCO AD & Introduzione delle \textbf{anomalie logiche} (errori di assemblaggio, componenti fuori posto); metrica sPRO per valutare il rilevamento di difetti contestuali. \
+2022 & Eyecandies & Dataset \textbf{sintetico} su larga scala (90K campioni); controllo completo su illuminazione, materiali e anomalie; include RGB, depth e mappe delle normali. \
+\midrule
+\multicolumn{3}{c}{\textit{\textbf{Terza Generazione: Scenari realistici, multi-vista e large-scale (2023–2025)}}} \
+\midrule
+2023 & Real3D-AD & Dataset 3D ad alta precisione; setting \textbf{few-shot} (4 campioni per categoria); copertura a 360° senza punti ciechi. \
+2023 & PAD / MAD & Setting \textbf{pose-agnostic}; acquisizioni multi-vista (~20 viewpoint); versioni sia reali (MAD-Real) che sintetiche (MAD-Sim). \
+2024 & Real-IAD & Dataset \textbf{large-scale} (150K immagini); 30 categorie industriali; acquisizione multi-vista (5 angolazioni); progettato per il deployment in scenari reali. \
+2024 & RAD & \textbf{Multi-vista estremo} (60+ viewpoint); setting \textbf{noisy-pose} per testare la robustezza; include ricostruzione 3D a partire dalle viste RGB. \
+2025 & \textbf{MVTec AD 2} & Introduce \textbf{sfide realistiche}: oggetti trasparenti/riflettenti, condizioni di illuminazione variabili, anomalie ai bordi dell'immagine, variazione nel numero di oggetti. \
+2025 & Real-IAD D³ & Estensione \textbf{tri-modale} di Real-IAD: RGB, point cloud e mappe delle normali; 20 categorie; 69 gruppi di difetti per valutazione fine. \
+2025 & SiM3D & Dataset \textbf{ibrido} (reale + sintetico); multi-vista (12-36 viste per istanza); valutazione voxel-level per segmentazione 3D. \
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+
+%% section metriche
+\subsection{Metriche di Valutazione Standard}
+\label{subsec:metriche}
+
+La valutazione rigorosa degli algoritmi di anomaly detection richiede metriche standardizzate che catturino aspetti diversi della performance: accuratezza a livello di immagine, precisione nella localizzazione, robustezza ai falsi positivi, etc. Le metriche più utilizzate nei benchmark industriali possono essere classificate in due categorie principali: \textit{threshold-free} (indipendenti da una soglia di decisione) e \textit{threshold-dependent} (che richiedono la binarizzazione dello score di anomalia).
+
+\paragraph{Metriche Threshold-Free.}
+\begin{itemize}
+\item \textbf{AUROC (Area Under the Receiver Operating Characteristic Curve)}: misura la capacità del modello di separare classi normali e anomale al variare della soglia. Viene riportata sia a livello immagine (\textit{Image AUROC}) che a livello pixel (\textit{Pixel AUROC}). Valori prossimi a 1 indicano prestazioni eccellenti. È la metrica più comunemente riportata per la sua robustezza a classi sbilanciate.
+\item \textbf{PRO (Per-Region Overlap)} \cite{bergmann2022beyond}: progettata per valutare la qualità della localizzazione, specialmente per difetti piccoli. Calcola la curva Precision-Recall media su ogni regione anomala indipendentemente dalla sua dimensione, evitando che difetti grandi dominino la metrica. Il suo integrale (AUPRO) è diventato standard per dataset con annotazioni pixel-precise.
+\end{itemize}
+
+\paragraph{Metriche Threshold-Dependent.}
+\begin{itemize}
+\item \textbf{F1-Score}: media armonica di precision e recall, calcolata dopo aver applicato una soglia ottimale (tipicamente sul validation set). Sensibile allo sbilanciamento delle classi, ma utile per scenari dove è critico bilanciare falsi positivi e falsi negativi.
+\item \textbf{MAE (Mean Absolute Error)}: utilizzata principalmente in metodi basati su ricostruzione o saliency map, misura l'errore medio assoluto tra la mappa predetta e la ground truth.
+\end{itemize}
+
+La scelta della metrica influenza direttamente la comparabilità dei risultati. Dataset incentrati sulla localizzazione (es. MVTec AD) privilegiano AUROC e PRO, mentre dataset con anomalie logiche (es. MVTec LOCO AD) possono introdurre metriche ad-hoc come la \textit{sPRO} (Saturated PRO). Nei paragrafi seguenti, per ciascun dataset indicheremo le metriche con cui è stato principalmente valutato, collegandole alle specifiche esigenze applicative che lo hanno ispirato.

@@ -66,6 +66,7 @@ In questo scenario meno comune, si assume che l'insieme di training contenga una
 % METODI 
 % ----------------------
 \subsection{Evoluzione dei Metodi di Anomaly Detection}
+\label{subsec:metodi}
 
 Lo sviluppo di metodi di deep learning per l'anomaly detection ha seguito un'evoluzione rapida negli ultimi anni. Presentiamo qui i principali approcci in ordine cronologico, con attenzione ai metodi moderni che rappresentano lo stato dell'arte attuale.
 
@@ -594,7 +595,7 @@ L'integrazione di vision-language models (VLM) pre-addestrati nell'anomaly de\-t
 \item \textbf{Zero-shot impossibility}: In assenza di esempi visivi dal dominio target, i metodi basati solo sulla visione non hanno alcun meccanismo per trasferire la nozione di "anomalia". Senza supervisione visiva diretta, il loro comportamento equivale a un'ipotesi casuale.
 \end{enumerate}
 
-\paragraph{Cosa Portano i Vision-Language Models}. L'introduzione di modelli multimodali pre-addestrati come CLIP \cite{radford2021learning} affronta queste limitazioni sfruttando una conoscenza semantica fondata sia sulla visione che sul linguaggio, appresa da dataset web-scale
+\paragraph{Cosa Portano i Vision-Language Models.} L'introduzione di modelli multimodali pre-addestrati come CLIP \cite{radford2021learning} affronta queste limitazioni sfruttando una conoscenza semantica fondata sia sulla visione che sul linguaggio, appresa da dataset web-scale
 
 \begin{itemize}
 \item \textbf{Radicamento semantico (semantic grounding)}: Gli spazi di embedding allineati permettono di specificare \textit{concettualmente} cosa cercare ("defect", "anomaly", "damage", "scratch") andando oltre il confronto statistico di pattern visivi. Questo consente il trasferimento di conoscenza concettuale tra domini anche molto diversi \cite{zhou2024anomalyclip}.
