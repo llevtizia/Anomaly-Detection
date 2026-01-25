@@ -47,40 +47,51 @@ I dataset più recenti hanno spostao l'attenzione verso condizioni realistiche. 
 
 La Tabella \ref{tab:dataset_evolution} sintetizza questa progressione temporale, evidenziando l'in\-cre\-men\-to di complessità e realismo.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Evoluzione dei dataset per anomaly detection industriale (2018-2025). La suddivisione in tre generazioni riflette l'espansione dalle basi 2D alla multimodalità, fino agli scenari realistici e multi-vista.}
 \label{tab:dataset_evolution}
-\small
-\begin{tabular}{clp{7cm}}
+\footnotesize
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.8cm}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{10cm}}
 \toprule
 \textbf{Anno} & \textbf{Dataset} & \textbf{Contributi Principali / Innovazioni} \\
 \midrule
-\multicolumn{3}{l}{\textit{\textbf{Prima Generazione: Benchmark 2D e definizione del task (2018–2020)}}} \\
+\multicolumn{3}{c}{\textit{\textbf{Prima Generazione: Benchmark 2D e definizione del task (2018--2020)}}} \\
 \midrule
 2018 & Magnetic Tile Defects & Dataset pionieristico per difetti industriali; immagini in scala di grigi; valutazione di modelli di saliency detection. \\
+\addlinespace
 2019 & \textbf{MVTec AD} & \textbf{Benchmark di riferimento universale}; 15 categorie (oggetti e texture); annotazioni pixel-precise; separazione chiara training/test; standardizzazione di metriche (AUROC, PRO). \\
+\addlinespace
 2021 & MPDD & Focus su parti metalliche; scenari tipici dell'industria metallurgica (graffi, fori, ruggine). \\
+\addlinespace
 2022 & VisA & Oggetti con strutture complesse e multiple istanze; introduce protocolli few-shot e high-shot per valutare la sensibilità locale dei metodi self-supervised. \\
 \midrule
-\multicolumn{3}{l}{\textit{\textbf{Seconda Generazione: Espansione multimodale e anomalie complesse (2021–2022)}}} \\
+\multicolumn{3}{c}{\textit{\textbf{Seconda Generazione: Espansione multimodale e anomalie complesse (2021--2022)}}} \\
 \midrule
 2021 & MVTec 3D-AD & Primo dataset 3D industriale; unisce RGB, depth map e point cloud; anomalie geometriche (graffi, ammaccature, contaminazioni). \\
+\addlinespace
 2022 & MVTec LOCO AD & Introduzione delle \textbf{anomalie logiche} (errori di assemblaggio, componenti fuori posto); metrica sPRO per valutare il rilevamento di difetti contestuali. \\
+\addlinespace
 2022 & Eyecandies & Dataset \textbf{sintetico} su larga scala (90K campioni); controllo completo su illuminazione, materiali e anomalie; include RGB, depth e mappe delle normali. \\
 \midrule
-\multicolumn{3}{l}{\textit{\textbf{Terza Generazione: Scenari realistici, multi-vista e large-scale (2023–2025)}}} \\
+\multicolumn{3}{c}{\textit{\textbf{Terza Generazione: Scenari realistici, multi-vista e large-scale (2023--2025)}}} \\
 \midrule
 2023 & Real3D-AD & Dataset 3D ad alta precisione; setting \textbf{few-shot} (4 campioni per categoria); copertura a 360° senza punti ciechi. \\
-2023 & PAD / MAD & Setting \textbf{pose-agnostic}; acquisizioni multi-vista (~20 viewpoint); versioni sia reali (MAD-Real) che sintetiche (MAD-Sim). \\
+\addlinespace
+2023 & PAD / MAD & Setting \textbf{pose-agnostic}; acquisizioni multi-vista ($\sim$20 viewpoint); versioni sia reali (MAD-Real) che sintetiche (MAD-Sim). \\
+\addlinespace
 2024 & Real-IAD & Dataset \textbf{large-scale} (150K immagini); 30 categorie industriali; acquisizione multi-vista (5 angolazioni); progettato per il deployment in scenari reali. \\
+\addlinespace
 2024 & RAD & \textbf{Multi-vista estremo} (60+ viewpoint); setting \textbf{noisy-pose} per testare la robustezza; include ricostruzione 3D a partire dalle viste RGB. \\
+\addlinespace
 2025 & \textbf{MVTec AD 2} & Introduce \textbf{sfide realistiche}: oggetti trasparenti/riflettenti, condizioni di illuminazione variabili, anomalie ai bordi dell'immagine, variazione nel numero di oggetti. \\
+\addlinespace
 2025 & Real-IAD D³ & Estensione \textbf{tri-modale} di Real-IAD: RGB, point cloud e mappe delle normali; 20 categorie; 69 gruppi di difetti per valutazione fine. \\
-2025 & SiM3D & Dataset \textbf{ibrido} (reale + sintetico); multi-vista (12-36 viste per istanza); valutazione voxel-level per segmentazione 3D. \\
+\addlinespace
+2025 & SiM3D & Dataset \textbf{ibrido} (reale + sintetico); multi-vista (12--36 viste per istanza); valutazione voxel-level per segmentazione 3D. \\
 \bottomrule
 \end{tabular}
-\end{table```
+\end{table}
 
 
 
