@@ -625,12 +625,11 @@ Per ottenere lo score di anomalia finale, il metodo combina i risultati delle si
 
 \paragraph{AnomalyCLIP (2024).}
 
-AnomalyCLIP \cite{zhou2024anomalyclip} nasce per adattare CLIP al \textbf{zero-shot anomaly detection} (ZSAD): rilevare anomalie \textit{senza alcun esempio dal dominio target}, introducendo quattro innovazioni che portano zero-shot a livelli competitivi.
+AnomalyCLIP \cite{zhou2024anomalyclip} nasce per adattare CLIP al \textbf{zero-shot anomaly detection} (ZSAD): rilevare anomalie \textit{senza alcun esempio dal dominio target}, introducendo una serie di innovazioni che portano zero-shot a livelli competitivi.
 
 \begin{itemize}
     \item \textbf{Object-Agnostic Prompts}: Abbandona i prompts legati a specifiche categorie in favore di prompts generici ("image without defects") , eliminando necessità di conoscere la classe dell'oggetto.
     \item \textbf{Global-Local Dual Alignment}: Introduce una supervisione a due livelli: oltre ad allineare l'embedding dell'intera immagine con descrizioni testuali, allinea anche le feature a livello di pixel con etichette di normalità/anomalia, garantendo così una comprensione sia del contesto globale che del dettaglio locale per la segmentazione.
-    \item \textbf{Object-Agnostic Text Prompt}: I prompt testuali sono generici e capaci di identificare anomalie su diversi oggetti e diversi domini, non includendo la semantica dell'oggetto. 
     \item \textbf{Multi-Layer Local Optimization}: Invece di utilizzare feature da un singolo layer, AnomalyCLIP applica la local context optimization a \textit{multiple intermediate layers} dell'encoder visivo di CLIP. Per ogni layer selezionato \(M_l\), calcola mappe di similarità locali \(S_{n,M_l}\) e \(S_{a,M_l}\) tra i prompt testuali e le feature visive a quel livello. Queste mappe da layer a diversa profondità (che catturano informazioni a diversa granularità spaziale/semantica) vengono poi combinate per formare la predizione finale, permettendo di rilevare sia difetti fini che anomalie strutturali su larga scala
 \end{itemize}
 
