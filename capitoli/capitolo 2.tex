@@ -537,7 +537,45 @@ La mappa di anomalia finale viene ottenuta attraverso una combinazione pesata de
 \begin{itemize}
     \item \textbf{Complementarità dei Segnali}: Lo Student-Teacher è sensibile a cambiamenti semantici e strutturali, mentre l'Autoencoder è sensibile a variazioni di texture e aspetto locale. La loro combinazione copre un ampio spettro di possibili difetti.
     \item \textbf{Efficienza Radicale}: L'attenzione alla leggerezza dei modelli (pochissimi parametri, quantizzazione) lo rende adatto al deployment in tempo reale anche su hardware limitato.
-    \item \textbf{Semplicità Concettuale}: Non richiede la generazione di dati sintetici né complessi meccanismi di training addizionali, semplificando l'implementazione e la riproducibilità.
+    \item \textbf{Semplicità Concettuale}: Non richiede la generazione di dati sintetici né complessi meccanismi di training addizionali, semplificando l'im\-ple\-men\-ta\-zio\-ne e la riproducibilità.
 \end{itemize}
 
-EfficientAD rappresenta un punto di arrivo significativo, dimostrando che l'intelligenza del sistema risiede più nell'architettura dell'ensemble e nell'ottimizzazione dell'efficienza che nella complessità di un singolo modello.
+EfficientAD rappresenta un punto di arrivo significativo, dimostrando che l'intelligenza del sistema risiede più nell'architettura dell'ensemble e nell'ot\-ti\-miz\-za\-zio\-ne dell'efficienza che nella complessità di un singolo modello.
+
+
+\paragraph{SimpleNet (2023).}
+
+SimpleNet \cite{liu2023simplenet} riduce al minimo la complessità, proponendo un sistema robusto, riproducibile ed efficiente. 
+
+
+\subparagraph{Architettura: Four Components Only.}
+
+SimpleNet si compone di solo 4 componenti essenziali:
+
+\begin{enumerate}
+    \item \textbf{Feature Extractor (pre-trained, frozen)}: Una rete pre-addestrato su ImageNet (tipicamente WideResNet50). Pesi completamente frozen, senza fine-tuning, nessun backpropagation attraverso l'encoder. Estrazione mul\-ti\-sca\-la da layer intermedi.
+    \item \textbf{Feature Adaptor (opzionale, leggero)}: Una o due convoluzioni $1 \times 1$ per ridurre la dimensionalità e allineare le feature alla distribuzione del task specifico. Questo è il modulo che "adatta" le feature pre-trained al dominio target.
+    \item \textbf{Anomalous Feature Generator}: SimpleNet genera anomalie \textit{direttamente nello spazio delle feature}. Durante il training, a ciascun vettore di feature normale $\mathbf{q}_{h,w} \in \mathbb{R}^C$ viene aggiunto rumore Gaussiano $\epsilon \sim \mathcal{N}(\mu, \sigma^2)$:
+    \begin{equation}
+        \mathbf{q}^{-}_{h,w} = \mathbf{q}_{h,w} + \epsilon
+    \end{equation}
+    Questa perturbazione sfrutta la compattezza dello spazio delle feature normali, spingendo le feature modificate al di fuori di questa regione per creare esempi anomali efficaci.
+
+    \item \textbf{Discriminator}: Un classificatore a due livelli (2-layer MLP) che agisce come \textit{normality scorer}, stimando la probabilità che una feature sia normale. Per ogni posizione spaziale $(h,w)$, riceve in input $\mathbf{q}_{h,w}$ (feature normale) o $\mathbf{q}^{-}_{h,w}$ (feature anomala) e produce uno score $D_{\psi}(\mathbf{q}_{h,w}) \in \mathbb{R}$. Durante il training, impara a massimizzare lo score per feature normali e minimizzarlo per feature anomale.
+\end{enumerate}
+
+
+\subparagraph{Perché SimpleNet Funziona.}
+
+Quattro insights fondamentali rivelati:
+\begin{enumerate}
+    \item \textbf{Pre-trained features}: WideResNet50 addestrato su ImageNet apprende rappresentazioni semantiche e strutturali potenti. Il task di anomaly detection diventa "solo" imparare un boundary lineare nello spazio feature.
+    \item \textbf{Synthetic feature-space anomalies }: le anomalie generate nello spazio compatto delle features forniscono \textit{contrasto sufficiente} con le features normali per supervised learning efficace. 
+    \item \textbf{Costi di complessità}: Oltre un certo punto la complessità architetturale aggiunge overhead computazionale, fragilità sugli hyperparameters e difficoltà di debugging, senza benefici misurabili in accuratezza.
+\end{enumerate}
+
+
+\subparagraph{Limitazioni.}
+
+SimpleNet presenta comunque alcune limitazioni da considerare. Per iniziare, la sua performance dipende fortemente dalla qualità del backbone pre-addestrato utilizzato come estrattore di feature. Inoltre, la strategia di generazione delle anomalie basata sulla semplice perturbazione con rumore Gaussiano nello spazio delle feature, sebbene efficace, potrebbe non catturare la piena varietà e complessità dei difetti reali incontrati in scenari industriali specifici. Benchè competitivo, su alcuni dataset specializzati metodi più complessi come EfficientAD o PatchCore riescono a ottenere un margine di accuratezza superiore, attestandosi intorno all'1-2\% in più nelle metriche di punta. Infine, la mancanza di meccanismi di adattamento rende l'architettura minimalista meno flessibile nell'incorporare conoscenze specifiche del dominio (domain-specific knowledge) rispetto ad approcci più complessi e personalizzabili.
+

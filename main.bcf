@@ -2582,6 +2582,7 @@
     <bcf:citekey order="197" intorder="1">deng2022anomaly</bcf:citekey>
     <bcf:citekey order="198" intorder="1">tien2023revisiting</bcf:citekey>
     <bcf:citekey order="199" intorder="1">batzner2024efficientad</bcf:citekey>
+    <bcf:citekey order="200" intorder="1">liu2023simplenet</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">
