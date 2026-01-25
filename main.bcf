@@ -2583,6 +2583,18 @@
     <bcf:citekey order="198" intorder="1">tien2023revisiting</bcf:citekey>
     <bcf:citekey order="199" intorder="1">batzner2024efficientad</bcf:citekey>
     <bcf:citekey order="200" intorder="1">liu2023simplenet</bcf:citekey>
+    <bcf:citekey order="201" intorder="1">jeong2023winclip</bcf:citekey>
+    <bcf:citekey order="201" intorder="2">zhou2024anomalyclip</bcf:citekey>
+    <bcf:citekey order="202" intorder="1">bergmann2022beyond</bcf:citekey>
+    <bcf:citekey order="203" intorder="1">roth2022towards</bcf:citekey>
+    <bcf:citekey order="204" intorder="1">radford2021learning</bcf:citekey>
+    <bcf:citekey order="205" intorder="1">zhou2024anomalyclip</bcf:citekey>
+    <bcf:citekey order="206" intorder="1">jeong2023winclip</bcf:citekey>
+    <bcf:citekey order="207" intorder="1">radford2021learning</bcf:citekey>
+    <bcf:citekey order="208" intorder="1">jeong2023winclip</bcf:citekey>
+    <bcf:citekey order="209" intorder="1">zhou2024anomalyclip</bcf:citekey>
+    <bcf:citekey order="210" intorder="1">zhou2024anomalyclip</bcf:citekey>
+    <bcf:citekey order="210" intorder="2">jeong2023winclip</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

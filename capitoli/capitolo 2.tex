@@ -579,3 +579,149 @@ Quattro insights fondamentali rivelati:
 
 SimpleNet presenta comunque alcune limitazioni da considerare. Per iniziare, la sua performance dipende fortemente dalla qualità del backbone pre-addestrato utilizzato come estrattore di feature. Inoltre, la strategia di generazione delle anomalie basata sulla semplice perturbazione con rumore Gaussiano nello spazio delle feature, sebbene efficace, potrebbe non catturare la piena varietà e complessità dei difetti reali incontrati in scenari industriali specifici. Benchè competitivo, su alcuni dataset specializzati metodi più complessi come EfficientAD o PatchCore riescono a ottenere un margine di accuratezza superiore, attestandosi intorno all'1-2\% in più nelle metriche di punta. Infine, la mancanza di meccanismi di adattamento rende l'architettura minimalista meno flessibile nell'incorporare conoscenze specifiche del dominio (domain-specific knowledge) rispetto ad approcci più complessi e personalizzabili.
 
+%%% VLM
+\subsubsection{Vision-Language Models (2023-2024)}
+
+L'integrazione di vision-language models (VLM) pre-addestrati nell'anomaly de\-tec\-tion rappresenta un cambio di paradigma in grado di risolvere limitazioni critiche dei metodi puramente visivi \cite{jeong2023winclip, zhou2024anomalyclip}. Questi metodi sfruttano la conoscenza semantica multimodale, appresa dall'analisi congiunta di coppie immagine-testo, per superare le carenze dei metodi puramente visivi, soprattutto in termini di generalizzazione e adattamento a nuovi domini con pochi esempi.
+
+\paragraph{Motivazioni e Limitazioni dei Metodi Vision-Only.} I metodi tra\-di\-zio\-na\-li, estremamente accurati in condizioni ideali, possono presentare alcune vunerabilità critiche in scenari pratici:
+
+\begin{enumerate}
+\item \textbf{Domain specificity}: Feature estratte da reti pre-addestrate su ImageNet catturano bene pattern visivi generici (texture, edges, forme) ma mancano di una comprensione semantica profonda \cite{bergmann2022beyond}.
+
+\item \textbf{Few-shot fragility}: La costruzione di rappresentazioni robuste della normalità richiede tipicamente un numero molto elevato di esempi. Con pochi esempi le performance degradano \cite{roth2022towards}.
+
+\item \textbf{Zero-shot impossibility}: In assenza di esempi visivi dal dominio target, i metodi basati solo sulla visione non hanno alcun meccanismo per trasferire la nozione di "anomalia". Senza supervisione visiva diretta, il loro comportamento equivale a un'ipotesi casuale.
+\end{enumerate}
+
+\paragraph{Cosa Portano i Vision-Language Models}. L'introduzione di modelli multimodali pre-addestrati come CLIP \cite{radford2021learning} affronta queste limitazioni sfruttando una conoscenza semantica fondata sia sulla visione che sul linguaggio, appresa da dataset web-scale
+
+\begin{itemize}
+\item \textbf{Radicamento semantico (semantic grounding)}: Gli spazi di embedding allineati permettono di specificare \textit{concettualmente} cosa cercare ("defect", "anomaly", "damage", "scratch") andando oltre il confronto statistico di pattern visivi. Questo consente il trasferimento di conoscenza concettuale tra domini anche molto diversi \cite{zhou2024anomalyclip}.
+
+\item \textbf{Transfer via language}: Conoscenza di "anomalia" appresa su un dominio (es. "crepa su bottiglia di vetro") può trasferire ad altro dominio (es. "graffio su lamiera metallica") via descrizioni testuali condivise ("linear defect"), anche senza alcun esempio visivo del secondo dominio \cite{jeong2023winclip}.
+
+\end{itemize}
+
+\paragraph{CLIP Foundation.}
+
+CLIP (Contrastive Language-Image Pre-training) \cite{radford2021learning} addestra congiuntamente un image encoder (Vision Transformer o ResNet) e un text encoder (Transformer) a massimizzare la \textit{cosine similarity} per coppie (immagine, testo) corrette e minimizzarla per incorrette. Dopo un pre-training su circa 400 milioni di coppie, CLIP fornisce \textbf{embedding allineati} in uno spazio condiviso: immagini e descrizioni testuali semanticamente simili risultano vicine.
+
+Questa proprietà abilita la \textbf{classificazione zero-shot} tramite il semplice confronto con prompt testuali (ad esempio, confrontando la similarità con \textit{"a photo of a defect"} e \textit{"a photo of a normal object"}), senza alcun training specifico sul dominio target.
+
+\paragraph{WinCLIP (2023).}
+
+WinCLIP \cite{jeong2023winclip} è stato il primo metodo ad adattare CLIP all'anomaly detection attraverso un approccio a \textit{sliding windows} per localizzazione pixel-level.
+
+Data un'immagine, WinCLIP estrae le feature per ogni finestra e calcola gli embedding CLIP. Questo processo genera una mappa densa di feature, dove ogni posizione è rappresentata da un vettore che codifica l'informazione visiva locale, ben allineata con lo spazio semantico del linguaggio.
+
+Per ottenere lo score di anomalia finale, il metodo combina i risultati delle singole finestre. Lo score di ciascuna finestra (dissimilarità tra la sua feature e l'embedding testuale del prompt che descrive la "normalità") viene prima riportato a livello di pixel. Successivamente, i contributi di tutte le finestre che sovrappongono uno stesso pixel vengono aggregati tramite una \textit{media armonica}, privilegiando i segnali meno anomali. Per rilevare difetti di dimensioni diverse, WinCLIP utilizza infine finestre di dimensioni multiple (piccola, media e a scala d'immagine), fondendo le relative mappe di anomalia in un'unica predizione finale robusta e multi-scala.
+
+\begin{itemize}
+  \item \textbf{Vantaggi}: Architettura zero-shot che non richiede training, interpretabilità data dall'uso di prompt testuali, flessibilità nell'adattarsi a nuove categorie di oggetti
+  \item \textbf{Limitazioni}: Performance sensibili alla formulazione dei prompt testuali, un divario di accuratezza rispetto ai metodi supervisionati addestrati su dati specifici, e un costo computazionale non trascurabile dovuto all'elaborazione di molte finestre scorrevoli.
+\end{itemize}
+
+\paragraph{AnomalyCLIP (2024).}
+
+AnomalyCLIP \cite{zhou2024anomalyclip} nasce per adattare CLIP al \textbf{zero-shot anomaly detection} (ZSAD): rilevare anomalie \textit{senza alcun esempio dal dominio target}, introducendo quattro innovazioni che portano zero-shot a livelli competitivi.
+
+\begin{itemize}
+    \item \textbf{Object-Agnostic Prompts}: Abbandona i prompts legati a specifiche categorie in favore di prompts generici ("image without defects") , eliminando necessità di conoscere la classe dell'oggetto.
+    \item \textbf{Global-Local Dual Alignment}: Introduce una supervisione a due livelli: oltre ad allineare l'embedding dell'intera immagine con descrizioni testuali, allinea anche le feature a livello di pixel con etichette di normalità/anomalia, garantendo così una comprensione sia del contesto globale che del dettaglio locale per la segmentazione.
+    \item \textbf{Object-Agnostic Text Prompt}: I prompt testuali sono generici e capaci di identificare anomalie su diversi oggetti e diversi domini, non includendo la semantica dell'oggetto. 
+    \item \textbf{Multi-Layer Local Optimization}: Invece di utilizzare feature da un singolo layer, AnomalyCLIP applica la local context optimization a \textit{multiple intermediate layers} dell'encoder visivo di CLIP. Per ogni layer selezionato \(M_l\), calcola mappe di similarità locali \(S_{n,M_l}\) e \(S_{a,M_l}\) tra i prompt testuali e le feature visive a quel livello. Queste mappe da layer a diversa profondità (che catturano informazioni a diversa granularità spaziale/semantica) vengono poi combinate per formare la predizione finale, permettendo di rilevare sia difetti fini che anomalie strutturali su larga scala
+\end{itemize}
+
+
+
+
+\subparagraph{Vantaggi e Limitazioni.}
+
+\begin{itemize}
+    \item \textbf{Generalizzazione Superiore}: La conoscenza semantica multimodale trascende le semplici statistiche visive, consentendo un trasferimento più robusto tra domini diversi \cite{zhou2024anomalyclip, jeong2023winclip}.
+    \item \textbf{Few-Shot Efficacia}: Questi modelli risultano particolarmente adatti a scenari reali, dove la raccolta di grandi dataset annotati può essere difficile.
+    \item \textbf{Limitazioni}: Overhead computazionale e un tetto di accuratezza legegrmente inferiore ne limitano l'adozione in applicazioni critiche per velocità o precisione. La loro performance è inoltre sensibile all'ingegneria dei prompt.
+\end{itemize}
+
+
+%%% confronti finali
+\subsection{Confronto}
+
+Dopo aver esaminato l'evoluzione dei metodi, presentiamo un confronto sintetico delle caratteristiche chiave e delle performance relative. I valori di riferimento sono basati sul benchmark \textbf{MVTec AD} e derivano dai paper originali quando disponibili. Si noti che le performance assolute possono variare leggermente tra diverse implementazioni e configurazioni hardware. 
+
+\begin{table}[h]
+\centering
+\caption{Confronto sintetico dei principali metodi (valori indicativi su MVTec AD)}
+\label{tab:panorama_metodi}
+\footnotesize
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\textbf{Metodo} & \textbf{Anno} & \textbf{I-AUROC} & \textbf{P-AUROC} & \textbf{Tipo} & \textbf{Tr.} & \textbf{Vel.} \\
+\midrule
+PaDiM & 2020 & 97.9 & 98.3 & Feature & No & Media \\
+SPADE & 2021 & 85.5 & 96.0 & k-NN & No & Lenta \\
+CutPaste & 2021 & 95.2 & 96.8 & Synthetic & Sì & Veloce \\
+DRAEM & 2021 & 98.4 & 98.6 & Rec+Disc & Sì & Media \\
+FastFlow & 2021 & 99.4 & 98.5 & Flows & Sì & Media \\
+PatchCore & 2022 & 99.1 & 98.1 & Memory & No* & Media \\
+MemSeg & 2022 & 99.6 & 98.8 & Segm. & Sì & \textbf{Veloce†} \\
+RD++ & 2023 & 99.4 & 98.3 & S-T & Sì & Media \\
+SimpleNet & 2023 & 99.2 & 98.1 & Discrim. & Sì & \textbf{Veloce†} \\
+EfficientAD & 2024 & 99.5 & 98.7 & Ensemble & Sì & Veloce \\
+WinCLIP & 2023 & 91.8 & 95.2 & V-L & \textbf{No} & Lenta \\
+AnomalyCLIP‡ & 2024 & 95-98 & 93-96 & V-L & Opz. & Media \\
+\bottomrule
+\end{tabular}
+\vspace{2mm}
+\parbox{\linewidth}{\scriptsize 
+\textbf{Note:} Valori in \%. *PatchCore richiede costruzione coreset offline. †Molto veloce ($<$10ms). ‡AnomalyCLIP: zero-shot (85-88), few-shot (95-96), full-shot (97-98). Velocità relativa su GPU moderna: Veloce† ($<$10ms), Veloce (10-50ms), Media (50-150ms), Lenta ($>$150ms). Abbreviazioni: I-AUROC (Image AUROC), P-AUROC (Pixel AUROC), Tr. (Training), S-T (Student-Teacher), V-L (Vision-Language), Rec+Disc (Ricostruzione+Discriminatore), Segm. (Segmentazione).
+}
+\end{table}
+
+\subsubsection{Panorama Sintetico dei Metodi}
+La Tabella \ref{tab:panorama_metodi} riporta un confronto sintetico tra i metodi più rilevanti discussi in questo capitolo, evidenziando le loro caratteristiche principali e performance indicative sul benchmark MVTec AD.
+
+
+\subsubsection{Guida alla Selezione per Scenario Applicativo}
+
+La scelta del metodo ottimale dipende fortemente dal contesto applicativo. La Tabella \ref{tab:guida_selezione} sintetizza i punti di forza di ciascun approccio.
+
+\begin{table}[h]
+\centering
+\caption{Guida pratica alla selezione del metodo}
+\label{tab:guida_selezione}
+\begin{tabular}{lp{9.5cm}}
+\toprule
+\textbf{Scenario Prioritario} & \textbf{Metodo Consigliato e Motivazione} \\
+\midrule
+\textbf{Accuratezza Massima} & \textbf{EfficientAD} (ensemble ottimizzato) o \textbf{RD++} (student-teacher avanzato) per performance top-tier ($>$99.4\% AUROC). \textbf{PatchCore} se non si può addestrare. \\
+\textbf{Inferenza Real-Time} & \textbf{SimpleNet} (estremamente leggero) o \textbf{MemSeg} (segmentazione diretta) per latenze $<$10ms. \textbf{EfficientAD} per miglior bilanciamento accuratezza/velocità. \\
+\textbf{Dati Limitati (Few-Shot)} & \textbf{AnomalyCLIP} (eccelle con K$<$10 esempi) sfruttando conoscenza semantica pre-esistente. \textbf{RD++} per un approccio solamente visivo. \\
+\textbf{Validazione Concettuale Rapida} & \textbf{SimpleNet} (implementazione minimalista) o \textbf{PatchCore} (nessun training). Consentono validazione concettuale in tempi brevi. \\
+\textbf{Generalizzazione Cross-Domain} & \textbf{AnomalyCLIP} (migliore robustezza a cambiamenti di dominio) grazie all'allineamento visione-linguaggio. \\
+\textbf{Localizzazione Precisa} & \textbf{MemSeg} (segmentazione end-to-end) o \textbf{DRAEM} (ricostruzione discriminativa) per mappe di anomalia dettagliate. \\
+\textbf{Zero-Shot / Nessun Training} & \textbf{WinCLIP} (pronto all'uso) o \textbf{PatchCore} (solo costruzione coreset). \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsubsection{Tendenze Evolutive e Considerazioni Finali}
+
+L'analisi comparativa rivela cinque tendenze chiare che hanno plasmato il campo tra il 2017 e il 2024:
+
+\begin{enumerate}
+    \item \textbf{Semplicità efficace}: I metodi moderni (SimpleNet, EfficientAD) dimostrano che architetture minimaliste ma ben progettate possono superare sistemi complessi (GAN, autoencoder profondi).
+
+    \item \textbf{Ensemble complementari}: EfficientAD ha stabilito che combinare componenti semplici con punti di forza complementari (struttura, texture, robustezza) supera le architetture monolitiche.
+
+    \item \textbf{Memoria esplicita}: I memory-based methods (PatchCore, MemSeg) hanno mostrato che memorizzare esplicitamente pattern normali è più efficace dell'apprendimento implicito.
+
+    \item \textbf{Conoscenza multimodale}: I Vision-Language Models (WinCLIP, A\-no\-ma\-ly\-CLIP) affrontano limitazioni fondamentali dei metodi puramente visivi, specialmente in scenari few-shot e multi-dominio.
+
+    \item \textbf{Efficienza}: La pressione verso il deployment industriale ha reso l'efficienza computazionale (velocità, memoria) un criterio di progetto primario.
+\end{enumerate}
+
+
+\paragraph{Conclusioni.} Non esiste un metodo universalmente ottimale per l'anomaly detection industriale. La scelta deve bilanciare accuratezza, efficienza computazionale, quantità di dati disponibili e requisiti di deployment. La tendenza attuale privilegia architetture semplici, efficienti e generalizzabili, con un ruolo crescente della conoscenza semantica multimodale per superare i limiti della supervisione puramente visiva. Per applicazioni critiche, si raccomanda sempre la validazione sperimentale diretta sul dominio specifico di interesse.
