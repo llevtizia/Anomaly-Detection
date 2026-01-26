@@ -2616,6 +2616,21 @@
     <bcf:citekey order="228" intorder="1">jiang2013salient</bcf:citekey>
     <bcf:citekey order="229" intorder="1">bergmann2019mvtec</bcf:citekey>
     <bcf:citekey order="230" intorder="1">schlegl2017unsupervised</bcf:citekey>
+    <bcf:citekey order="231" intorder="1">jezek2021deep</bcf:citekey>
+    <bcf:citekey order="232" intorder="1">roth2022towards</bcf:citekey>
+    <bcf:citekey order="233" intorder="1">gudovskiy2022cflow</bcf:citekey>
+    <bcf:citekey order="234" intorder="1">defard2021padim</bcf:citekey>
+    <bcf:citekey order="235" intorder="1">liznerski2021explainable</bcf:citekey>
+    <bcf:citekey order="236" intorder="1">cohen2021sub</bcf:citekey>
+    <bcf:citekey order="237" intorder="1">di2021dagan</bcf:citekey>
+    <bcf:citekey order="238" intorder="1">akcay2019skip</bcf:citekey>
+    <bcf:citekey order="239" intorder="1">you2022unified</bcf:citekey>
+    <bcf:citekey order="240" intorder="1">zou2022spot</bcf:citekey>
+    <bcf:citekey order="241" intorder="1">chen2020simple</bcf:citekey>
+    <bcf:citekey order="242" intorder="1">he2020momentum</bcf:citekey>
+    <bcf:citekey order="243" intorder="1">chen2021exploring</bcf:citekey>
+    <bcf:citekey order="244" intorder="1">roth2022towards</bcf:citekey>
+    <bcf:citekey order="245" intorder="1">defard2021padim</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

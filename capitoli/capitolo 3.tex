@@ -162,25 +162,115 @@ MVTec Anomaly Detection (MVTec AD) \cite{bergmann2019mvtec} è diventato il benc
 \paragraph{Metodi Valutati e Performance Iniziali.} Il paper originale valutò diversi approcci rappresentativi dell'epoca, rivelando limiti significativi:
 \begin{itemize}
     \item \textbf{AnoGAN} \cite{schlegl2017unsupervised}: GAN-based, discusso in Sezione \ref{subsec:metodi-GAN}. 70\% image AUROC, in difficoltà nelle categorie che presentano oggetti con più variazioni (forma, orientamento).
-    \item \textbf{Autoencoder} (MSE/SSIM): 80-85\% image AUROC (problemi di reconstruction bias)
-    \item \textbf{CNN Feature Dictionary}: performance migliori ma ancora limitate
+    \item \textbf{Autoencoder} (MSE/SSIM): varianti con loss L2 (MSE) e SSIM (Structural Similarity), discussi in Sezione \ref{subsec:autoencoder}. 80-85\% image AUROC (problemi di false positive, falliscono nel modellare piccoli dettagli).
+    \item \textbf{CNN Feature Dictionary}: metodo basato su feature pre-addestrate, performance migliori ma limitate
     \item \textbf{Texture Inspection GMM-Based}: efficace per texture ma non per oggetti
     \item \textbf{Variation Model}: adatto a oggetti con variazioni limitate
 \end{itemize}
-Queste performance modeste dimostrarono la necessità di approcci più sofisticati.
 
 \paragraph{Metriche Standardizzate.} Il dataset introdusse e popolarizzò due metriche fondamentali:
 \begin{itemize}
-    \item \textbf{AUROC (Area Under ROC Curve)}: per valutazione a livello immagine e pixel
-    \item \textbf{PRO (Per-Region Overlap)}: sviluppata appositamente per compensare il bias dell'AUROC pixel-level verso difetti di grandi dimensioni, assegnando uguale peso a regioni anomale di qualsiasi dimensione
+    \item \textbf{AUROC (Area Under ROC Curve)}: per valutazione a livello im\-ma\-gi\-ne e pixel
+    \item \textbf{PRO (Per-Region Overlap)}: metrica pixel-level che penalizza errori su piccole regioni anomale, affrontando il bias dell'AUROC pixel-level verso grandi regioni (discussa in Sezione \ref{sec:metriche})
+
 \end{itemize}
 
-\paragraph{Impatto Profondo sulla Ricerca.} MVTec AD ha catalizzato il progresso del campo:
+\paragraph{Impatto.} MVTec AD ha avuto un profondo impatto sulla ricerca:
 \begin{enumerate}
-    \item Fornì il primo benchmark realistico, riproducibile e completo
+    \item Definì uno standard riproducibile e condiviso per la valutazione
     \item Espose i limiti dei metodi contemporanei (GAN-based, autoencoder)
-    \item Motivò lo sviluppo di nuove generazioni di metodi (feature-based, memory-based, student-teacher) che oggi superano il 99\% AUROC
+    \item Motivò lo sviluppo di approcci più avanzati che oggi superano il 99\% AUROC
     \item Divenne la piattaforma di riferimento per confronti oggettivi e riproducibili
 \end{enumerate}
 
 \paragraph{Disponibilità e Adozione.} Distribuito sotto licenza Creative Commons, MVTec AD è ampiamente utilizzato sia in ricerca che in contesti industriali, con implementazioni integrate nei principali framework di deep learning e continui aggiornamenti (come MVTec AD 2, 2025).
+
+% mpdd
+\subsection{MPDD (2021)}
+\label{sec:mpdd}
+
+Metal Parts Defect Dataset (MPDD) \cite{jezek2021deep} fu introdotto per colmare una lacuna specifica: la scarsità di dataset focalizzati su parti metalliche, un dominio con caratteristiche distintive (superfici riflettenti, texture uniformi, variazioni cromatiche sottili). 
+
+\paragraph{Caratteristiche.} MPDD contiene \textbf{1,346 immagini RGB} distribuite su 6 classi di componenti metallici: bracket black, bracket brown, bracket white, connector, metal plate, tubes. Il dataset è suddiviso in:
+\begin{itemize}
+\item \textbf{Training set}: 888 campioni (solo normali)
+\item \textbf{Test set}: 458 campioni (176 normali, 282 anomali)
+\end{itemize}
+
+Le anomalie coprono scenari tipici: scratches (graffi), holes (buchi), missing parts (parti mancanti), rust (ruggine). Ogni immagine anomala è annotata con una pixel-precise ground truth mask.
+
+\paragraph{Metodi Valutati.} MPDD confrontò due categorie di metodi:
+\begin{itemize}
+\item \textbf{Feature extraction-based}: PatchCore \cite{roth2022towards}, CFLOW-AD \cite{gudovskiy2022cflow}, PaDiM \cite{defard2021padim}, Semi-Orthogonal \cite{liznerski2021explainable}, SPADE \cite{cohen2021sub}
+\item \textbf{Reconstruction-based}: DAGAN \cite{di2021dagan}, Skip-GANomaly \cite{akcay2019skip}, ITAE \cite{you2022unified}
+\end{itemize}
+
+
+\paragraph{Gap di Performance.} 
+I risultati mostrarono la superiorità degli approcci feature-based (PatchCore, PaDiM) rispetto ai reconstruction-based. Tuttavia, i metodi subivano un \textbf{calo di per\-for\-mance} su MPDD:
+\begin{itemize}
+    \item \textbf{Differenza AUROC image-level}: fino a \textbf{23.12\%} per singoli metodi
+    \item \textbf{Differenza media}: \textbf{15.24\%} tra le performance aggregate sui due dataset
+\end{itemize}
+
+Questo gap dimostrò in modo empirico che la vera generalizzazione richiede test su dataset che riflettano le condizioni operative reali.
+
+\paragraph{Conclusione e Impatto.} 
+MPDD contribuì a spostare il focus della comunità dalla semplice ottimizzazione delle metriche su benchmark standardizzati verso la robustezza in condizioni reali. Il suo messaggio chiave è che per lo sviluppo e il miglioramento dei metodi di AD, è necessario testare questi metodi su dataset basati su applicazioni reali specifiche.
+
+%%% VisA
+
+\subsection{VisA / SPot-the-Difference (2022)}
+\label{sec:visa}
+VisA (Visual Anomaly) \cite{zou2022spot} introdusse sfide significative e scenari più complessi: oggetti con strutture dettagliate, istanze multiple nello stesso frame, e anomalie sia superficiali che strutturali.
+
+\paragraph{Caratteristiche.} Il dataset contiene \textbf{10,821 immagini RGB} (9,621 normali, 1,200 anomale) di 12 oggetti organizzati in 3 domini:
+\begin{enumerate}
+\item \textbf{Complex structures}: quattro tipi di printed circuit boards (PCB), con strutture complesse contententi transistors, capacitors, chips,
+etc. 
+\item \textbf{Multiple instances}: più oggetti nella stessa immagine (Macaroni1, Macaroni2, Capsule, Candele). Le istanze di Macaroni2 e Capsules sono molto diverse in posizione e orientamento degli oggetti.
+\item \textbf{Single instance}: singolo oggetto per immagine (Cashew, Chewing gum, Fryum e Pipe fryum)
+\end{enumerate}
+
+Le anomalie, generate manualmente per produrre risultati realistici,  coprono due categorie principali:
+\begin{itemize}
+\item \textbf{Surface defects}: scratches, dents, color spots, cracks
+\item \textbf{Structural defects}: misplacement (componenti disallineati), missing parts (parti mancanti)
+\end{itemize}
+
+Ci sono 5-20 immagini per tipo di anomalia e ogni immagine può contenerne più di una. Tutte le anomalie sono annotate con image-level e pixel-level labels.
+
+\paragraph{Benchmark Protocols.} VisA introdusse protocolli few-shot e high-shot in aggiunta al paradigma one-class tradizionale:
+\begin{itemize}
+    \item \textbf{1-class vs 2-class training}: 
+        \begin{itemize}
+            \item \textbf{1-class}: addestramento su una singola classe (paradigma standard). Il 90\% delle immagini normali viene assegnato come \textit{train set} mentre il restante 10\% e le immagini anomale costituiscono il \textit{test set}.
+            \item \textbf{2-class}: addestramento su dati normali \textbf{e} anomali per valutare la \textit{cross-category generalization}
+        \end{itemize}
+    \item \textbf{High-shot vs Low-shot} (definiti da percentuali di split):
+        \begin{itemize}
+            \item \textbf{High-shot}: 60\% dei dati normali/anomali per training, 40\% per test
+            \item \textbf{Low-shot}: 20\% dei dati normali/anomali per training, 80\% per test
+        \end{itemize}
+    \item \textbf{k-shot (k=5,10)} (campionamento assoluto dal Low-shot):
+        \begin{itemize}
+            \item Dal training set Low-shot, si campionano \textbf{k immagini} dalla classe normale e \textbf{k immagini} dalla classe anomala
+            \item Totale training: \textbf{2k immagini} (es: 10 immagini totali per 5-shot)
+            \item Le performance sono mediate su 5 run random per robustezza statistica
+        \end{itemize}
+\end{itemize}
+
+\paragraph{SPot-the-Difference (SPD).} Il paper introdusse SPD, un metodo di self-supervised pre-training progettato per aumentare la sensibilità locale di metodi SSL (Self-Supervised Learning) come SimCLR \cite{chen2020simple}, MoCo \cite{he2020momentum}, SimSiam \cite{chen2021exploring}. 
+
+SPD utilizza \textbf{SmoothBlend}, una tecnica di local augmentation che genera pseudo-anomalie mescolando patch da immagini diverse con smoothing ai bordi per creare transizioni realistiche. Durante il pre-training, il modello impara a rilevare queste perturbazioni locali, sviluppando una sensibilità utile per l'anomaly detection.
+
+\paragraph{Metodi Valutati.} Confronto con patch-based methods come PatchCore \cite{roth2022towards} e PaDiM \cite{defard2021padim}, dimostrando che SPD migliora le performance nei regimi few-shot.
+
+\paragraph{Metriche.} Oltre all'AUROC standard, VisA utilizzò \textbf{AUPR (Area Under Precision-Recall curve)}, utile in scenari sbilanciati dove le anomalie sono rare.
+
+\paragraph{Contributo.} VisA sottolineò l'importanza di:
+\begin{enumerate}
+\item \textbf{Scenari multi-istanza}: più comuni rispetto a single-object
+\item \textbf{Efficienza dati}: few-shot learning per ridurre i costi di acquisizione
+\item \textbf{Pre-training self-supervised}: come alternativa al fine-tuning supervisionato
+\end{enumerate}
