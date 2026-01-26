@@ -274,3 +274,89 @@ SPD utilizza \textbf{SmoothBlend}, una tecnica di local augmentation che genera 
 \item \textbf{Efficienza dati}: few-shot learning per ridurre i costi di acquisizione
 \item \textbf{Pre-training self-supervised}: come alternativa al fine-tuning supervisionato
 \end{enumerate}
+
+% LOCO
+\subsection{MVTec LOCO AD (2022)}
+\label{sec:mvtec_loco}
+MVTec Logical Constraints Anomaly Detection (MVTec LOCO AD) \cite{bergmann2022beyond} introdusse per la prima volta le \textbf{anomalie logiche} oltre a quelle strutturali.
+
+\paragraph{Motivazione.} In molti scenari industriali, un prodotto può essere strutturalmente integro ma logicamente errato. Esempi tipici possono includere:
+\begin{itemize}
+\item \textbf{Montaggio errato}: componenti montati nella posizione sbagliata, orientamento invertito
+\item \textbf{Violazione di vincoli}: combinazioni di colori non conformi, numero errato di elementi
+\item \textbf{Errori di assemblaggio}: parti mancanti in un insieme
+\end{itemize}
+
+Queste anomalie non sono rilevabili attraverso l'analisi di texture o geometria locale ma richiedono comprensione contestuale e reasoning sulle relazioni spaziali tra componenti, andando oltre il rilevamento di difetti superficiali.
+
+\paragraph{Caratteristiche.} Il dataset contiene immagini RGB di \textbf{5 categorie di og\-get\-ti} (Breakfast Box, Screw Bag, Pushpins, Splicing Connectors, Juice Bottle), ciascuna con vincoli logici specifici. Il dataset è suddiviso in:
+\begin{itemize}
+\item \textbf{Training set}: 1,772 immagini (anomaly-free)
+\item \textbf{Validation set}: 304 immagini (anomaly-free)
+\item \textbf{Test set}: 1,568 immagini (con e senza anomalie)
+\end{itemize}
+
+Le anomalie sono sia \textbf{strutturali} (difetti fisici) che \textbf{logiche} (violazioni di vincoli logici). Entrambi i tipi hanno annotazioni pixel-precise.
+
+\paragraph{Metodi Valutati.} Benchmark di diversi approcci:
+\begin{itemize}
+\item \textbf{Autoencoders}: Deterministic (AE), Variational (VAE) \cite{kingma2014auto}, Memory-guided (MNAD) \cite{park2020learning}
+\item \textbf{GAN-based}: f-AnoGAN \cite{schlegl2019f}
+\item \textbf{Feature-based}: SPADE \cite{cohen2021sub}, Student-Teacher \cite{bergmann2020uninformed}
+\item \textbf{GCAD (Global Context Anomaly Detection)}: metodo specificamente progettato per anomalie logiche
+\end{itemize}
+
+\paragraph{Metriche.}  
+Oltre all'AUROC, LOCO AD introdusse \textbf{sPRO (saturated Per-Region Overlap)}, una generalizzazione della metrica PRO. 
+Mentre PRO standard calcola la media dell'overlap (percentuale di pixel correttamente predetti) per ciascuna regione anomala, pesando tutte le regioni allo stesso modo indipendentemente dalla loro dimensione, \textbf{sPRO} satura il contributo di una regione una volta che l'overlap supera una certa soglia. 
+
+Questo approccio è particolarmente adatto per anomalie logiche: ad esempio, per un componente mancante (come una puntina da disegno assente in un contenitore), è sufficiente che il metodo segmenti un'area delle dimensioni di una puntina all'interno dello scomparto vuoto, senza bisogno di segmentare perfettamente tutti i pixel della regione annotata (che potrebbe essere più grande). 
+
+\paragraph{Risultati Chiave.} I risultati rivelarono che:
+\begin{enumerate}
+\item Metodi reconstruction-based (AE, VAE, GAN) hanno performance significativamente peggiori su anomalie logiche rispetto a strutturali
+\item Approcci feature-based con reti pre-addestrate generalizzano meglio
+\item Il rilevamento di anomalie logiche rimane una sfida aperta, con AUROC tipicamente 5-10\% inferiore rispetto a MVTec AD standard
+\end{enumerate}
+
+\paragraph{Impatto.} MVTec LOCO AD evidenziò la necessità di metodi con capacità di reasoning contestuale, spingendo lo sviluppo di approcci basati su attention mechanisms e vision-language models capaci di comprendere relazioni semantiche.
+
+% Real IAD
+
+\subsection{Real-IAD (2024)}
+\label{sec:real_iad}
+Real-world Industrial Anomaly Detection (Real-IAD) \cite{ding2024realiad} rappresenta un passo significativo per la riduzione del gap tra performance su benchmark controllati e scenari di deployment reale.
+
+\paragraph{Caratteristiche.} Real-IAD è uno dei dataset più grandi disponibili:
+\begin{itemize}
+    \item \textbf{150,000 immagini ad alta risoluzione}
+    \item \textbf{30 categorie} diverse di oggetti di diversi materiali (metallo, plastica, legno, ceramica e mixed materials)
+    \item \textbf{Acquisizione multi-view}: ogni oggetto viene catturato da 5 angolazioni distinte (dall'alto e da quattro angoli simmetrici a 45 gradi)
+\end{itemize}
+
+Questa struttura multi-view consente di valutare non solo la capacità di rilevamento ma anche la robustezza dei metodi rispetto a variazioni di prospettiva.
+
+\paragraph{Protocolli di Valutazione.} Real-IAD introduce due setting sperimentali:
+
+\subparagraph{1. Unsupervised IAD (UIAD).} L'algoritmo impara pattern e strutture \textit{solo} da campioni normali (paradigma standard). Il training set contiene solo imamgini normali, mentreil testing set ha sia campioni normali che anomali. Benchmark:
+\begin{itemize}
+\item \textbf{Embedding-based}: PatchCore \cite{roth2022towards}, PaDiM \cite{defard2021padim}, CFlow \cite{gudovskiy2022cflow}
+\item \textbf{Data-augmentation-based}: SimpleNet \cite{liu2023simplenet}, DeSTSeg \cite{zhang2023destseg}
+\item \textbf{Reconstruction-based}: RD (Reverse Distillation) \cite{deng2022anomaly}, UniAD \cite{you2022unified}
+\end{itemize}
+
+\subparagraph{2. Fully Unsupervised IAD (FUIAD).} Estensione realistica del setting UIAD dove il training set contiene \textit{rumore} (una frazione sconosciuta di campioni anomali mescolati ai normali), riflettendo scenari dove non è possibile garantire purezza assoluta del training set.
+
+FUIAD è particolarmente rilevante per deployment industriale, dove la certificazione manuale di ogni immagine di training può essere proibitiva. I metodi devono essere robusti a contaminazione parziale del training set.
+
+\paragraph{Metriche.} \textbf{AUROC} (image-level e pixel-level) e \textbf{AUPRO (Area Under PRO curve)}, che integra la metrica PRO su tutti i threshold.
+
+\paragraph{Risultati.}
+\begin{enumerate}
+\item PatchCore mantiene performance elevate ($>95\%$ AUROC) 
+\item Metodi data-augmentation-based (SimpleNet) mostrano robustezza superiore in FUIAD
+\item Multi-view fusion migliora significativamente la detection rispetto a single-view
+\end{enumerate}
+
+\paragraph{Impatto.} Real-IAD stabilì un nuovo standard di scala e realismo, spingendo la ricerca verso soluzioni che non solo massimizzano le metriche su benchmark controllati, ma mantengono robustezza e affidabilità in condizioni operative realistiche. 
+
