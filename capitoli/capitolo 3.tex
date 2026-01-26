@@ -97,8 +97,8 @@ La Tabella \ref{tab:dataset_evolution} sintetizza questa progressione temporale,
 
 
 %% section metriche
-\subsection{Metriche di Valutazione Standard}
-\label{subsec:metriche}
+\subsection{Metriche di Valutazione: Panoramica}
+\label{subsec:metriche_intro}
 
 La valutazione rigorosa degli algoritmi di anomaly detection richiede metriche standardizzate che catturino aspetti diversi della performance: accuratezza a livello di immagine, precisione nella localizzazione, robustezza ai falsi positivi, etc. Le metriche più utilizzate nei benchmark industriali possono essere classificate in due categorie principali: \textit{threshold-free} (indipendenti da una soglia di decisione) e \textit{threshold-dependent} (che richiedono la binarizzazione dello score di anomalia).
 
@@ -114,4 +114,30 @@ La valutazione rigorosa degli algoritmi di anomaly detection richiede metriche s
 \item \textbf{MAE (Mean Absolute Error)}: utilizzata principalmente in metodi basati su ricostruzione o saliency map, misura l'errore medio assoluto tra la mappa predetta e la ground truth.
 \end{itemize}
 
-La scelta della metrica influenza direttamente la comparabilità dei risultati. Dataset incentrati sulla localizzazione (es. MVTec AD) privilegiano AUROC e PRO, mentre dataset con anomalie logiche (es. MVTec LOCO AD) possono introdurre metriche ad-hoc come la \textit{sPRO} (Saturated PRO). Nei paragrafi seguenti, per ciascun dataset indicheremo le metriche con cui è stato principalmente valutato, collegandole alle specifiche esigenze applicative che lo hanno ispirato.
+La scelta della metrica influenza direttamente la comparabilità dei risultati. Dataset incentrati sulla localizzazione (es. MVTec AD) privilegiano AUROC e PRO, mentre dataset con anomalie logiche (es. MVTec LOCO AD) possono introdurre metriche ad-hoc come \textit{sPRO} (Saturated PRO). Nei paragrafi seguenti, per ciascun dataset indicheremo le metriche con cui è stato principalmente valutato, collegandole alle specifiche esigenze applicative che lo hanno ispirato.
+
+%%% DATASET 2D
+\section{Dataset 2D RGB}
+I dataset basati su immagini RGB 2D rappresentano il nucleo della ricerca in anomaly detection visiva. Questa sezione presenta i principali benchmark ordinati cronologicamente, evidenziando le caratteristiche distintive e i contributi di ciascuno.
+
+\subsection{Surface Defect Saliency of Magnetic Tile (2018)}
+\label{sec:magnetic_tile}
+Rappresentante della prima generazione di dataset, Magnetic Tile \cite{huang2018surface} è stato uno dei primi dataset specificamente creati per anomaly detection industriale, focalizzato sul rilevamento di difetti superficiali in piastrelle magnetiche.
+
+\paragraph{Caratteristiche.} Il dataset contiene \textbf{1,344 immagini in scala di grigi} di piastrelle magnetiche distribuite in 6 classi a seconda del tipo di difetto: Blowhole, Crack, Fray, Break, Uneven, e Free (assenza di difetti). Le immagini catturano difetti tipici del processo di produzione di componenti magnetici.
+
+\paragraph{Contributo Metodologico.} Il dataset introdusse \textbf{MCuePushU}, un mo\-del\-lo di saliency detection che combina:
+\begin{enumerate}
+\item Estrazione di \textit{dominant cues} (caratteristiche salienti) dai dati
+\item Fusione di questi cues in una rete U-Net \cite{ronneberger2015u} tramite operazioni aritmetiche sulle immagini
+\item Un modulo Push Network che produce bounding boxes per evidenziare i difetti predetti
+\end{enumerate}
+
+\paragraph{Valutazione.} Gli esperimenti confrontarono MCuePushU con i principali me\-to\-di non deep-learning dell'epoca su dataset di scene naturali: GMR \cite{yang2013saliency}, MBP \cite{zhang2013minimum}, MC \cite{jiang2013automatic}, RBD \cite{zhu2014saliency}, DRFI \cite{jiang2013salient}. Le metriche utilizzate furono:
+\begin{itemize}
+\item \textbf{AUC (Area Under ROC)}: misura la capacità di separare regioni normali e anomale
+\item \textbf{MAE (Mean Absolute Error)}: errore medio assoluto tra saliency map e ground-truth
+\item \textbf{F$_\beta$}: massimo della curva Precision-Recall, con $\beta$ che bilancia precision e recall.
+\end{itemize}
+
+\paragraph{Limitazioni.} Sebbene pioneristico, il dataset presentava limitazioni significative: immagini in scala di grigi (perdita di informazioni cromatiche), dimensione limitata ($<1,500$ immagini), focus su un singolo tipo di oggetto. Tuttavia, il suo contributo fu fondamentale nel dimostrare la necessità di dataset industriali dedicati e nel stabilire protocolli di valutazione che sarebbero stati adottati e ampliati da benchmark successivi come MVTec AD.
