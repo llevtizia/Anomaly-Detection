@@ -556,7 +556,9 @@ La mappa di anomalia finale viene ottenuta attraverso una combinazione pesata de
 EfficientAD rappresenta un punto di arrivo significativo, dimostrando che l'intelligenza del sistema risiede più nell'architettura dell'ensemble e nell'ot\-ti\-miz\-za\-zio\-ne dell'efficienza che nella complessità di un singolo modello.
 
 %%% SUBCTION SIMPLENET
+
 \subsection{Metodi Semplificati (2023)}
+\label{subsec:metodi-semplificati}
 
 Mentre metodi come EfficientAD hanno dimostrato l'efficacia degli ensemble complessi, una tendenza alternativa e contemporanea ha esplorato la direzione opposta: la \textbf{semplicità radicale}. L'idea fondamentale è che la complessità architettuale, oltre un certo punto, non porta benefici misurabili in accuratezza, ma introduce overhead computazionale, fragilità nella scelta degli iperparametri e difficoltà 
 di debugging e manutenzione \cite{liu2023simplenet}.
@@ -598,7 +600,8 @@ Quattro insights fondamentali rivelati:
 SimpleNet presenta comunque alcune limitazioni da considerare. Per iniziare, la sua performance dipende fortemente dalla qualità del backbone pre-addestrato utilizzato come estrattore di feature. Inoltre, la strategia di generazione delle anomalie basata sulla semplice perturbazione con rumore Gaussiano nello spazio delle feature, sebbene efficace, potrebbe non catturare la piena varietà e complessità dei difetti reali incontrati in scenari industriali specifici. Benchè competitivo, su alcuni dataset specializzati metodi più complessi come EfficientAD o PatchCore riescono a ottenere un margine di accuratezza superiore, attestandosi intorno all'1-2\% in più nelle metriche di punta. Infine, la mancanza di meccanismi di adattamento rende l'architettura minimalista meno flessibile nell'incorporare conoscenze specifiche del dominio (domain-specific knowledge) rispetto ad approcci più complessi e personalizzabili.
 
 %%% VLM
-\subsubsection{Vision-Language Models (2023-2024)}
+\subsection{Vision-Language Models (2023-2024)}
+\label{subsec:vlm}
 
 L'integrazione di vision-language models (VLM) pre-addestrati nell'anomaly de\-tec\-tion rappresenta un cambio di paradigma in grado di risolvere limitazioni critiche dei metodi puramente visivi \cite{jeong2023winclip, zhou2024anomalyclip}. Questi metodi sfruttano la conoscenza semantica multimodale, appresa dall'analisi congiunta di coppie immagine-testo, per superare le carenze dei metodi puramente visivi, soprattutto in termini di generalizzazione e adattamento a nuovi domini con pochi esempi.
 
