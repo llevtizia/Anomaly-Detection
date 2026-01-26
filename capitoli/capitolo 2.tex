@@ -160,6 +160,7 @@ Per gestire efficientemente la gallery — che può contenere milioni di feature
 
 %%% SUBSECTION FLOW BASED
 \subsection{Normalizing Flow-based Methods (2021-2022)}
+\label{subsec:metodi-flow-based}
 
 Un'ulteriore evoluzione nei metodi di anomaly detection fu l'introduzione dei normalizing flows, modelli probabilistici in grado di modellare esplicitamente distribuzioni complesse. A differenza dei metodi precedenti che si basavano su distanze o confronti diretti, i flow permettono di calcolare esattamente la probabilità (likelihood) dei dati, offrendo una modellazione più espressiva della normalità
 
@@ -172,7 +173,9 @@ FastFlow \cite{yu2021fastflow} introduce un'architettura 2D normalizing flow est
 \paragraph{CS-Flow (2022).}
 CS-Flow (Cross-Scale Flow) \cite{rudolph2022fully} estende l'approccio flow-based a feature multi-scala. Utilizza normalizing flows separati su feature estratte da layer diversi di una rete pre-addestrata, catturando anomalie sia a livello locale (texture, dettagli) che globale (struttura, forma). L'anomaly score aggrega likelihood da tutte le scale. CS-Flow è ancora competitivo nei benchmark recenti.
 
-\subsubsection{Synthetic Anomaly Generation (2021)}
+%%% SUBSECTION SYNTH ANOMALIES
+\subsection{Synthetic Anomaly Generation (2021)}
+\label{subsec:synthetic-anomaly-generation}
 
 Un approccio innovativo alla sfida della scarsità di dati anomali consiste nel generare sinteticamente anomalie durante il training, trasformando il problema da puramente unsupervised in una forma di apprendimento supervisionato con etichette generate automaticamente. L'idea fondamentale è che, sebbene non si disponga di esempi reali di difetti, sia possibile creare simulazioni plausibili che insegnino al modello a distinguere tra normale e anomalo.
 
@@ -188,9 +191,9 @@ L'architettura comprende:
 \end{itemize}
 Durante il training, il ricostruttore impara a ricostruire le anomalie sintetiche, mentre il discriminatore impara a identificarle. Al test time, le deviazioni nella ricostruzione e l'output del discriminatore vengono combinati per produrre mappe di anomalia dettagliate. DRAEM eccelle nella localizzazione precisa dei difetti e può gestire un'ampia varietà di texture anomale, ma richiede l'accesso a dataset di texture esterne e un training più complesso.
 
-%%% riparte da qui
-
-\subsubsection{Memory-based Methods (2022)}
+%%% MEMORY BASED
+\subsection{Memory-based Methods (2022)}
+\label{subsec:metodi-memory-based}
 
 Un'evoluzione dei metodi feature-based è rappresentata dai \textbf{memory-based methods}, che esplicitano e ottimizzano il concetto di "memoria" dei pat\-tern normali. Mentre approcci come PaDiM modellano statisticamente la dis\-tri\-bu\-zio\-ne normale e SPADE utilizza l'intero training set come gallery, i memory-based methods costruiscono attivamente una \textit{memory bank} di prototipi rappresentativi. Questo supera le limitazioni di approcci precedenti: metodi non parametrici (SPADE) soffrono di elevato uso di memoria e tempi di ricerca, mentre metodi parametrici (autoencoders, GAN) tendono a generalizzare eccessivamente, perdendo la capacità di rilevare anomalie sottili.
 
@@ -204,8 +207,8 @@ Per rilevare difetti sottili (micro-graffi, piccole contaminazioni, variazioni t
 
 PatchCore estrae activation maps da due layer a risoluzioni diverse:
 \begin{itemize}
-\item \textbf{Layer 2}: risoluzione maggiore, cattura pattern locali e texture dettagliate
-\item \textbf{Layer 3}: risoluzione intermedia, codifica informazioni semantiche più astratte
+    \item \textbf{Layer 2}: risoluzione maggiore, cattura pattern locali e texture dettagliate
+    \item \textbf{Layer 3}: risoluzione intermedia, codifica informazioni semantiche più astratte
 \end{itemize}
 
 Per ogni posizione spaziale $(i,j)$, le feature dai due layer vengono concatenate e aggregate attraverso adaptive average pooling, per catturare sia anomalie a grana fine (layer superficiale) che deviazioni strutturali (layer profondo). 
@@ -409,8 +412,9 @@ Entrambi i metodi superano significativamente approcci precedenti (PaDiM, SPADE)
 
 
 
-
-\subsubsection{Student-Teacher Avanzati (2022-2023)}
+%%% SUBSECTION S-T AVANZATI
+\subsection{Student-Teacher Avanzati (2022-2023)}
+\label{subsec:metodi-student-teacher-avanzati}
 
 Il paradigma student-teacher, introdotto inizialmente con metodi come Uninformed Students (2020), ha subito un'evoluzione significativa tra il 2022 e il 2023, producendo metodi più performanti e efficienti. 
 
@@ -551,9 +555,14 @@ La mappa di anomalia finale viene ottenuta attraverso una combinazione pesata de
 
 EfficientAD rappresenta un punto di arrivo significativo, dimostrando che l'intelligenza del sistema risiede più nell'architettura dell'ensemble e nell'ot\-ti\-miz\-za\-zio\-ne dell'efficienza che nella complessità di un singolo modello.
 
+%%% SUBCTION SIMPLENET
+\subsection{Metodi Semplificati (2023)}
+
+Mentre metodi come EfficientAD hanno dimostrato l'efficacia degli ensemble complessi, una tendenza alternativa e contemporanea ha esplorato la direzione opposta: la \textbf{semplicità radicale}. L'idea fondamentale è che la complessità architettuale, oltre un certo punto, non porta benefici misurabili in accuratezza, ma introduce overhead computazionale, fragilità nella scelta degli iperparametri e difficoltà 
+di debugging e manutenzione \cite{liu2023simplenet}.
+
 
 \paragraph{SimpleNet (2023).}
-
 SimpleNet \cite{liu2023simplenet} riduce al minimo la complessità, proponendo un sistema robusto, riproducibile ed efficiente. 
 
 
