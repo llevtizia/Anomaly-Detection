@@ -2588,4 +2588,49 @@
     <bcf:citekey order="202" intorder="1">bergmann2022beyond</bcf:citekey>
     <bcf:citekey order="203" intorder="1">roth2022towards</bcf:citekey>
     <bcf:citekey order="204" intorder="1">radford2021learning</bcf:citekey>
-    <bcf:citekey order="205" intorder="1">zhou2024anomalyclip</b
+    <bcf:citekey order="205" intorder="1">zhou2024anomalyclip</bcf:citekey>
+    <bcf:citekey order="206" intorder="1">jeong2023winclip</bcf:citekey>
+    <bcf:citekey order="207" intorder="1">radford2021learning</bcf:citekey>
+    <bcf:citekey order="208" intorder="1">jeong2023winclip</bcf:citekey>
+    <bcf:citekey order="209" intorder="1">zhou2024anomalyclip</bcf:citekey>
+    <bcf:citekey order="210" intorder="1">zhou2024anomalyclip</bcf:citekey>
+    <bcf:citekey order="210" intorder="2">jeong2023winclip</bcf:citekey>
+    <bcf:citekey order="211" intorder="1">bergmann2019mvtec</bcf:citekey>
+    <bcf:citekey order="211" intorder="2">bergmann2022beyond</bcf:citekey>
+    <bcf:citekey order="212" intorder="1">huang2018surface</bcf:citekey>
+    <bcf:citekey order="213" intorder="1">bergmann2019mvtec</bcf:citekey>
+    <bcf:citekey order="214" intorder="1">bergmann2021mvtec3d</bcf:citekey>
+    <bcf:citekey order="215" intorder="1">bergmann2022beyond</bcf:citekey>
+    <bcf:citekey order="216" intorder="1">bonfiglioli2022eyecandies</bcf:citekey>
+    <bcf:citekey order="217" intorder="1">ding2024realiad</bcf:citekey>
+    <bcf:citekey order="218" intorder="1">liu2024rad</bcf:citekey>
+    <bcf:citekey order="219" intorder="1">bergmann2025mvtecad2</bcf:citekey>
+    <bcf:citekey order="220" intorder="1">bergmann2022beyond</bcf:citekey>
+    <bcf:citekey order="221" intorder="1">huang2018surface</bcf:citekey>
+    <bcf:citekey order="222" intorder="1">ronneberger2015u</bcf:citekey>
+    <bcf:citekey order="223" intorder="1">yang2013saliency</bcf:citekey>
+    <bcf:citekey order="224" intorder="1">zhang2013minimum</bcf:citekey>
+    <bcf:citekey order="225" intorder="1">jiang2013automatic</bcf:citekey>
+    <bcf:citekey order="226" intorder="1">zhu2014saliency</bcf:citekey>
+    <bcf:citekey order="227" intorder="1">jiang2013salient</bcf:citekey>
+  </bcf:section>
+  <!-- SORTING TEMPLATES -->
+  <bcf:sortingtemplate name="none">
+    <bcf:sort order="1">
+      <bcf:sortitem order="1">citeorder</bcf:sortitem>
+    </bcf:sort>
+    <bcf:sort order="2">
+      <bcf:sortitem order="1">intciteorder</bcf:sortitem>
+    </bcf:sort>
+  </bcf:sortingtemplate>
+  <!-- DATALISTS -->
+  <bcf:datalist section="0"
+                name="none/global//global/global"
+                type="entry"
+                sortingtemplatename="none"
+                sortingnamekeytemplatename="global"
+                labelprefix=""
+                uniquenametemplatename="global"
+                labelalphanametemplatename="global">
+  </bcf:datalist>
+</bcf:controlfile>
