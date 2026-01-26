@@ -2613,6 +2613,8 @@
     <bcf:citekey order="225" intorder="1">jiang2013automatic</bcf:citekey>
     <bcf:citekey order="226" intorder="1">zhu2014saliency</bcf:citekey>
     <bcf:citekey order="227" intorder="1">jiang2013salient</bcf:citekey>
+    <bcf:citekey order="228" intorder="1">bergmann2019mvtec</bcf:citekey>
+    <bcf:citekey order="229" intorder="1">schlegl2017unsupervised</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

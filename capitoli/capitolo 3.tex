@@ -22,7 +22,7 @@ Un dataset di qualità per l'anomaly detection industriale deve soddisfare alcun
 
 %
 
-L'evoluzione dei metodi di anomaly detection, illustrata in \ref{subsec:metodi}, è andata di pari passo con l'evoluzione dei dataset a disposizione. I primi approcci, spesso basati su \textbf{autoencoder} o \textbf{GAN}, sono stati valutati su dataset relativamente piccoli e omogenei (ad esempio, immagini in scala di grigi di singole componenti). La pubblicazione di dataset come \textbf{MVTec AD} ha segnato una svolta, offrendo una varietà di oggetti e texture, annotazioni pixel-precise e una chiara separazione tra training (solo esempi normali) e test (con anomalie). Questo ha permesso la nascita e il confronto di metodi più sofisticati, basati su \textit{feature pre-addestrate}, \textit{memory bank} e \textit{normalizing flows}. 
+L'evoluzione dei metodi di anomaly detection, illustrata in \ref{sec:metodi}, è andata di pari passo con l'evoluzione dei dataset a disposizione. I primi approcci, spesso basati su \textbf{autoencoder} o \textbf{GAN}, sono stati valutati su dataset relativamente piccoli e omogenei (ad esempio, immagini in scala di grigi di singole componenti). La pubblicazione di dataset come \textbf{MVTec AD} ha segnato una svolta, offrendo una varietà di oggetti e texture, annotazioni pixel-precise e una chiara separazione tra training (solo esempi normali) e test (con anomalie). Questo ha permesso la nascita e il confronto di metodi più sofisticati, basati su \textit{feature pre-addestrate}, \textit{memory bank} e \textit{normalizing flows}. 
 
 
 Più recentemente, la necessità di affrontare scenari industriali sempre più complessi (ispezioni 3D, illuminazione variabile, oggetti multi-vista) ha portato verso la creazione di dataset \textbf{multimodali} (RGB, depth, point cloud) e \textbf{large-scale}, spesso acquisiti in ambienti reali o generati sinteticamente con alto realismo. Questi dataset consentono di testare la robustezza e la generalizzazione dei metodi esistenti, ma portano anche verso lo sviluppo di nuove architetture in grado di elaborare informazioni visive e geometriche in modo integrato.
@@ -120,6 +120,7 @@ La scelta della metrica influenza direttamente la comparabilità dei risultati. 
 \section{Dataset 2D RGB}
 I dataset basati su immagini RGB 2D rappresentano il nucleo della ricerca in anomaly detection visiva. Questa sezione presenta i principali benchmark ordinati cronologicamente, evidenziando le caratteristiche distintive e i contributi di ciascuno.
 
+% surface detection
 \subsection{Surface Defect Saliency of Magnetic Tile (2018)}
 \label{sec:magnetic_tile}
 Rappresentante della prima generazione di dataset, Magnetic Tile \cite{huang2018surface} è stato uno dei primi dataset specificamente creati per anomaly detection industriale, focalizzato sul rilevamento di difetti superficiali in piastrelle magnetiche.
@@ -141,3 +142,45 @@ Rappresentante della prima generazione di dataset, Magnetic Tile \cite{huang2018
 \end{itemize}
 
 \paragraph{Limitazioni.} Sebbene pioneristico, il dataset presentava limitazioni significative: immagini in scala di grigi (perdita di informazioni cromatiche), dimensione limitata ($<1,500$ immagini), focus su un singolo tipo di oggetto. Tuttavia, il suo contributo fu fondamentale nel dimostrare la necessità di dataset industriali dedicati e nel stabilire protocolli di valutazione che sarebbero stati adottati e ampliati da benchmark successivi come MVTec AD.
+
+% mvtec
+\subsection{MVTec AD (2019)}
+\label{sec:mvtec_ad}
+MVTec Anomaly Detection (MVTec AD) \cite{bergmann2019mvtec} è diventato il benchmark di riferimento universale per l'anomaly detection industriale, utilizzato come baseline in praticamente tutti i lavori successivi.
+
+\paragraph{Caratteristiche.} Il dataset contiene \textbf{5,354 immagini RGB ad alta ri\-so\-lu\-zio\-ne} distribuite su 15 categorie distinte: 10 categorie di oggetti (bottle, cable, capsule, hazelnut, metal nut, pill, screw, toothbrush, transistor, zipper) e 5 categorie di texture (carpet, grid, leather, tile, wood). Le immagini normali (3629 defect-free) costituiscono il training set, mentre il test set include 1725 immagini con anomalie. Sono presenti \textbf{73 tipologie di difetti} generati manualmente (in media 5 per categoria), riproducendo difetti realistici: graffi, denti, contaminazioni, deformazioni, componenti mancanti, disallineamenti
+
+\paragraph{Annotazioni Pixel-Precise.} Ogni immagine anomala è corredata da una \textit{ground truth} mask binaria che segmenta a livello di pixel la regione difettosa. Questo permette la valutazione sia del task di \textbf{image-level classification} (l'im\-ma\-gi\-ne è normale o anomala?) che di \textbf{pixel-level localization} (dove si trova esattamente il difetto?).
+
+\paragraph{Protocollo Sperimentale.} 
+\begin{itemize}
+    \item \textbf{Training}: solo su immagini normali (semi-supervised/one-class)
+    \item \textbf{Testing}: su immagini normali e anomale, con valutazione separata per detection e localization
+    \item \textbf{Data augmentation}: random crop di patch rettangolari ruotate per le texture, mentre per gli oggetti si applicano traslazioni, rotazioni casuali e mirroring dove possibile, generando 10000 patch di training per categoria.
+\end{itemize}
+
+\paragraph{Metodi Valutati e Performance Iniziali.} Il paper originale valutò diversi approcci rappresentativi dell'epoca, rivelando limiti significativi:
+\begin{itemize}
+    \item \textbf{AnoGAN} \cite{schlegl2017unsupervised}: GAN-based, discusso in Sezione \ref{subsec:metodi-GAN}. 70\% image AUROC, in difficoltà nelle categorie che presentano oggetti con più variazioni (forma, orientamento).
+    \item \textbf{Autoencoder} (MSE/SSIM): 80-85\% image AUROC (problemi di reconstruction bias)
+    \item \textbf{CNN Feature Dictionary}: performance migliori ma ancora limitate
+    \item \textbf{Texture Inspection GMM-Based}: efficace per texture ma non per oggetti
+    \item \textbf{Variation Model}: adatto a oggetti con variazioni limitate
+\end{itemize}
+Queste performance modeste dimostrarono la necessità di approcci più sofisticati.
+
+\paragraph{Metriche Standardizzate.} Il dataset introdusse e popolarizzò due metriche fondamentali:
+\begin{itemize}
+    \item \textbf{AUROC (Area Under ROC Curve)}: per valutazione a livello immagine e pixel
+    \item \textbf{PRO (Per-Region Overlap)}: sviluppata appositamente per compensare il bias dell'AUROC pixel-level verso difetti di grandi dimensioni, assegnando uguale peso a regioni anomale di qualsiasi dimensione
+\end{itemize}
+
+\paragraph{Impatto Profondo sulla Ricerca.} MVTec AD ha catalizzato il progresso del campo:
+\begin{enumerate}
+    \item Fornì il primo benchmark realistico, riproducibile e completo
+    \item Espose i limiti dei metodi contemporanei (GAN-based, autoencoder)
+    \item Motivò lo sviluppo di nuove generazioni di metodi (feature-based, memory-based, student-teacher) che oggi superano il 99\% AUROC
+    \item Divenne la piattaforma di riferimento per confronti oggettivi e riproducibili
+\end{enumerate}
+
+\paragraph{Disponibilità e Adozione.} Distribuito sotto licenza Creative Commons, MVTec AD è ampiamente utilizzato sia in ricerca che in contesti industriali, con implementazioni integrate nei principali framework di deep learning e continui aggiornamenti (come MVTec AD 2, 2025).

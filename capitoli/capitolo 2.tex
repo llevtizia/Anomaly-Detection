@@ -65,27 +65,31 @@ In questo scenario meno comune, si assume che l'insieme di training contenga una
 % ----------------------
 % METODI 
 % ----------------------
-\subsection{Evoluzione dei Metodi di Anomaly Detection}
-\label{subsec:metodi}
+\section{Evoluzione dei Metodi di Anomaly Detection}
+\label{sec:metodi}
 
 Lo sviluppo di metodi di deep learning per l'anomaly detection ha seguito un'evoluzione rapida negli ultimi anni. Presentiamo qui i principali approcci in ordine cronologico, con attenzione ai metodi moderni che rappresentano lo stato dell'arte attuale.
 
-\subsubsection{Era dei Metodi GAN-based (2017-2019)}
+%%% SUBSECTION GAN METHODS
+\subsection{Era dei Metodi GAN-based (2017-2019)}
+\label{subsec:metodi-GAN}
 
 I primi tentativi di applicare il deep learning all'anomaly detection sfruttarono le Generative Adversarial Networks (GAN) \cite{goodfellow2014generative}. L'idea fondamentale era addestrare un generatore a sintetizzare immagini realistiche utilizzando esclusivamente campioni normali, per poi rilevare anomalie misurando la difficoltà di ricostruzione o la distanza dalla distribuzione appresa.
 
-\paragraph{AnoGAN} 
-AnoGAN \cite{schlegl2017unsupervised} è stato tra i primi, introducendo un approccio basato su mapping nello spazio latente: data un'immagine di test, si cerca iterativamente il vettore latente $\mathbf{z}^*$ che genera l'immagine più simile, combinando \textit{residual loss} (distanza pixel-wise) e \textit{discrimination loss} (similarità nelle feature del discriminatore). L'anomaly score finale è dato dalla loss ottimizzata. Limitazione principale: ottimizzazione iterativa lenta al test time.
+\paragraph{AnoGAN.} 
+AnoGAN \cite{schlegl2017unsupervised} è stato tra i primi, introducendo un approccio basato su mapping nello spazio latente: data un'immagine di test, si cerca iterativamente il vettore latente $\mathbf{z}^*$ che genera l'immagine più simile, combinando \textit{re\-sid\-u\-al loss} (distanza pixel-wise) e \textit{discrimination loss} (similarità nelle feature del discriminatore). L'anomaly score finale è dato dalla loss ottimizzata. Limitazione principale: ottimizzazione iterativa lenta al test time.
 
-\paragraph{GANomaly} 
-Per ovviare a questa inefficenza, GANomaly \cite{akcay2018ganomaly} introdusse un'ar\-chi\-tet\-tu\-ra encoder-decoder-encoder più efficiente, eliminando l'ot\-ti\-miz\-za\-zio\-ne iterativa. L'anomaly score si basava sulla distanza tra rappresentazioni latenti prima e dopo la ricostruzione.
+\paragraph{GANomaly.} 
+Per ovviare a questa inefficenza, GANomaly \cite{akcay2018ganomaly} introdusse un'ar\-chi\-tet\-tu\-ra encoder-decoder-encoder più efficiente, eliminando l'ot\-ti\-miz\-za\-zio\-ne iterativa. L'anomaly score si basava sulla distanza tra rappresentazioni la\-ten\-ti prima e dopo la ricostruzione.
 
-\paragraph{f-AnoGAN e Skip-GANomaly}
+\paragraph{f-AnoGAN e Skip-GANomaly.}
 f-AnoGAN \cite{schlegl2019f} risolse ulteriormente il problema di efficienza addestrando un encoder che mappava direttamente immagini nel latent space, riducendo i tempi di inferenza da minuti a millisecondi. Skip-GANomaly \cite{akcay2019skip} migliorò la qualità delle ricostruzioni aggiungendo skip connections U-Net-style per preservare dettagli spaziali.
 
 \paragraph{Limitazioni dei metodi GAN.} Sebbene pionieristici, i metodi GAN-based sono stati progressivamente abbandonati per diverse ragioni: (1) training instabile tipico delle GAN, (2) difficoltà di convergenza e bilanciamento delle loss multiple , (3) performance inferiori ai metodi successivi più semplici. I benchmark recenti dimostrano che approcci più semplici superano consistentemente i metodi GAN \cite{bergmann2025mvtecad2, roth2022towards}.
 
-\subsubsection{Autoencoder-based Methods (2016-2021)}
+%%% SUBSECTION AUTOENCODER
+\subsection{Autoencoder-based Methods (2016-2021)}
+\label{subsec:autoencoder}
 
 Gli autoencoder rappresentano un paradigma intuitivo per l'anomaly detection \cite{chalapathy2019deep}: addestrati a ricostruire immagini normali minimizzando l'errore $\mathcal{L} = \|\mathbf{x} - D(E(\mathbf{x}))\|^2$, si ipotizza che falliscano nel ricostruire accuratamente anomalie mai viste, poiché queste ultime si discostano dai pattern appresi. Di conseguenza, un valore elevato della loss di ricostruzione su un'immagine di test segnala una potenziale anomalia. L'anomaly score è dato appunto dall'errore di ricostruzione. Questo approccio dominò la letteratura tra il 2016 e il 2020, con diverse varianti.
 
@@ -122,7 +126,9 @@ Nonostante l'intuizione semplice, gli autoencoder presentano limitazioni intrins
 
 Tra il 2020 e 2021, divenne chiaro che feature pre-addestrate da reti come ResNet catturavano pattern normali meglio di encoder addestrati da zero, e metodi non parametrici come k-NN evitavano il reconstruction bias. Questo portò al graduale abbandono degli autoencoder come metodo primario. Varianti moderne sopravvivono solo come componenti di architetture ibride (es. DRAEM, EfficientAD).
 
-\subsubsection{Primi Metodi Feature-based (2020-2021)}
+%%% SUBSECTION FEATURE BASED
+\subsection{Primi Metodi Feature-based (2020-2021)}
+\label{subsec:metodi-feature-based}
 
 Un cambio di paradigma avvenne con metodi che sfruttarono feature estratte da reti pre-addestrate, evitando training di generatori complessi. Questi metodi condividevano l'intuizione che le feature estratte da reti pre-addestrate contenessero informazioni sufficienti per modellare la normalità, senza necessità di complessi meccanismi generativi. La differenza principale risiedeva in \textit{come} queste feature venivano modellate: PaDiM utilizzava distribuzioni parametriche (Gaussiane), Uninformed Students sfruttava un paradigma teacher-student, e SPADE adottava un approccio non-parametrico basato su nearest neighbors.
 
@@ -151,7 +157,9 @@ d(\mathbf{y}, p) = \frac{1}{\kappa} \sum_{f \in \mathcal{N}_\kappa(F(\mathbf{y},
 
 Per gestire efficientemente la gallery — che può contenere milioni di feature — SPADE utilizza strutture dati ottimizzate per la ricerca approssimata dei vicini più prossimi (Approximate Nearest Neighbor search).
 
-\subsubsection{Normalizing Flow-based Methods (2021-2022)}
+
+%%% SUBSECTION FLOW BASED
+\subsection{Normalizing Flow-based Methods (2021-2022)}
 
 Un'ulteriore evoluzione nei metodi di anomaly detection fu l'introduzione dei normalizing flows, modelli probabilistici in grado di modellare esplicitamente distribuzioni complesse. A differenza dei metodi precedenti che si basavano su distanze o confronti diretti, i flow permettono di calcolare esattamente la probabilità (likelihood) dei dati, offrendo una modellazione più espressiva della normalità
 
