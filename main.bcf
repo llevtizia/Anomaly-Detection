@@ -2645,6 +2645,13 @@
     <bcf:citekey order="257" intorder="1">zhang2023destseg</bcf:citekey>
     <bcf:citekey order="258" intorder="1">deng2022anomaly</bcf:citekey>
     <bcf:citekey order="259" intorder="1">you2022unified</bcf:citekey>
+    <bcf:citekey order="260" intorder="1">bergmann2025mvtecad2</bcf:citekey>
+    <bcf:citekey order="261" intorder="1">batzner2024efficientad</bcf:citekey>
+    <bcf:citekey order="262" intorder="1">deng2022anomaly</bcf:citekey>
+    <bcf:citekey order="263" intorder="1">tien2023revisiting</bcf:citekey>
+    <bcf:citekey order="264" intorder="1">roth2022towards</bcf:citekey>
+    <bcf:citekey order="265" intorder="1">yu2021fastflow</bcf:citekey>
+    <bcf:citekey order="266" intorder="1">liu2023simplenet</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

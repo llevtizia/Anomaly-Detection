@@ -360,3 +360,61 @@ FUIAD è particolarmente rilevante per deployment industriale, dove la certifica
 
 \paragraph{Impatto.} Real-IAD stabilì un nuovo standard di scala e realismo, spingendo la ricerca verso soluzioni che non solo massimizzano le metriche su benchmark controllati, ma mantengono robustezza e affidabilità in condizioni operative realistiche. 
 
+% mvtec 2
+\subsection{MVTec AD 2 (2025)}
+\label{sec:mvtec_ad2}
+MVTec Anomaly Detection 2 (MVTec AD 2) \cite{bergmann2025mvtecad2} rappresenta l'evoluzione del benchmark MVTec AD originale, introducendo sfide che riflettono problemi aperti nella pratica industriale.
+
+\paragraph{Composizione.} Il dataset contiene \textbf{8,004 immagini RGB ad alta ri\-so\-lu\-zio\-ne} distribuite su 8 scenari challenging:
+\begin{enumerate}
+\item \textbf{Bulk goods}: materiali sfusi (Wall
+Plugs, Walnuts, Rice) con alta variabilità
+\item \textbf{Textured objects}: oggetti con texture complesse e non uniformi
+\item \textbf{Reflective metal objects}: superfici metalliche lucide con riflessi speculari
+\item \textbf{Transparent objects}: oggetti trasparenti (vetro, plastica) difficili da ispezionare
+\end{enumerate}
+
+Ogni scenario presenta sfide specifiche che causano fallimenti nei metodi standard.
+
+\paragraph{Caratteristiche Distintive.} MVTec AD 2 introduce innovazioni rispetto al predecessore:
+
+\subparagraph{1. Anomalie ai Bordi dell'Immagine.} Le anomalie sono distribuite \textit{sull'intera altezza e larghezza} delle immagini, inclusi i bordi. Molti metodi (es. PatchCore con padding) hanno performance degradate vicino ai bordi.
+
+\subparagraph{2. Condizioni di Illuminazione Realistiche.} Include acquisizioni con setup comuni nell'ispezione industriale:
+\begin{itemize}
+\item \textbf{Back-light illumination} (controluce): illuminazione da dietro l'oggetto
+\item \textbf{Dark-field illumination} (campo scuro): illuminazione angolata che enfatizza difetti superficiali
+\end{itemize}
+
+Queste condizioni creano forte variabilità nell'aspetto di oggetti normali, rendendo più difficile distinguere anomalie da variazioni di illuminazione.
+
+\subparagraph{3. Alta Variabilità Intra-Classe.} I dati normali presentano variazioni significative (orientamento, posizione, condizioni di luce), testando la robustezza dei modelli a distribution shift.
+
+\paragraph{Metodi Benchmarkati.} MVTec AD 2 valutò metodi state-of-the-art rappresentativi di diverse famiglie:
+\begin{itemize}
+\item \textbf{Student-teacher}: EfficientAD \cite{batzner2024efficientad}, Reverse Distillation \cite{deng2022anomaly}, RD++ \cite{tien2023revisiting}
+\item \textbf{Memory-bank}: PatchCore \cite{roth2022towards}
+\item \textbf{Normalizing Flow}: MSFlow \cite{yu2021fastflow}
+\item \textbf{Synthetic anomalies}: SimpleNet \cite{liu2023simplenet}, Dual Subspace Re-Projection
+\end{itemize}
+
+\paragraph{Nuove Metriche.} MVTec AD 2 introdusse metriche più rigorose:
+\begin{itemize}
+\item \textbf{AU-PRO (FPR 5\%)}: threshold-independent metric che integra PRO fino a un False Positive Rate del 5\%, enfatizzando precisione in regimi operativi realistici
+\item \textbf{F1-score}: metrica threshold-dependent che bilancia precision e recall
+\end{itemize}
+
+\paragraph{Risultati Chiave.} I risultati rivelarono:
+\begin{enumerate}
+\item Nessun metodo raggiunge $>90\%$ AU-PRO su tutte le categorie (vs $>98\%$ AUROC su MVTec AD originale)
+\item Oggetti trasparenti e riflettenti causano le maggiori difficoltà (AU-PRO $<70\%$)
+\item Condizioni di illuminazione variabili aumentano significativamente i falsi positivi
+\item EfficientAD e RD++ mostrano migliore robustezza complessiva
+\end{enumerate}
+
+\paragraph{Contributo.} MVTec AD 2 evidenziò che:
+\begin{itemize}
+\item Performance elevate su MVTec AD non garantiscono successo in scenari reali complessi
+\item Sono necessari metodi robusti a distribution shift e condizioni di acquisizione variabili
+\item Oggetti con proprietà ottiche speciali (trasparenza, riflessione) richiedono approcci dedicati
+\end{itemize}
