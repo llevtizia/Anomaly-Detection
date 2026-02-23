@@ -76,14 +76,47 @@ Lo sviluppo di metodi di deep learning per l'anomaly detection ha seguito un'evo
 
 I primi tentativi di applicare il deep learning all'anomaly detection sfruttarono le Generative Adversarial Networks (GAN) \cite{goodfellow2014generative}. L'idea fondamentale era addestrare un generatore a sintetizzare immagini realistiche utilizzando esclusivamente campioni normali, per poi rilevare anomalie misurando la difficoltà di ricostruzione o la distanza dalla distribuzione appresa.
 
+
 \paragraph{AnoGAN.} 
-AnoGAN \cite{schlegl2017unsupervised} è stato tra i primi, introducendo un approccio basato su mapping nello spazio latente: data un'immagine di test, si cerca iterativamente il vettore latente $\mathbf{z}^*$ che genera l'immagine più simile, combinando \textit{re\-sid\-u\-al loss} (distanza pixel-wise) e \textit{discrimination loss} (similarità nelle feature del discriminatore). L'anomaly score finale è dato dalla loss ottimizzata. Limitazione principale: ottimizzazione iterativa lenta al test time.
+AnoGAN \cite{schlegl2017unsupervised} (Figura \ref{fig:anogan_overview}) è stato tra i primi, introducendo un approccio ba\-sa\-to su mapping nello spazio latente: data un'immagine di test, si cerca i\-te\-ra\-ti\-va\-men\-te il vettore latente $\mathbf{z}^*$ che genera l'immagine più simile, combinando \textit{re\-sid\-u\-al loss} (distanza pixel-wise) e \textit{discrimination loss} (similarità nelle feature del dis\-cri\-mi\-na\-to\-re). L'anomaly score finale è dato dalla loss ottimizzata. Li\-mi\-ta\-zio\-ne principale: ottimizzazione iterativa lenta al test time.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{immagini/capitolo2/anogan_overview.png}
+\caption{Framework di anomaly detection di AnoGAN. La fase di preprocessing include l'estrazione e l'appiattimento dell'area, l'estrazione di patch e la normalizzazione dell'intensità. L'addestramento generativo avversario (GAN) viene eseguito su dati sani, mentre il testing viene effettuato sia su casi sani non visti che su dati anomali. Fonte: \cite{schlegl2017unsupervised}}
+\label{fig:anogan_overview}
+\end{figure}
 
 \paragraph{GANomaly.} 
-Per ovviare a questa inefficenza, GANomaly \cite{akcay2018ganomaly} introdusse un'ar\-chi\-tet\-tu\-ra encoder-decoder-encoder più efficiente, eliminando l'ot\-ti\-miz\-za\-zio\-ne iterativa. L'anomaly score si basava sulla distanza tra rappresentazioni la\-ten\-ti prima e dopo la ricostruzione.
+Per ovviare a questa inefficenza, GANomaly \cite{akcay2018ganomaly} introdusse un'ar\-chi\-tet\-tu\-ra encoder-decoder-encoder più efficiente, eliminando l'ot\-ti\-miz\-za\-zio\-ne iterativa. L'anomaly score si basava sulla distanza tra rappresentazioni la\-ten\-ti prima e dopo la ricostruzione (Figura \ref{fig:ganomaly_architecture}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{ganomaly-architecture.png}
+\caption{Architettura di GANomaly. Il sistema utilizza una struttura encoder-decoder-encoder dove l'immagine di input $x$ viene codificata in uno spazio latente $\tilde{z}$, ricostruita come $\hat{x}$, e poi nuovamente codificata. L'anomaly score si basa sulla distanza tra le rappresentazioni latenti ($\mathcal{L}_{enc}$), sulla ricostruzione dell'immagine ($\mathcal{L}_{con}$) e sulle feature del discriminatore ($\mathcal{L}_{adv}$). Fonte: \cite{akcay2018ganomaly}}
+\label{fig:ganomaly_architecture}
+\end{figure}
+
 
 \paragraph{f-AnoGAN e Skip-GANomaly.}
-f-AnoGAN \cite{schlegl2019f} risolse ulteriormente il problema di efficienza addestrando un encoder che mappava direttamente immagini nel latent space, riducendo i tempi di inferenza da minuti a millisecondi. Skip-GANomaly \cite{akcay2019skip} migliorò la qualità delle ricostruzioni aggiungendo skip connections U-Net-style per preservare dettagli spaziali.
+f-AnoGAN \cite{schlegl2019f} risolse ulteriormente il pro\-ble\-ma di efficienza addestrando un encoder che mappava direttamente immagini nel latent space (Figura \ref{fig:fanogan_framework}), riducendo i tempi di inferenza da minuti a millisecondi. 
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{immagini/capitolo2/f-anogan-architecture.png}
+\caption{Framework di f-AnoGAN. Il training del modello avviene in due fasi: addestramento GAN (generator e discriminator) e addestramento dell'encoder (componente chiave che elimina l'ottimizzazione iterativa di AnoGAN). Entrambe le fasi utilizzano solo dati normali. L'anomaly detection viene poi eseguita su dati \textit{unseen}, identificando regioni anomale evidenziate in rosso. Adattata da \cite{schlegl2019f}.}
+\label{fig:fanogan_framework}
+\end{figure}
+
+Skip-GANomaly \cite{akcay2019skip} migliorò la qualità delle ricostruzioni aggiungendo skip connections U-Net-style per preservare dettagli spaziali (Figura \ref{fig:skip-ganomaly-architecture}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{skip-ganomaly-architecture.png}
+\caption{Architettura di Skip-GANomaly. Il sistema estende GANomaly aggiungendo skip connections in stile U-Net tra encoder e decoder, preservando informazioni spaziali ad alta risoluzione a diversi livelli. Questo migliora la qualità delle ricostruzioni e la capacità di localizzazione delle anomalie. Fonte: \cite{akcay2019skip}}
+\label{fig:skip-ganomaly-architecture}
+\end{figure}
+
 
 \paragraph{Limitazioni dei metodi GAN.} Sebbene pionieristici, i metodi GAN-based sono stati progressivamente abbandonati per diverse ragioni: (1) training instabile tipico delle GAN, (2) difficoltà di convergenza e bilanciamento delle loss multiple , (3) performance inferiori ai metodi successivi più semplici. I benchmark recenti dimostrano che approcci più semplici superano consistentemente i metodi GAN \cite{bergmann2025mvtecad2, roth2022towards}.
 
@@ -108,7 +141,15 @@ dove il termine KL regolarizza il latent space verso una Gaussiana $p(\mathbf{z}
 
 
 \paragraph{Memory-Augmented Autoencoder.} 
-Per risolvere il problema del \textit{reconstruction bias} (autoencoder che ricostruiscono bene anche anomalie), MemAE \cite{gong2019memorizing} introduce un modulo di memoria tra encoder e decoder: feature dell'encoder vengono recuperate dal memory module di prototipi normali tramite attention, forzando la ricostruzione attraverso pattern normali memorizzati. MNAD \cite{park2020learning} estese questo approccio con predizione multi-frame. Entrambi furono valutati in MVTec LOCO AD \cite{bergmann2022beyond} con risultati modesti.
+Per risolvere il problema del \textit{reconstruction bias} (autoencoder che ricostruiscono bene anche anomalie), MemAE \cite{gong2019memorizing} introduce un modulo di memoria tra encoder e decoder (Figura \ref{fig:memae-architecture}): feature dell'encoder vengono recuperate dal memory module di prototipi normali tramite attention, forzando la ricostruzione attraverso pattern normali memorizzati. MNAD \cite{park2020learning} estese questo approccio con predizione multi-frame. Entrambi furono valutati in MVTec LOCO AD \cite{bergmann2022beyond} con risultati modesti.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width =0.90\textwidth]{memae-architecture.png}
+\caption{Anomaly detection tramite Memory-Augmented Autoencoder (MemAE). Dopo il training su un dataset contenente solo campioni normali, il modulo di memoria in MemAE registra prototipi di pattern normali. Dato un input anomalo, MemAE recupera i pattern normali più rilevanti in memoria per la ricostruzione, risultando in un output significativamente diverso dall'input anomalo. Gli input normali (blu) vengono mappati vicino ai prototipi in memoria (stelle blu), mentre gli input anomali (rosso) vengono forzatamente ricostruiti attraverso i pattern normali, producendo un errore di ricostruzione elevato. Fonte: \cite{gong2019memorizing}}
+\label{fig:memae-architecture}
+\end{figure}
+
 
 \paragraph{Limitazioni e Declino.}
 
@@ -133,7 +174,7 @@ Tra il 2020 e 2021, divenne chiaro che feature pre-addestrate da reti come ResNe
 Un cambio di paradigma avvenne con metodi che sfruttarono feature estratte da reti pre-addestrate, evitando training di generatori complessi. Questi metodi condividevano l'intuizione che le feature estratte da reti pre-addestrate contenessero informazioni sufficienti per modellare la normalità, senza necessità di complessi meccanismi generativi. La differenza principale risiedeva in \textit{come} queste feature venivano modellate: PaDiM utilizzava distribuzioni parametriche (Gaussiane), Uninformed Students sfruttava un paradigma teacher-student, e SPADE adottava un approccio non-parametrico basato su nearest neighbors.
 
 \paragraph{PaDiM (2020).}
-PaDiM (Patch Distribution Modeling) \cite{defard2021padim} modella la distribuzione normale tramite feature multi-scala da CNN pre-addestrate (tipicamente ResNet/WideResNet su ImageNet). Per ogni posizione spaziale $(i,j)$, concatena feature da layer a diverse profondità:
+PaDiM (Patch Distribution Modeling) \cite{defard2021padim} (Figura \ref{fig:padim_architecture}) mo\-del\-la la distribuzione normale tramite feature multi-scala da CNN pre\-ad\-des\-tra\-te (tipicamente ResNet/WideResNet su ImageNet). Per ogni posizione spaziale $(i,j)$, concatena feature da layer a diverse profondità:
 \begin{equation}
 x_{ij} = [\mathbf{f}_1^{(i,j)}, \mathbf{f}_2^{(i,j)}, \mathbf{f}_3^{(i,j)}]
 \end{equation}
@@ -145,9 +186,25 @@ M_{ij} = \sqrt{(x_{ij} - \mu_{ij})^T \Sigma_{ij}^{-1} (x_{ij} - \mu_{ij})}
 
 PaDiM applica random dimensionality reduction per efficienza. Vantaggi: no training, localizzazione precisa, robustezza. Limitazioni: memoria per matrici di covarianza.
 
-\paragraph{Uninformed Students (2020).}
-Bergmann et al. \cite{bergmann2020uninformed} introdussero un approccio student-teacher: un teacher network pre-addestrato fornisce supervisione a un insieme di student networks addestrati solo su dati normali. 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{padim-architecture.png}
+\caption{Funzionamento di PaDiM. Per ogni posizione $(i,j)$ nella feature map, PaDiM concatena feature estratte da tre layer CNN pre-addestrati a diverse profondità e apprende i parametri di una distribuzione Gaussiana $(\mu_{ij}, \Sigma_{ij})$ dall'insieme di vettori di training.}
+\label{fig:padim_architecture}
+\end{figure}
+
+
+\paragraph{ Uninformed Students (2020).}
+Bergmann et al. \cite{bergmann2020uninformed} introdussero un approccio student-teacher (Figura \ref{fig:fig:uninformed_students}): un teacher network pre-addestrato fornisce supervisione a un insieme di student networks addestrati solo su dati normali. 
 Gli studenti imparano a replicare l'output del teacher per immagini normali ma non sono in grado di farlo per anomalie non viste durante l'addestramento. L'anomaly score misura la discrepanza tra l'output del teacher e la media degli output degli studenti: regioni con alta discrepanza indicano potenziali anomalie.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{uninformed-students.png}
+\caption{Schema dell'approccio Uninformed Students. Le immagini di input vengono processate da una rete teacher che estrae feature per regioni locali (receptive fields). Un ensemble di $M$ student networks viene addestrato a predire l'output del teacher solo su dati anomaly-free. Durante l'inferenza, gli students producono errori di regressione $e$ e incertezze predittive $v$ elevati per i pixel in cui il receptive field copre regioni anomale. Le mappe di anomalia generate con receptive fields di diverse dimensioni possono essere combinate per segmentazione multi-scala. Fonte: \cite{bergmann2020uninformed}}
+\label{fig:uninformed_students}
+\end{figure}
+
 
 \paragraph{SPADE (2021).}
 SPADE (Sub-image Anomaly Detection) \cite{cohen2021sub} utilizza k-nearest neighbors (k-NN) nello spazio delle feature profonde. Costruisce una gallery $\mathcal{G}$ memorizzando tutte le feature di tutte le posizioni spaziali delle immagini normali. Al test, per ogni posizione $p$, recupera i $\kappa$ nearest neighbors dalla gallery e calcola:
