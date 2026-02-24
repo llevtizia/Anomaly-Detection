@@ -195,7 +195,7 @@ PaDiM applica random dimensionality reduction per efficienza. Vantaggi: no train
 
 
 \paragraph{ Uninformed Students (2020).}
-Bergmann et al. \cite{bergmann2020uninformed} introdussero un approccio student-teacher (Figura \ref{fig:fig:uninformed_students}): un teacher network pre-addestrato fornisce supervisione a un insieme di student networks addestrati solo su dati normali. 
+Bergmann et al. \cite{bergmann2020uninformed} introdussero un approccio student-teacher (Figura \ref{fig:uninformed_students}): un teacher network pre-addestrato fornisce supervisione a un insieme di student networks addestrati solo su dati normali. 
 Gli studenti imparano a replicare l'output del teacher per immagini normali ma non sono in grado di farlo per anomalie non viste durante l'addestramento. L'anomaly score misura la discrepanza tra l'output del teacher e la media degli output degli studenti: regioni con alta discrepanza indicano potenziali anomalie.
 
 \begin{figure}[htbp]
@@ -222,13 +222,37 @@ Per gestire efficientemente la gallery — che può contenere milioni di feature
 Un'ulteriore evoluzione nei metodi di anomaly detection fu l'introduzione dei normalizing flows, modelli probabilistici in grado di modellare esplicitamente distribuzioni complesse. A differenza dei metodi precedenti che si basavano su distanze o confronti diretti, i flow permettono di calcolare esattamente la probabilità (likelihood) dei dati, offrendo una modellazione più espressiva della normalità
 
 \paragraph{CFLOW-AD (2021).}
-CFLOW-AD \cite{gudovskiy2022cflow} utilizza conditional normalizing flows per modellare la distribuzione delle feature estratte da reti pre-addestrate. Il flow trasforma la distribuzione complessa delle feature normali in una Gaussiana standard, permettendo di calcolare direttamente la likelihood. L'anomaly score è dato dalla negative log-likelihood: campioni anomali, avendo bassa probabilità sotto il modello appreso, ricevono punteggi elevati.
+CFLOW-AD \cite{gudovskiy2022cflow} usa conditional normalizing flows per modellare la distribuzione delle feature estratte da reti pre-addestrate (Fi\-gu\-ra \ref{fig:cflow_overview}). Il flow trasforma la distribuzione complessa delle feature normali in una Gaussiana standard, permettendo di calcolare direttamente la like\-li\-hood. L'a\-no\-ma\-ly score è dato dalla negative log-likelihood: campioni anomali, avendo bassa pro\-ba\-bi\-li\-tà sotto il modello appreso, ricevono punteggi elevati.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{c-flow-overview.png}
+\caption{Architettura di CFLOW-AD. L'encoder CNN con pyramid pooling estrae feature multi-scala che catturano informazioni sia globali che locali. Per ogni scala $k$, un decoder basato su conditional normalizing flow processa le feature $z_i^k$ con input condizionale $c_i^k$ contenente informazioni spaziali da un positional encoder (PE). Le likelihood multi-scala $p_i^k$ vengono aggregate per produrre la mappa di anomalia finale. Fonte: \cite{gudovskiy2022cflow}}
+\label{fig:cflow_overview}
+\end{figure}
+
 
 \paragraph{FastFlow (2021).}
-FastFlow \cite{yu2021fastflow} introduce un'architettura 2D normalizing flow estremamente efficiente basata su 2D coupling layers, preservando la struttura spaziale delle feature. A differenza di CFLOW-AD che opera su vettori appiattiti di feature, FastFlow mantiene la struttura 2D, risultando più veloce e accurato. Il metodo raggiunse performance competitive con tempi di inferenza ridotti, rendendo i flow pratici per applicazioni in tempo reale.
+FastFlow \cite{yu2021fastflow} introduce un'architettura 2D normalizing flow estremamente efficiente basata su 2D coupling layers, preservando la struttura spaziale delle feature (Figura \ref{fig:fastflow_architecture}). A differenza di CFLOW-AD che opera su vettori appiattiti di feature, FastFlow mantiene la struttura 2D, risultando più veloce e accurato. Il metodo raggiunse performance competitive con tempi di inferenza ridotti, rendendo i flow pratici per applicazioni in tempo reale.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{fastflow.png}
+\caption{Pipeline di FastFlow per anomaly detection. (a) L'architettura completa comprende un feature extractor (CNN o vision transformer) seguito dal modello FastFlow, composto da flow layers alternati "3×3" e "1×1". (b) Dettaglio di un flow step: le feature vengono processate attraverso operazioni di convoluzione, split, attivazioni esponenziali e concatenazione per preservare la struttura spaziale 2D. Fonte: \cite{yu2021fastflow}}
+\label{fig:fastflow_architecture}
+\end{figure}
+
 
 \paragraph{CS-Flow (2022).}
 CS-Flow (Cross-Scale Flow) \cite{rudolph2022fully} estende l'approccio flow-based a feature multi-scala. Utilizza normalizing flows separati su feature estratte da layer diversi di una rete pre-addestrata, catturando anomalie sia a livello locale (texture, dettagli) che globale (struttura, forma). L'anomaly score aggrega likelihood da tutte le scale. CS-Flow è ancora competitivo nei benchmark recenti.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{cs-flow.png}
+\caption{Schema di CS-Flow. Il metodo processa feature estratte da input multi-scala attraverso normalizing flows con cross-connections tra scale ($f_{csf}$). Ogni scala elabora separatamente le feature ($f_{fe}$) per catturare anomalie a diversi livelli di granularità, dalla texture fine alla struttura globale. Fonte: \cite{rudolph2022fully}}
+\label{fig:csflow_overview}
+\end{figure}
+
 
 %%% SUBSECTION SYNTH ANOMALIES
 \subsection{Synthetic Anomaly Generation (2021)}
@@ -237,7 +261,7 @@ CS-Flow (Cross-Scale Flow) \cite{rudolph2022fully} estende l'approccio flow-base
 Un approccio innovativo alla sfida della scarsità di dati anomali consiste nel generare sinteticamente anomalie durante il training, trasformando il problema da puramente unsupervised in una forma di apprendimento supervisionato con etichette generate automaticamente. L'idea fondamentale è che, sebbene non si disponga di esempi reali di difetti, sia possibile creare simulazioni plausibili che insegnino al modello a distinguere tra normale e anomalo.
 
 \paragraph{CutPaste (2021).}
-CutPaste \cite{li2021cutpaste} adotta una strategia molto semplice: genera anomalie sintetiche tagliando una patch rettangolare da un'immagine normale e incollandola in una posizione casuale della stessa immagine, eventualmente applicando trasformazioni aggiuntive (rotazione, variazione di colore). Una CNN viene poi addestrata come classificatore binario a distinguere tra immagini originali (classe normale) e immagini manipolate (classe anomalia sintetica). Vantaggi principali: implementazione semplice, training veloce, nessuna dipendenza da feature pre-addestrate. Tuttavia, le anomalie generate sono limitate a difetti di tipo "oggetto dislocato" e non generalizzano a tutti i tipi di difetti.
+CutPaste \cite{li2021cutpaste} adotta una strategia molto semplice: genera anomalie sintetiche tagliando una patch rettangolare da un'immagine normale e incollandola in una posizione casuale della stessa immagine, eventualmente applicando trasformazioni aggiuntive (rotazione, variazione di colore). Una CNN viene poi addestrata come classificatore binario a distinguere tra immagini o\-ri\-gi\-na\-li (classe normale) e immagini manipolate (classe anomalia sintetica). Vantaggi principali: implementazione semplice, training veloce, nessuna dipendenza da feature pre-addestrate. Tuttavia, le anomalie generate sono limitate a difetti di tipo "oggetto dislocato" e non generalizzano a tutti i tipi di difetti.
 
 \paragraph{DRAEM (2021).}
 DRAEM (Discriminatively Trained Reconstruction Embedding) \cite{zavrtanik2021draem} combina generazione di anomalie realistiche con un meccanismo di ricostruzione. Utilizza texture di difetti reali provenienti da dataset esterni per creare anomalie visivamente plausibili. 
