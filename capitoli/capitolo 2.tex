@@ -244,7 +244,7 @@ FastFlow \cite{yu2021fastflow} introduce un'architettura 2D normalizing flow est
 
 
 \paragraph{CS-Flow (2022).}
-CS-Flow (Cross-Scale Flow) \cite{rudolph2022fully} estende l'approccio flow-based a feature multi-scala. Utilizza normalizing flows separati su feature estratte da layer diversi di una rete pre-addestrata, catturando anomalie sia a livello locale (texture, dettagli) che globale (struttura, forma). L'anomaly score aggrega likelihood da tutte le scale. CS-Flow è ancora competitivo nei benchmark recenti.
+CS-Flow (Cross-Scale Flow) \cite{rudolph2022fully} estende l'approccio flow-based a feature multi-scala (Figura \ref{fig:csflow_overview}). Utilizza normalizing flows separati su feature estratte da layer diversi di una rete pre-addestrata, catturando anomalie sia a livello locale (texture, dettagli) che globale (struttura, forma). L'anomaly score aggrega likelihood da tutte le scale. CS-Flow è ancora competitivo nei benchmark recenti.
 
 \begin{figure}[htbp]
 \centering
@@ -261,16 +261,33 @@ CS-Flow (Cross-Scale Flow) \cite{rudolph2022fully} estende l'approccio flow-base
 Un approccio innovativo alla sfida della scarsità di dati anomali consiste nel generare sinteticamente anomalie durante il training, trasformando il problema da puramente unsupervised in una forma di apprendimento supervisionato con etichette generate automaticamente. L'idea fondamentale è che, sebbene non si disponga di esempi reali di difetti, sia possibile creare simulazioni plausibili che insegnino al modello a distinguere tra normale e anomalo.
 
 \paragraph{CutPaste (2021).}
-CutPaste \cite{li2021cutpaste} adotta una strategia molto semplice: genera anomalie sintetiche tagliando una patch rettangolare da un'immagine normale e incollandola in una posizione casuale della stessa immagine, eventualmente applicando trasformazioni aggiuntive (rotazione, variazione di colore). Una CNN viene poi addestrata come classificatore binario a distinguere tra immagini o\-ri\-gi\-na\-li (classe normale) e immagini manipolate (classe anomalia sintetica). Vantaggi principali: implementazione semplice, training veloce, nessuna dipendenza da feature pre-addestrate. Tuttavia, le anomalie generate sono limitate a difetti di tipo "oggetto dislocato" e non generalizzano a tutti i tipi di difetti.
+CutPaste \cite{li2021cutpaste} adotta una strategia molto semplice (Figura \ref{fig:cutpaste_overview}): genera anomalie sintetiche tagliando una patch rettangolare da un'im\-ma\-gi\-ne normale e incollandola in una posizione casuale della stessa immagine, eventualmente applicando trasformazioni aggiuntive (rotazione, variazione di colore). Una CNN viene poi addestrata come classificatore binario a distinguere tra immagini o\-ri\-gi\-na\-li (classe normale) e immagini manipolate (classe anomalia sintetica). Vantaggi principali: implementazione semplice, training veloce, nessuna dipendenza da feature pre-addestrate. Tuttavia, le anomalie generate sono limitate a difetti di tipo "oggetto dislocato" e non generalizzano a tutti i tipi di difetti.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{cutpaste-overview.png}
+\caption{Overview di CutPaste. (a) Training: una CNN viene addestrata a distinguere immagini normali (blu) da immagini augmented (verde) tramite \textit{CutPaste} (riquadro arancione), che taglia una regione rettangolare (riquadro giallo) e la incolla in posizione casuale. Le rappresentazioni possono essere apprese a livello di immagine intera o patch locali. (b) Detection e localizzazione: la rappresentazione image-level produce un anomaly score globale e localizza difetti via GradCAM; la rappresentazione patch-level estrae feature dense per produrre mappe di anomalia dettagliate. Fonte: \cite{li2021cutpaste}}
+\label{fig:cutpaste_overview}
+\end{figure}
+
 
 \paragraph{DRAEM (2021).}
-DRAEM (Discriminatively Trained Reconstruction Embedding) \cite{zavrtanik2021draem} combina generazione di anomalie realistiche con un meccanismo di ricostruzione. Utilizza texture di difetti reali provenienti da dataset esterni per creare anomalie visivamente plausibili. 
+DRAEM (Discriminatively Trained Reconstruction Embedding) \cite{zavrtanik2021draem} combina generazione di anomalie realistiche con un meccanismo di ricostruzione. Utilizza texture di difetti reali provenienti da dataset esterni per creare anomalie visivamente plausibili (Figura \ref{fig:draem_overview}). 
 L'architettura comprende:
 \begin{itemize}
     \item Un network di ricostruzione (tipicamente un autoencoder) addestrato a ripristinare l'immagine originale dall'input alterato
     \item Un discriminatore che localizza pixel-level le regioni anomale (differenza tra input e output)
 \end{itemize}
 Durante il training, il ricostruttore impara a ricostruire le anomalie sintetiche, mentre il discriminatore impara a identificarle. Al test time, le deviazioni nella ricostruzione e l'output del discriminatore vengono combinati per produrre mappe di anomalia dettagliate. DRAEM eccelle nella localizzazione precisa dei difetti e può gestire un'ampia varietà di texture anomale, ma richiede l'accesso a dataset di texture esterne e un training più complesso.
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{draem-overview.png}
+\caption{Processo di anomaly detection di DRAEM. Le regioni anomale vengono implicitamente rilevate e corrette (inpainting) dalla sotto-rete ricostruttiva addestrata  con $\mathcal{L}_{rec}$. L'output della sotto-rete e l'immagine di input vengono concatenati e processati dalla sotto-rete discriminativa. La rete di segmentazione, addestrata utilizzando la Focal loss $\mathcal{L}_{focal}$, localizza le regioni anomale producendo una mappa di anomalia. L'anomaly score $\eta$ a livello immagine è derivato dalla mappa. Fonte: \cite{zavrtanik2021draem}}
+\label{fig:draem_overview}
+\end{figure}
+
 
 %%% MEMORY BASED
 \subsection{Memory-based Methods (2022)}
@@ -280,7 +297,15 @@ Un'evoluzione dei metodi feature-based è rappresentata dai \textbf{memory-based
 
 \paragraph{PatchCore (2022).}
 
-PatchCore \cite{roth2022towards} è rapidamente divenuto uno dei baseline di riferimento per l'anomaly detection industriale, combinando accuratezza ed efficienza operativa e rimanendo competitivo anche nei benchmark più recenti.
+PatchCore \cite{roth2022towards} è rapidamente divenuto uno dei baseline di riferimento per l'anomaly detection industriale, combinando accuratezza ed efficienza operativa e rimanendo competitivo anche nei benchmark più recenti (Figura \ref{fig:patchcore_overview}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{patchcore-architecture.png}
+\caption{Overview di PatchCore. Durante il training (blu), i campioni normali vengono scomposti in una memory bank di feature a livello di patch neighbourhood-aware. Per ridurre ridondanza e tempo di inferenza, la memory bank viene compressa tramite  un coreset subsampling greedy. Al momento del test (verde), le immagini sono classificate come anomale se almeno una patch è anomala, e viene generata una mappa di segmentazione dell'anomalia a livello di pixel valutando ciascuna patch-feature. Fonte: \cite{roth2022towards}}
+\label{fig:patchcore_overview}
+\end{figure}
+
 
 \subparagraph{Locally Aware Patch Features.}
 
@@ -363,11 +388,19 @@ Nonostante queste limitazioni, PatchCore rimane uno dei metodi più pratici e af
 
 \paragraph{MemSeg (2022).}
 
-MemSeg (Memory-guided Segmentation) \cite{yang2022memseg} adotta un approccio diverso: invece di confrontare feature o ricostruire immagini, trasforma l'anomaly detection in un task di segmentazione semantica end-to-end. Sulla base dell'idea di una ridotta varianza intra-classe tra prodotti della stessa linea produttiva:
+MemSeg (Memory-guided Segmentation) \cite{yang2022memseg} adotta un approccio diverso: invece di confrontare feature o ricostruire immagini, tras\-for\-ma l'anomaly detection in un task di segmentazione semantica end-to-end (Figura \ref{fig:memseg_overview}). Sulla base dell'idea di una ridotta varianza intra-classe tra prodotti della stessa linea produttiva:
 \begin{itemize}
     \item introducendo anomalie simulate durante il training, il modello impara esplicitamente a discriminare normale da non-normale
     \item l'uso di un memory module consente di memorizzare pattern normali tipici per confrontare l'input
 \end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{memseg-overview.png}
+\caption{Architettura di MemSeg. Basato su architettura U-Net con encoder ResNet18 pre-addestrato, il metodo introduce anomalie simulate e un modulo di memoria per realizzare il rilevamento di difetti superficiali semi-supervisionato in maniera end-to-end. Inoltre, per fondere le informazioni della memoria con le feature di alto livello dell'immagine di input, è introdotto un modulo di fusione di feature multiscala (MSFF Module) e un modulo di attenzione spazialeFonte: \cite{yang2022memseg}}
+\label{fig:memseg_overview}
+\end{figure}
+
 
 \subparagraph{Architettura U-Net Based.}
 
@@ -380,7 +413,7 @@ MemSeg usa U-Net \cite{ronneberger2015u} come architettura base. L'architettura 
 
 \item \textbf{MSFF Module}: Multi-Scale Feature Fusion module che fonde feature dell'input con difference information
 
-\item \textbf{Decoder}: genera una mappa di segmentazione binaria (normale/anomalo) invece di ricostruire l'immagine
+\item \textbf{Decoder}: genera una mappa di segmentazione binaria (nor\-ma\-le/a\-no\-ma\-lo) invece di ricostruire l'immagine
 \end{enumerate}
 
 \subparagraph{Memory Module e Difference Information.}
@@ -501,11 +534,19 @@ Il paradigma student-teacher, introdotto inizialmente con metodi come Uninformed
 
 \paragraph{Reverse Distillation (2022).}
 
-Reverse Distillation (RD) \cite{deng2022anomaly} modifica il pa\-ra\-dig\-ma student-teacher invertendo il flusso dell'informazione. Invece di teacher e student entrambi encoder con architetture simili, in RD il \textbf{teacher} è un \textit{encoder} pre-addestrato e congelato (down-sampling), mentre lo \textbf{student} è un \textit{decoder} (up-sampling) che deve ricostruire le feature estratte dal teacher partendo da una rappresentazione compressa.
+Reverse Distillation (RD) \cite{deng2022anomaly} modifica il pa\-ra\-dig\-ma student-teacher invertendo il flusso dell'informazione. Invece di teacher e student entrambi encoder con architetture simili, in RD il \textbf{teacher} è un \textit{encoder} pre-addestrato e congelato (down-sampling), mentre lo \textbf{student} è un \textit{decoder} (up-sampling) che deve ricostruire le feature estratte dal teacher partendo da una rappresentazione compressa (Figura \ref{fig:reverse_distillation}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{reverse-distillation.png}
+\caption{Reverse Distillation framework per anomaly detection. (a) Architettura: teacher encoder $E$ pre-addestrato, One-Class Bottleneck Embedding (OCBE), student decoder $D$ (addestrabile). Multi-scale Feature Fusion (MFF) combina le feature di basso e alto livello provenienti da $E$ e le mappa in un codice compatto tramite il blocco One-Class Embedding (OCE). Durante il training, lo student impara a replicare le feature del teacher minimizzando la similarity loss $\mathcal{L}$. (b) Inferenza: il teacher estrae feature fedelmente, mentre lo student produce versioni senza anomalie. Una bassa similarità tra feature corrispondenti indica anomalia. (c) La predizione finale aggrega mappe di similarità multi-scala $M$. Fonte: \cite{deng2022anomaly}}
+\label{fig:reverse_distillation}
+\end{figure}
+
 
 \subparagraph{Architettura e Inversione del Paradigma.}
 
-Oltre all'inversione dei ruoli, si ha anche l'inversione del flusso dei dati: l'immagine va al teacher mentre lo student riceve solo un embedding compatto. La distillazione avviene trasferendo la conoscenza da rappresentazioni high-level (astratte) a low-level (dettagli), in\-ver\-ten\-do l'ordine naturale.
+Oltre all'inversione dei ruo\-li, si ha anche l'inversione del flusso dei dati: l'immagine va al teacher mentre lo student riceve solo un embedding compatto. La distillazione avviene tras\-fe\-ren\-do la conoscenza da rappresentazioni high-level (astratte) a low-level (dettagli), in\-ver\-ten\-do l'ordine naturale.
 
 \begin{enumerate}
 \item \textbf{Teacher Encoder $E_T$} (pre-trained, fixed): Una rete pre-addestrata su ImageNet (es. ResNet) che estrae feature multi-scala $\{F_1^T, F_2^T, F_3^T\}$ da un'immagine di input $x$.
@@ -556,15 +597,23 @@ La performance di RD dipende fortemente dalla scelta della dimensione del bottle
 
 \paragraph{Reverse Distillation Revisited (RD++, 2023).}
 
-Tien et al. \cite{tien2023revisiting} identificano alcune limitazioni critiche nell'originale Reverse Distillation (RD) e propongono RD++, un'architettura migliorata che le affronta attraverso meccanismi espliciti di supervisione.
+Tien et al. \cite{tien2023revisiting} identificano alcune limitazioni critiche nell'originale Reverse Distillation (RD) e propongono RD++, un'architettura migliorata che le affronta attraverso meccanismi espliciti di supervisione (Figura \ref{fig:rd_plus_plus}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{reverse-distillation-revisited.png}
+\caption{Overview di RD++ durante training. Rispetto a RD, RD++ integra dei livelli di proiezione (\textit{projection layers}) dopo ogni blocco teacher intermedio per fornire rappresentazioni compatte prive di anomalie. La distillation loss $\mathcal{L}_{KD}$ viene combinata con: (1) Self-supervised Optimal Transport loss $\mathcal{L}_{SSOT}$, per proiettare lo spazio delle feature normali in una rappresentazione compatta, (2) Contrast loss $\mathcal{L}_{Con}$, per separare feature normali proiettate da quelle anomale, (3) Reconstruction loss $\mathcal{L}_{Recon}$ con pseudo-anomalie per guidare i projection layers a ricostruire lo spazio normale da feature pseudo-anomale. Fonte: \cite{tien2023revisiting}}
+\label{fig:rd_plus_plus}
+\end{figure}
+
 
 \subparagraph{Limitazioni di RD Originale.}
 
 Analizzando l'output del modulo OCBE (input allo student), gli autori scoprono due problemi critici:
 
-\textbf{Feature Compactness Insufficiente}: L'embedding prodotto per immagini normali presenta un'elevata varianza, indicando che il bottleneck non concentra efficacemente le feature nella regione normale dello spazio latente
+\textbf{Feature Compactness Insufficiente}: L'embedding prodotto per im\-ma\-gi\-ni normali presenta un'elevata varianza, indicando che il bottleneck non concentra efficacemente le feature nella regione normale dello spazio latente
 
-\textbf{Nessun Meccanismo Esplicito per Soppressione Anomalie}: RD assume implicitamente che il bottleneck filtri le anomalie, ma manca un meccanismo di supervisione diretta che penalizzi la propagazione di feature anomale.
+\textbf{Nessun Meccanismo Esplicito per Soppressione Anomalie}: RD assume implicitamente che il bottleneck filtri le anomalie, ma manca un mec\-ca\-nis\-mo di supervisione diretta che penalizzi la propagazione di feature anomale.
 
 \subparagraph{Architettura e Training Migliorati.}
 
@@ -572,7 +621,7 @@ RD++ introduce:
 \begin{enumerate}
     \item \textbf{Projection Layers Multi-Scala}: Strati convoluzionali leggeri inseriti dopo ogni blocco intermedio del teacher encoder, prima del modulo OCBE. Questi layers proiettano le feature in uno spazio più adatto prima della compressione nel bottleneck, permettendo di processare informazioni a diverse scale spaziali.
     \item \textbf{Self-Supervised Optimal Transport Loss ($\mathcal{L}_{SSOT}$)}: Una nuova loss che forza le feature di diversi campioni normali ad essere vicine nello spazio latente, migliorando esplicitamente la compattezza della rappresentazione.
-    \item \textbf{Reconstruction Loss ($\mathcal{L}_{Recon}$)}: Durante l'addestramento, vengono generate immagini sintetiche corrotte con rumore strutturato (Simplex noise). La loss incoraggia projection layers a mappare feature normali e pseudo-anomale \textit{vicine}, insegnando ai projection layer a "ricostruire" feature normali anche da input alterati, sviluppando robustezza contro anomalie.
+    \item \textbf{Reconstruction Loss ($\mathcal{L}_{Recon}$)}: Nell'addestramento, vengono ge\-ne\-ra\-te immagini sintetiche corrotte con rumore strutturato (Simplex noise). La loss incoraggia projection layers a mappare feature normali e pseudo-anomale \textit{vicine}, insegnando ai projection layer a "ricostruire" feature nor\-ma\-li anche da input alterati, sviluppando robustezza contro anomalie.
     \item \textbf{Contrast Loss ($\mathcal{L}_{Con}$)}: Loss margin-based che crea una separazione esplicita nello spazio latente tra feature normali (proiettate) e feature anomale (non proiettate). Impedisce al modello di collassare tutte le feature in un'unica regione, mantenendo una distinzione tra pattern normali e anomali.
 \end{enumerate}
 
@@ -608,8 +657,16 @@ EfficientAD \cite{batzner2024efficientad} rappresenta l'ultima evoluzione del pa
 EfficientAD combina \textbf{tre componenti in\-di\-pen\-den\-ti} con ruoli complementari:
 
 \begin{enumerate}
-    \item \textbf{Student-Teacher con PDN Teacher}: inizialmente, un \textbf{Patch Description Network (PDN)} leggero (tra 1M e 2M di parametri) viene "distillato" da un encoder pre-addestrato grande (WideResNet-101 su ImageNet). Questo processo di distillazione comprime la conoscenza della rete grande nel PDN piccolo. Poi, il PDN distillato diventa il \textbf{teacher} fisso, e uno \textbf{student} ancora più piccolo viene addestrato a replicarne l'output solo su dati normali.
+    \item \textbf{Student-Teacher con PDN Teacher}: inizialmente, un \textbf{Patch De\-scrip\-tion Network (PDN)} (Figura \ref{fig:efficientad_pdn}) leggero (tra 1M e 2M di parametri) viene "distillato" da un encoder pre-addestrato grande (Wide\-Res\-Net-101 su ImageNet). Questo processo di distillazione comprime la conoscenza della rete grande nel PDN piccolo. Poi, il PDN distillato diventa il \textbf{teacher} fisso, e uno \textbf{student} ancora più piccolo viene addestrato a replicarne l'output solo su dati normali.
     Al test, un'alta discrepanza tra student e PDN teacher indica una potenziale anomalia. Questo componente è particolarmente efficace nel rilevare \textit{anomalie strutturali e semantiche}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.80\textwidth]{pdn.png}
+\caption{Architettura del Patch Description Network (PDN) in EfficientAD. Il PDN riceve patch 33×33×3 e produce patch descriptors 1×1×384 attraverso layer convoluzionali (4×4 conv, 4×4 conv, 4×4 conv, 3×3 conv, 4×4 conv) alternati a pooling 2×2. Questo teacher leggero fornisce feature dense per il training dello student ancora più compatto, permettendo anomaly detection real-time efficiente. Fonte: \cite{batzner2024efficientad}}
+\label{fig:efficientad_pdn}
+\end{figure}
+
 
     \item \textbf{Autoencoder Compatto}: Un autoencoder con bottleneck molto stretto (64 canali) è addestrato a ricostruire immagini normali. La forte compressione impedisce la ricostruzione fedele di patterm mai visti durante il training (anomalie): la ricostruzione fallisce su anomalie ma riesce su normali. Al test, un elevato errore di ricostruzione segnala un'anomalia. Questo componente è specializzato nel catturare \textit{anomalie di texture e apparenza locale}.
     
@@ -641,17 +698,24 @@ EfficientAD rappresenta un punto di arrivo significativo, dimostrando che l'inte
 \subsection{Metodi Semplificati (2023)}
 \label{subsec:metodi-semplificati}
 
-Mentre metodi come EfficientAD hanno dimostrato l'efficacia degli ensemble complessi, una tendenza alternativa e contemporanea ha esplorato la direzione opposta: la \textbf{semplicità radicale}. L'idea fondamentale è che la complessità architettuale, oltre un certo punto, non porta benefici misurabili in accuratezza, ma introduce overhead computazionale, fragilità nella scelta degli iperparametri e difficoltà 
-di debugging e manutenzione \cite{liu2023simplenet}.
+Mentre metodi come EfficientAD hanno dimostrato l'efficacia degli ensemble complessi, una tendenza alternativa e contemporanea ha esplorato la direzione opposta: la \textbf{semplicità radicale}. L'idea fondamentale è che la complessità architettuale, oltre un certo punto, non porta benefici misurabili in accuratezza, ma introduce overhead computazionale, fragilità nella scelta degli iperparametri e difficoltà di debugging e manutenzione \cite{liu2023simplenet}.
 
 
 \paragraph{SimpleNet (2023).}
 SimpleNet \cite{liu2023simplenet} riduce al minimo la complessità, proponendo un sistema robusto, riproducibile ed efficiente. 
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{simplenet.png}
+\caption{Architettura di SimpleNet. Nella fase di addestramento, campioni normali passano attraverso un Feature Extractor pre-addestrato per ottenere le feature locali (\textit{local features}). In seguito, un Feature Adaptor adatta le feature al dominio target. Un Anomalous Feature Generator sintetizza feature anomale aggiungendo rumore Gaussiano $\varepsilon_{ijc} \sim \mathcal{N}(\mu, \sigma^2)$ alle features adattate. Il Discriminator impara a distinguere feature adattate (positive) da feature anomale (negative). All'inferenza, il generatore viene rimosso e il discriminatore produce direttamente anomaly maps. Fonte: \cite{liu2023simplenet}}
+\label{fig:simplenet}
+\end{figure}
+
+
 
 \subparagraph{Architettura: Four Components Only.}
 
-SimpleNet si compone di solo 4 componenti essenziali:
+SimpleNet si compone di solo 4 componenti essenziali (Figura \ref{fig:simplenet}):
 
 \begin{enumerate}
     \item \textbf{Feature Extractor (pre-trained, frozen)}: Una rete pre-addestrato su ImageNet (tipicamente WideResNet50). Pesi completamente frozen, senza fine-tuning, nessun backpropagation attraverso l'encoder. Estrazione mul\-ti\-sca\-la da layer intermedi.
@@ -713,20 +777,36 @@ Questa proprietà abilita la \textbf{classificazione zero-shot} tramite il sempl
 
 \paragraph{WinCLIP (2023).}
 
-WinCLIP \cite{jeong2023winclip} è stato il primo metodo ad adattare CLIP all'anomaly detection attraverso un approccio a \textit{sliding windows} per localizzazione pixel-level.
+WinCLIP \cite{jeong2023winclip} è stato il primo metodo ad adattare CLIP all'anomaly detection attraverso un approccio a \textit{sliding windows} per localizzazione pixel-level (Figura \ref{fig:winclip}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{winCLIP_w_plus.png}
+\caption{Workflow di WinCLIP e WinCLIP+. Templates testuali ("Perfect", "Flawless", stati anomali) vengono convertiti in due embedding testuali come prototipi di classe tramite l'encoder testuale di CLIP. WinCLIP (pannello superiore): feature multi-scala dell'encoder immagine di CLIP vengono correlate con i prototipi per zero-shot anomaly classification/segmentation. WinCLIP+ (pannello completo): aggiunge l'associazione di riferimento a livello di patch e finestre piccole/medie (Patch/WindowAssociation) per ottenere mappe di anomalia vision-based, che vengono poi aggregate per la segmentazione e il rilevamento di anomalie few-shot insieme ai punteggi guidati dal linguaggio. Fonte: \cite{jeong2023winclip}}
+\label{fig:winclip}
+\end{figure}
+
 
 Data un'immagine, WinCLIP estrae le feature per ogni finestra e calcola gli embedding CLIP. Questo processo genera una mappa densa di feature, dove ogni posizione è rappresentata da un vettore che codifica l'informazione visiva locale, ben allineata con lo spazio semantico del linguaggio.
 
 Per ottenere lo score di anomalia finale, il metodo combina i risultati delle singole finestre. Lo score di ciascuna finestra (dissimilarità tra la sua feature e l'embedding testuale del prompt che descrive la "normalità") viene prima riportato a livello di pixel. Successivamente, i contributi di tutte le finestre che sovrappongono uno stesso pixel vengono aggregati tramite una \textit{media armonica}, privilegiando i segnali meno anomali. Per rilevare difetti di dimensioni diverse, WinCLIP utilizza infine finestre di dimensioni multiple (piccola, media e a scala d'immagine), fondendo le relative mappe di anomalia in un'unica predizione finale robusta e multi-scala.
 
 \begin{itemize}
-  \item \textbf{Vantaggi}: Architettura zero-shot che non richiede training, interpretabilità data dall'uso di prompt testuali, flessibilità nell'adattarsi a nuove categorie di oggetti
+  \item \textbf{Vantaggi}: Architettura zero-shot che non richiede training, in\-ter\-pre\-ta\-bi\-li\-tà data dall'uso di prompt testuali, flessibilità nell'adattarsi a nuove categorie di oggetti
   \item \textbf{Limitazioni}: Performance sensibili alla formulazione dei prompt testuali, un divario di accuratezza rispetto ai metodi supervisionati addestrati su dati specifici, e un costo computazionale non trascurabile dovuto all'elaborazione di molte finestre scorrevoli.
 \end{itemize}
 
 \paragraph{AnomalyCLIP (2024).}
 
-AnomalyCLIP \cite{zhou2024anomalyclip} nasce per adattare CLIP al \textbf{zero-shot anomaly detection} (ZSAD): rilevare anomalie \textit{senza alcun esempio dal dominio target}, introducendo una serie di innovazioni che portano zero-shot a livelli competitivi.
+AnomalyCLIP \cite{zhou2024anomalyclip} nasce per adattare CLIP al \textbf{zero-shot anomaly detection} (ZSAD): rilevare anomalie \textit{senza alcun esempio dal dominio target}, introducendo una serie di innovazioni che portano zero-shot a livelli competitivi (Figura \ref{fig:anomalyclip}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{anomalyclip.png}
+\caption{Overview di AnomalyCLIP. Per adattare CLIP a zero-shot anomaly detection (ZSAD), AnomalyCLIP introduce template di prompt testuali agnostici ($\mathbf{v}_1 \cdots \mathbf{v}_E$ per normale, $\mathbf{w}_1 \cdots \mathbf{w}_E$ per anomalo) che catturano normalità e anomalia generiche indipendentemente dalla semantica dell'oggetto. La glocal context optimization incorpora la semantica di anomalia sia a livello globale che di dettaglio nell'apprendimento dei prompt testuali agnostici rispetto all'oggetto. Textual prompt tuning e DPAM (Directed Patch Attention Module, verde) in layer selezionati del vision encoder abilitano l'apprendimento negli spazi visivi testuali e locali. Fonte: \cite{zhou2024anomalyclip}}
+\label{fig:anomalyclip}
+\end{figure}
+
 
 \begin{itemize}
     \item \textbf{Object-Agnostic Prompts}: Abbandona i prompts legati a specifiche categorie in favore di prompts generici ("image without defects") , eliminando necessità di conoscere la classe dell'oggetto.
