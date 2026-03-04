@@ -907,3 +907,117 @@ L'analisi comparativa rivela cinque tendenze chiare che hanno plasmato il campo 
 
 \paragraph{Conclusioni.} Non esiste un metodo universalmente ottimale per l'anomaly detection industriale. La scelta deve bilanciare accuratezza, efficienza computazionale, quantità di dati disponibili e requisiti di deployment. La tendenza attuale privilegia architetture semplici, efficienti e generalizzabili, con un ruolo crescente della conoscenza semantica multimodale per superare i limiti della supervisione puramente visiva. Per applicazioni critiche, si raccomanda sempre la validazione sperimentale diretta sul dominio specifico di interesse.
 
+% ----------------------
+% METODI 3d
+% ----------------------
+
+\section{Metodi 3D per Anomaly Detection}
+\label{sec:metodi-3d}
+
+L'ispezione visiva basata su immagini 2D, pur avendo raggiunto livelli di accuratezza notevoli con i metodi descritti nelle sezioni precedenti (si veda in particolare la Tabella \ref{tab:panorama_metodi}), presenta limitazioni intrinseche nel rilevamento di difetti con caratteristiche tridimensionali. Deformazioni superficiali sottili, variazioni di profondità, ammaccature, graffi rilevabili solo da angolazioni multiple — tutti questi difetti non sono catturabili da una singola proiezione 2D. In molti contesti industriali, inoltre, l'ispezione visiva tradizionale viene affiancata o sostituita da sensori 3D (scanner a luce strutturata, laser, time-of-flight camera) in grado di acquisire la geometria completa dell'oggetto esaminato.
+
+L'introduzione del benchmark MVTec 3D-AD \cite{bergmann2021mvtec3d} nel 2021 ha fornito il primo dataset standardizzato per l'anomaly detection su dati 3D, comprendente point cloud ad alta risoluzione e immagini RGB allineate per 10 categorie di oggetti. Questo dataset ha dato inizio allo sviluppo di una nuova generazione di metodi capaci di sfruttare informazioni geometriche, da soli o in combinazione con l'RGB.
+
+I dati 3D introducono sfide specifiche rispetto all'analisi 2D:
+\begin{itemize}
+    \item la natura non strutturata e sparsa dei point cloud richiede architetture dedicate (PointNet, voxel grid, sparse convolution) che possano operare su coordinate irregolari
+    \item l'allineamento tra modalità RGB e 3D aggiunge com\-ples\-si\-tà com\-pu\-ta\-zio\-na\-le
+    \item la densità di campionamento varia tra acquisizioni e all'interno dello stesso oggetto, rendendo meno diretta l'applicazione di metodi feature-based convenzionali come quelli descritti nel paragrafo \ref{subsec:metodi-feature-based}
+\end{itemize}
+
+Nonostante queste difficoltà, i metodi 3D hanno mostrato progressi rapidi, beneficiando anche dell'integrazione con tecniche 2D consolidate estese. Nelle prossime sottosezioni verranno analizzati i principali approcci proposti in letteratura, distinguendo tra metodi che operano esclusivamente su dati 3D (point cloud, voxel) e metodi multimodali che combinano RGB e geometria.
+
+% ---------------------------------------------------------------
+\subsection{Estensioni Dirette ai Dati 3D (2021)}
+\label{subsec:metodi-3d-voxel}
+
+I primi approcci all'anomaly detection su dati 3D adottarono la strategia più immediata: convertire i point cloud in rappresentazioni voxelizzate regolari e applicare adattamenti diretti dei metodi 2D già consolidati, mantenendo le stesse architetture con modifiche minime. Questi metodi furono proposti come baseline nel paper introduttivo di MVTec 3D-AD \cite{bergmann2021mvtec3d}.
+
+\paragraph{Voxel Autoencoder e Voxel f-AnoGAN.}
+Il \textbf{Voxel Autoencoder} \cite{bengs2021voxelae} estende il paradigma ricostruttivo degli AE 2D a volumi 3D voxelizzati: il modello viene addestrato a ricostruire voxel normali, utilizzando l'errore di ricostruzione come anomaly score. \textbf{Voxel f-AnoGAN} \cite{simarroviana2021voxelfanogan} applica analogamente l'architettura f-AnoGAN (si veda la Sezione \ref{subsec:metodi-GAN}) a rappresentazioni volumetriche.
+
+I risultati su MVTec 3D-AD rivelarono performance modeste. Ad esempio, Voxel f-AnoGAN, il migliore tra i metodi solo-3D, ottenne un AUPRO di segmentazione di circa $0.583$, mentre la sua versione con RGB integrato raggiunse lo $0.639$ \cite{bergmann2021mvtec3d}. Questi risultati evidenziavano un divario significativo rispetto alle performance che i metodi 2D raggiungevano sui loro benchmark, confermando che la semplice voxelizzazione e l'applicazione di architetture 2D non erano sufficienti \cite{bergmann2021mvtec3d}.
+
+Le limitazioni sono quelle già osservate per i corrispettivi 2D (reconstruction bias, information loss) ma amplificate dalla discretizzazione voxelica, che introduce una perdita di risoluzione geometrica e una crescita cubica dei requisiti di memoria all'aumentare della risoluzione desiderata \cite{qi2016volumetric}.
+
+È interessante notare come entrambi i metodi provengano originariamente dal dominio dell'analisi di immagini mediche cerebrali (MRI) e siano stati adattati da Bergmann et al. al contesto industriale come baseline: questo riflette la mancanza, nel 2021, di metodi nativamente progettati per point cloud industriali, e motiva direttamente lo sviluppo delle linee di ricerca descritte nelle sezioni successive.
+
+\paragraph{Variation Models e Metodi su Mappe di Profondità.}
+Come baseline aggiuntiva, il paper di MVTec 3D-AD valutò anche \textit{variation models}, metodi applicati direttamente alle immagini di profondità (depth maps). In questo caso, si trattava il canale di profondità come una quarta banda di un'immagine RGB-D, utilizzando architetture 2D standard (come Autoencoder e GAN) \cite{bergmann2021mvtec3d}. I risultati furono persino inferiori a quelli dei metodi voxel: sebbene concettualmente semplice, questo approccio perde completamente l'informazione geometrica tridimensionale e si rivela inadeguato per anomalie che si manifestano esclusivamente nella struttura 3D dell'oggetto, come ammaccature profonde o deformazioni \cite{bergmann2021mvtec3d}.
+
+L'insieme di questi risultati deludenti confermò la necessità di metodi nativamente progettati per la geometria 3D, stimolando le linee di ricerca descritte nelle sezioni successive, che si concentrarono sull'estrazione di feature geometriche robuste.
+
+% ---------------------------------------------------------------
+\subsection{Metodi Feature-based per Point Cloud (2022--2023)}
+\label{subsec:metodi-3d-pointcloud}
+
+Il trasferimento dell'intuizione dei metodi feature-based 2D (sfruttare rappresentazioni pre-addestrate potenti invece di addestrare generatori complessi) al dominio 3D ha prodotto i metodi più efficaci per l'analisi di point cloud. La differenza principale rispetto al caso 2D risiede nella necessità di backbone pre-addestrati specifici per point cloud, come PointMAE \cite{pang2022masked} o Point Transformer \cite{zhao2021point}, in grado di estrarre feature geometriche significative.
+
+%% fino a qui
+
+\paragraph{BTF --- Back to the Feature (2023).}
+BTF (\textit{Back to the Feature}) \cite{horwitz2023back} è rapidamente diventato il
+riferimento principale per l'anomaly detection su point cloud, portando al dominio 3D
+l'intuizione di PatchCore con risultati sorprendenti: come suggerito dal titolo, feature
+geometriche ``classiche'' estratte in maniera semplice si rivelano quasi sufficienti per ottenere
+performance state-of-the-art.
+
+\subparagraph{Architettura e Feature Extraction.}
+BTF opera direttamente sulla geometria del point cloud senza richiedere una voxelizzazione.
+Per ogni punto $\mathbf{p}_i$ del cloud, il metodo estrae un descrittore locale che combina:
+\begin{itemize}
+    \item \textbf{Feature FPFH} (Fast Point Feature Histograms) \cite{rusu2009fast}:
+    descrittori geometrici classici che codificano la curvatura e l'orientamento della superficie
+    locale tramite istogrammi di differenze angolari tra normali di superficie vicine.
+    \item \textbf{Feature profonde} estratte da backbone 3D pre-addestrati (opzionale):
+    PointMAE \cite{pang2022masked} addestrato su ShapeNet come feature extractor.
+\end{itemize}
+
+\subparagraph{Memory Bank e Nearest Neighbor Scoring.}
+Seguendo lo schema di PatchCore, BTF costruisce una memory bank dei descrittori di tutti i
+punti delle nuvole normali del training set, applicando un coreset subsampling per ridurne
+le dimensioni. Al test time, per ogni punto $\mathbf{p}^{test}_i$ si calcola la distanza dal
+nearest neighbor nella memory bank:
+\begin{equation}
+    s(\mathbf{p}^{test}_i) = \min_{\mathbf{f} \in \mathcal{M}} \|\mathbf{f}^{test}_i - \mathbf{f}\|_2
+\end{equation}
+L'anomaly score a livello di punto fornisce direttamente una mappa 3D di anomalia
+(\textit{point-level segmentation}), mentre lo score a livello di campione è il massimo dei
+punteggi sui punti.
+
+\subparagraph{Risultati e Impatto.}
+BTF dimostrò che feature geometriche classiche come FPFH, opportunamente organizzate in
+una memory bank, raggiungono performance competitive rispetto a metodi che sfruttano
+backbone profondi costosi, con il vantaggio di non richiedere alcuna fase di training.
+Il metodo stabilì un baseline solido per MVTec~3D-AD e rimane ampiamente utilizzato come
+confronto nei benchmark 3D più recenti (SiM3D \cite{sim3d2025}, RAD \cite{rad2024}).
+La limitazione principale è la sensibilità alla densità e all'allineamento del point cloud: variazioni
+significative nel campionamento possono alterare le statistiche FPFH.
+
+\paragraph{Shape-Guided Dual-Memory Learning (2023).}
+Shape-Guided \cite{chu2023shape} introduce un approccio a doppia memoria specializzato
+per sfruttare contemporaneamente l'informazione di forma (\textit{shape}) e di struttura
+locale (\textit{local geometry}). Il metodo mantiene due memory bank distinte:
+\begin{enumerate}
+    \item \textbf{Shape Memory}: prototipi globali che codificano la forma caratteristica
+    dell'oggetto normale a livello macroscopico.
+    \item \textbf{Patch Memory}: descrittori locali che modellano le variazioni di superficie
+    a livello di regione.
+\end{enumerate}
+L'anomaly score finale aggrega i contributi di entrambe le memorie, permettendo di rilevare
+sia anomalie strutturali (che alterano la forma globale) sia difetti superficiali locali
+(che modificano la geometria a piccola scala). Shape-Guided ottenne performance superiori
+a BTF su MVTec~3D-AD nella variante che integra anche feature RGB, dimostrando la
+complementarità tra informazione di forma e colore.
+
+\paragraph{Reg3D-AD (2023).}
+Reg3D-AD \cite{liu2023real3dad} è un metodo \textit{registration-based} progettato per
+lo scenario few-shot del benchmark Real3D-AD \cite{liu2023real3dad}, dove il training set
+contiene solo 4 campioni normali per categoria. L'idea fondamentale è registrare (allineare)
+il point cloud di test con il prototipo normale tramite ICP (\textit{Iterative Closest Point})
+o varianti differenziabili, e misurare le deviazioni residue post-allineamento come anomaly
+score. Questo approccio è particolarmente adatto agli scenari few-shot in cui non si dispone
+di dati sufficienti per costruire memory bank robuste, ma richiede che gli oggetti abbiano
+geometria sufficientemente rigida per garantire l'allineamento.
+
+
