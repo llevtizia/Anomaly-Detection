@@ -125,9 +125,24 @@ I dataset basati su immagini RGB 2D rappresentano il nucleo della ricerca in ano
 \label{sec:magnetic_tile}
 Rappresentante della prima generazione di dataset, Magnetic Tile \cite{huang2018surface} è stato uno dei primi dataset specificamente creati per anomaly detection industriale, focalizzato sul rilevamento di difetti superficiali in piastrelle magnetiche.
 
-\paragraph{Caratteristiche.} Il dataset contiene \textbf{1,344 immagini in scala di grigi} di piastrelle magnetiche distribuite in 6 classi a seconda del tipo di difetto: Blowhole, Crack, Fray, Break, Uneven, e Free (assenza di difetti). Le immagini catturano difetti tipici del processo di produzione di componenti magnetici.
+\paragraph{Caratteristiche.} Il dataset contiene \textbf{1,344 immagini in scala di grigi} di piastrelle magnetiche distribuite in 6 classi a seconda del tipo di difetto: Blowhole, Crack, Fray, Break, Uneven, e Free (assenza di difetti). Le immagini catturano difetti tipici del processo di produzione di componenti magnetici (Figura \ref{fig:magnetic_tile_defects}).
 
-\paragraph{Contributo Metodologico.} Il dataset introdusse \textbf{MCuePushU}, un mo\-del\-lo di saliency detection che combina:
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{magnetic-tile-defects}
+    \caption{Esempi di difetti superficiali su piastrelle magnetiche con le rispettive maschere di ground truth a livello di pixel (GT) \cite{huang2018surface}.}
+    \label{fig:magnetic_tile_defects}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{mcuepushu-overview}
+    \caption{Schema dell'architettura MCuePushU con i tre componenti principali: MCue, U-Net e Push Network.}
+    \label{fig:mcuepushu}
+\end{figure}
+
+
+\paragraph{Contributo Metodologico.} Il dataset introdusse \textbf{MCuePushU} (Fi\-gu\-ra \ref{fig:mcuepushu}), un mo\-del\-lo di saliency detection che combina:
 \begin{enumerate}
 \item Estrazione di \textit{dominant cues} (caratteristiche salienti) dai dati
 \item Fusione di questi cues in una rete U-Net \cite{ronneberger2015u} tramite operazioni aritmetiche sulle immagini
@@ -148,7 +163,14 @@ Rappresentante della prima generazione di dataset, Magnetic Tile \cite{huang2018
 \label{sec:mvtec_ad}
 MVTec Anomaly Detection (MVTec AD) \cite{bergmann2019mvtec} è diventato il benchmark di riferimento universale per l'anomaly detection industriale, utilizzato come baseline in praticamente tutti i lavori successivi.
 
-\paragraph{Caratteristiche.} Il dataset contiene \textbf{5,354 immagini RGB ad alta ri\-so\-lu\-zio\-ne} distribuite su 15 categorie distinte: 10 categorie di oggetti (bottle, cable, capsule, hazelnut, metal nut, pill, screw, toothbrush, transistor, zipper) e 5 categorie di texture (carpet, grid, leather, tile, wood). Le immagini normali (3629 defect-free) costituiscono il training set, mentre il test set include 1725 immagini con anomalie. Sono presenti \textbf{73 tipologie di difetti} generati manualmente (in media 5 per categoria), riproducendo difetti realistici: graffi, denti, contaminazioni, deformazioni, componenti mancanti, disallineamenti
+\paragraph{Caratteristiche.} Il dataset contiene \textbf{5,354 immagini RGB ad alta ri\-so\-lu\-zio\-ne} distribuite su 15 categorie distinte: 10 categorie di oggetti (bottle, cable, capsule, hazelnut, metal nut, pill, screw, toothbrush, transistor, zipper) e 5 categorie di texture (carpet, grid, leather, tile, wood). Le immagini normali (3629 defect-free) costituiscono il training set, mentre il test set include 1725 immagini con anomalie. Sono presenti \textbf{73 tipologie di difetti} generati manualmente (in media 5 per categoria), riproducendo difetti realistici: graffi, denti, contaminazioni, deformazioni, componenti mancanti, disallineamenti (Figura \ref{fig:mvtec_ad}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.82\textwidth]{mvtec-ad}
+    \caption{Esempi di immagini per le cinque categorie di texture e le dieci categorie di oggetti del dataset MVTec AD~\cite{bergmann2019mvtec}. Per ogni categoria, la riga superiore mostra un'immagine priva di anomalie, la riga centrale un esempio anomalo e la riga inferiore un ingrandimento che evidenzia la regione difettosa.}
+    \label{fig:mvtec_ad}
+\end{figure}
 
 \paragraph{Annotazioni Pixel-Precise.} Ogni immagine anomala è corredata da una \textit{ground truth} mask binaria che segmenta a livello di pixel la regione difettosa. Questo permette la valutazione sia del task di \textbf{image-level classification} (l'im\-ma\-gi\-ne è normale o anomala?) che di \textbf{pixel-level localization} (dove si trova esattamente il difetto?).
 
@@ -191,13 +213,20 @@ MVTec Anomaly Detection (MVTec AD) \cite{bergmann2019mvtec} è diventato il benc
 
 Metal Parts Defect Dataset (MPDD) \cite{jezek2021deep} fu introdotto per colmare una lacuna specifica: la scarsità di dataset focalizzati su parti metalliche, un dominio con caratteristiche distintive (superfici riflettenti, texture uniformi, variazioni cromatiche sottili). 
 
-\paragraph{Caratteristiche.} MPDD contiene \textbf{1,346 immagini RGB} distribuite su 6 classi di componenti metallici: bracket black, bracket brown, bracket white, connector, metal plate, tubes. Il dataset è suddiviso in:
+\paragraph{Caratteristiche.} MPDD contiene \textbf{1,346 immagini RGB} distribuite su 6 classi di componenti metallici: bracket black, bracket brown, bracket white, connector, metal plate, tubes (Figura \ref{fig:mpdd}). Il dataset è suddiviso in:
 \begin{itemize}
 \item \textbf{Training set}: 888 campioni (solo normali)
 \item \textbf{Test set}: 458 campioni (176 normali, 282 anomali)
 \end{itemize}
 
 Le anomalie coprono scenari tipici: scratches (graffi), holes (buchi), missing parts (parti mancanti), rust (ruggine). Ogni immagine anomala è annotata con una pixel-precise ground truth mask.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{mpdd-dataset}
+    \caption{Campioni del dataset MPDD \cite{jezek2021deep}: nella riga superiore gli esempi normali del training set, nelle righe centrale e inferiore i campioni del test set con le rispettive anomalie evidenziate.}
+    \label{fig:mpdd}
+\end{figure}
 
 \paragraph{Metodi Valutati.} MPDD confrontò due categorie di metodi:
 \begin{itemize}

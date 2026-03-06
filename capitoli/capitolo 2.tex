@@ -953,71 +953,28 @@ L'insieme di questi risultati deludenti confermò la necessità di metodi nativa
 
 Il trasferimento dell'intuizione dei metodi feature-based 2D (sfruttare rappresentazioni pre-addestrate potenti invece di addestrare generatori complessi) al dominio 3D ha prodotto i metodi più efficaci per l'analisi di point cloud. La differenza principale rispetto al caso 2D risiede nella necessità di backbone pre-addestrati specifici per point cloud, come PointMAE \cite{pang2022masked} o Point Transformer \cite{zhao2021point}, in grado di estrarre feature geometriche significative.
 
-%% fino a qui
 
 \paragraph{BTF --- Back to the Feature (2023).}
-BTF (\textit{Back to the Feature}) \cite{horwitz2023back} è rapidamente diventato il
-riferimento principale per l'anomaly detection su point cloud, portando al dominio 3D
-l'intuizione di PatchCore con risultati sorprendenti: come suggerito dal titolo, feature
-geometriche ``classiche'' estratte in maniera semplice si rivelano quasi sufficienti per ottenere
-performance state-of-the-art.
+Alla pubblicazione, BTF (\textit{Back to the Feature}) \cite{horwitz2023back} divenne un importante riferimento per l'anomaly detection su point cloud. Il contributo centrale del paper è un'analisi empirica sistematica delle rappresentazioni 3D: confrontando descrittori hand-crafted (FPFH, HoG, SIFT su depth map) con metodi deep (PointNeXt, SpinNet), si mostra che la \textit{rotation invariance} è la proprietà discriminante più importante. 
 
-\subparagraph{Architettura e Feature Extraction.}
-BTF opera direttamente sulla geometria del point cloud senza richiedere una voxelizzazione.
-Per ogni punto $\mathbf{p}_i$ del cloud, il metodo estrae un descrittore locale che combina:
-\begin{itemize}
-    \item \textbf{Feature FPFH} (Fast Point Feature Histograms) \cite{rusu2009fast}:
-    descrittori geometrici classici che codificano la curvatura e l'orientamento della superficie
-    locale tramite istogrammi di differenze angolari tra normali di superficie vicine.
-    \item \textbf{Feature profonde} estratte da backbone 3D pre-addestrati (opzionale):
-    PointMAE \cite{pang2022masked} addestrato su ShapeNet come feature extractor.
-\end{itemize}
+\subparagraph{Motivazione e Rotazione-Invarianza.}
+I metodi che non garantiscono questa proprietà falliscono nel riconoscere anomalie geometriche quando l'og\-get\-to si presenta in orientamenti diversi, mentre descrittori intrinsecamente invarianti alla rotazione (come FPFH) mantengono la loro efficacia indipendentemente dalla posa.
+ 
 
-\subparagraph{Memory Bank e Nearest Neighbor Scoring.}
-Seguendo lo schema di PatchCore, BTF costruisce una memory bank dei descrittori di tutti i
-punti delle nuvole normali del training set, applicando un coreset subsampling per ridurne
-le dimensioni. Al test time, per ogni punto $\mathbf{p}^{test}_i$ si calcola la distanza dal
-nearest neighbor nella memory bank:
-\begin{equation}
-    s(\mathbf{p}^{test}_i) = \min_{\mathbf{f} \in \mathcal{M}} \|\mathbf{f}^{test}_i - \mathbf{f}\|_2
-\end{equation}
-L'anomaly score a livello di punto fornisce direttamente una mappa 3D di anomalia
-(\textit{point-level segmentation}), mentre lo score a livello di campione è il massimo dei
-punteggi sui punti.
+\subparagraph{Feature Extraction.}
+BTF opera direttamente sulla geometria del point cloud senza richiedere una voxelizzazione. 
+
+Per la componente 3D estrae descrittori \textbf{FPFH} (Fast Point Feature Histograms) \cite{rusu2009fast}: per ogni punto, FPFH calcola  prima i punti k-NN (\textit{k-Nearest-Neighbors}) rispetto al punto centrale della regione, per poi calcolare un istogramma in funzione delle normali di superficie e della distanza dai punti vicini, Per la componente colore, BTF applica PatchCore sull'immagine RGB corrispondente, estraendo feature da un WideResNet50 pre-addestrato su ImageNet. Le due rappresentazioni vengono concatenate, formando un descrittore combinato colore + 3D.
+
+
+\subparagraph{k-NN Scoring.}
+Durante il training, BTF raccoglie i descrittori di tutti i punti di tutte le nuvole normali in un unico insieme $S = \{\phi(x, j) \; \forall x \; \forall j\}$, senza alcuna compressione o subsampling. Al test time, per ogni punto del campione di test si calcola la distanza dal suo k-esimo vicino più prossimo nell'insieme $S$: una distanza elevata indica che il punto si discosta dalla distribuzione
+normale appresa e segnala una potenziale anomalia. Questo produce direttamente una mappa di anomalia a livello di punto (\textit{point-level segmentation}), mentre lo score a livello di campione è determinato dal punto con la distanza massima. La scelta di usare l'intero insieme $S$ senza compressione è resa praticabile dalla bassa dimensionalità dei descrittori FPFH, molto più contenuta rispetto alle feature dense estratte da CNN.
+
 
 \subparagraph{Risultati e Impatto.}
-BTF dimostrò che feature geometriche classiche come FPFH, opportunamente organizzate in
-una memory bank, raggiungono performance competitive rispetto a metodi che sfruttano
-backbone profondi costosi, con il vantaggio di non richiedere alcuna fase di training.
-Il metodo stabilì un baseline solido per MVTec~3D-AD e rimane ampiamente utilizzato come
-confronto nei benchmark 3D più recenti (SiM3D \cite{sim3d2025}, RAD \cite{rad2024}).
-La limitazione principale è la sensibilità alla densità e all'allineamento del point cloud: variazioni
-significative nel campionamento possono alterare le statistiche FPFH.
-
-\paragraph{Shape-Guided Dual-Memory Learning (2023).}
-Shape-Guided \cite{chu2023shape} introduce un approccio a doppia memoria specializzato
-per sfruttare contemporaneamente l'informazione di forma (\textit{shape}) e di struttura
-locale (\textit{local geometry}). Il metodo mantiene due memory bank distinte:
-\begin{enumerate}
-    \item \textbf{Shape Memory}: prototipi globali che codificano la forma caratteristica
-    dell'oggetto normale a livello macroscopico.
-    \item \textbf{Patch Memory}: descrittori locali che modellano le variazioni di superficie
-    a livello di regione.
-\end{enumerate}
-L'anomaly score finale aggrega i contributi di entrambe le memorie, permettendo di rilevare
-sia anomalie strutturali (che alterano la forma globale) sia difetti superficiali locali
-(che modificano la geometria a piccola scala). Shape-Guided ottenne performance superiori
-a BTF su MVTec~3D-AD nella variante che integra anche feature RGB, dimostrando la
-complementarità tra informazione di forma e colore.
-
-\paragraph{Reg3D-AD (2023).}
-Reg3D-AD \cite{liu2023real3dad} è un metodo \textit{registration-based} progettato per
-lo scenario few-shot del benchmark Real3D-AD \cite{liu2023real3dad}, dove il training set
-contiene solo 4 campioni normali per categoria. L'idea fondamentale è registrare (allineare)
-il point cloud di test con il prototipo normale tramite ICP (\textit{Iterative Closest Point})
-o varianti differenziabili, e misurare le deviazioni residue post-allineamento come anomaly
-score. Questo approccio è particolarmente adatto agli scenari few-shot in cui non si dispone
-di dati sufficienti per costruire memory bank robuste, ma richiede che gli oggetti abbiano
-geometria sufficientemente rigida per garantire l'allineamento.
+BTF dimostrò che descrittori geometrici classici come FPFH, grazie alla loro invarianza alla rotazione, raggiungono performance competitive rispetto a metodi che sfruttano backbone profondi costosi, con il vantaggio di non richiedere alcuna fase di training.
+Il metodo stabilì un baseline solido per MVTec 3D-AD e rimane ampiamente utilizzato come confronto nei benchmark 3D più recenti (SiM3D \cite{sim3d2025}, Real3D-AD \cite{rad2024}).
+La limitazione principale è la sensibilità alla densità e all'allineamento del point cloud: variazioni significative nel campionamento possono alterare le statistiche FPFH.
 
 
