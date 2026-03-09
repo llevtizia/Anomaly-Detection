@@ -977,6 +977,38 @@ BTF dimostrò che descrittori geometrici classici come FPFH, grazie alla loro in
 Il metodo stabilì un baseline solido per MVTec 3D-AD e rimane ampiamente utilizzato come confronto nei benchmark 3D più recenti (SiM3D \cite{sim3d2025}, Real3D-AD \cite{liu2023real3dad}).
 La limitazione principale è la sensibilità alla densità e all'allineamento del point cloud: variazioni significative nel campionamento possono alterare le statistiche FPFH.
 
-%% riparto da qui 06/03
+%% Shape Guided Dual Memory
+\paragraph{Shape-Guided Dual-Memory Learning (2023).}
+Shape-Guided \cite{chu2023shape} introduce un framework a due esperti specializzati, ciascuno dedicato a una mo\-da\-li\-tà, le cui memory bank sono collegate da un meccanismo di guida geometrica (Figura \ref{fig:shape_guided_memory}).
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{immagini/capitolo2/shape-guided-memory.png}
+\caption{Dual memory bank di Shape-Guided. La SDF memory bank $M_S$ memorizza le feature geometriche locali di ciascun patch normale. La RGB memory bank $M_A$ non è un insieme piatto di descrittori, ma una collezione di dizionari RGB indicizzati per patch SDF: ogni entry di $M_S$ punta al proprio dizionario di feature RGB corrispondenti in $M_A$. Questo collegamento shape-guided permette di cercare i nearest neighbor RGB solo nel sottoinsieme geometricamente coerente con la patch di test. Fonte: \cite{chu2023shape}}
+\label{fig:shape_guided_memory}
+\end{figure}
+
+\subparagraph{Shape Expert e SDF Memory Bank.}
+Il point cloud viene suddiviso in 3D patch locali tramite Farthest Point Sampling (FPS). Per ciascun patch, PointNet \cite{qi2017pointnet} estrae un vettore di feature $\mathbf{f}$ che codifica la geometria locale. Questo vettore viene passato a una Neural Implicit Function (\textbf{NIF}) che apprende la \textit{signed distance function} (\textbf{SDF}) della superficie: per ogni punto query $\mathbf{q}$ vicino alla superficie, il modello predice la sua distanza con segno 
+\begin{equation}
+    s = \varphi(\mathbf{q};\, \mathbf{f})
+\end{equation}
+
+Un aspetto chiave è che la NIF $\varphi$ è \textbf{condivisa e category-agnostic}: lo stesso modello viene addestrato su tutte le patch di tutte le categorie, senza specializzazione per singola classe. Di conseguenza, al termine del training è sufficiente  memorizzare i soli vettori $\mathbf{f}$ di PointNet nella \textbf{SDF memory bank} $M_S$, senza salvare i parametri della NIF per ciascuna patch. Il vantaggio rispetto a descrittori classici come FPFH è che le SDF modellano la geometria in modo continuo, catturando deformazioni sottili che istogrammi discreti non riescono a rappresentare.
+
+
+\subparagraph{Appearance Expert e RGB Memory Bank Shape-Guided.}
+L'\textit{ap\-pear\-ance expert} costruisce la RGB memory bank $M_A$ sfruttando il collegamento geometrico stabilito dallo shape expert. Per ogni patch SDF in $M_S$, i punti 3D corrispondenti sono proiettati sul piano immagine 2D per recuperare le feature RGB  da un WideResNet50 pre-addestrato, espanse di due pixel per catturare anche i bordi dei difetti. 
+
+Ogni entry di $M_S$ ha il proprio dizionario RGB dedicato in $M_A$: al test time, per un patch di test si trovano prima i vicini più prossimi in $M_S$ (patch normali con geometria più simile). Solo per questi si accede ai rispettivi dizionari RGB in $M_A$: così, il confronto del colore avviene esclusivamente tra patch che condividono una struttura geometrica simile. Ad esempio, il colore di una zona curva dell'oggetto non viene mai confrontato con le feature RGB di una zona piatta, evitando falsi positivi..
+
+\subparagraph{Inferenza e Score Fusion.}
+Per ogni patch di test si trovano i $k_1 = 10$ vicini più prossimi in $M_S$, che formano un dizionario locale. Invece di usare la distanza dal singolo nearest neighbor come anomaly score, si applica \textbf{sparse coding}: si cerca la combinazione lineare sparsa dei 10 elementi che meglio ricostruisce la feature di test, e la distanza di ricostruzione diventa lo score di anomalia geometrica. Lo stesso meccanismo viene poi applicato per la componente RGB usando il dizionario shape-guided estratto da $M_A$, producendo uno score di anomalia di colore.
+
+Poiché le scale numeriche dei due score sono molto diverse, viene applicato un allineamento score-map calibrato su 25 campioni normali: la media $\pm 3 \times \text{standard deviation}$ della distribuzione
+RGB viene mappata sulla corrispondente distribuzione SDF. Le due mappe di anomalia vengono infine fuse per massimo pixel-wise.
+
+\subparagraph{Risultati e Impatto.}
+Shape-Guided superò BTF su MVTec 3D-AD (AU\-PRO $0.976$ vs $0.964$), con il vantaggio aggiuntivo di richiedere meno memoria rispetto a BTF che usa PatchCore sull'intero insieme RGB: la struttura shape-guided riduce il numero di feature RGB da indicizzare da $208{,}230$
+a $26{,}452$.
 
