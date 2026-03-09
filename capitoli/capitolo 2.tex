@@ -964,7 +964,7 @@ I metodi che non garantiscono questa proprietà falliscono nel riconoscere anoma
 \subparagraph{Feature Extraction.}
 BTF opera direttamente sulla geometria del point cloud senza richiedere una voxelizzazione. 
 
-Per la componente 3D estrae descrittori \textbf{FPFH} (Fast Point Feature Histograms) \cite{rusu2009fast}: per ogni punto, FPFH calcola  prima i punti k-NN (\textit{k-Nearest-Neighbors}) rispetto al punto centrale della regione, per poi calcolare un istogramma in funzione delle normali di superficie e della distanza dai punti vicini, Per la componente colore, BTF applica PatchCore sull'immagine RGB corrispondente, estraendo feature da un WideResNet50 pre-addestrato su ImageNet. Le due rappresentazioni vengono concatenate, formando un descrittore combinato colore + 3D.
+Per la componente 3D estrae descrittori \textbf{FPFH} (Fast Point Feature Histograms) \cite{rusu2009fast}: per ogni punto, FPFH calcola  prima i punti k-NN (\textit{k-Nearest-Neighbors}) rispetto al punto centrale della regione, per poi calcolare un istogramma in funzione delle normali di superficie e della distanza dai punti vicini. Per la componente colore, BTF applica PatchCore sull'immagine RGB corrispondente, estraendo feature da un WideResNet50 pre-addestrato su ImageNet. Le due rappresentazioni vengono concatenate, formando un descrittore combinato colore + 3D.
 
 
 \subparagraph{k-NN Scoring.}
@@ -1000,7 +1000,7 @@ Un aspetto chiave è che la NIF $\varphi$ è \textbf{condivisa e category-agnost
 \subparagraph{Appearance Expert e RGB Memory Bank Shape-Guided.}
 L'\textit{ap\-pear\-ance expert} costruisce la RGB memory bank $M_A$ sfruttando il collegamento geometrico stabilito dallo shape expert. Per ogni patch SDF in $M_S$, i punti 3D corrispondenti sono proiettati sul piano immagine 2D per recuperare le feature RGB  da un WideResNet50 pre-addestrato, espanse di due pixel per catturare anche i bordi dei difetti. 
 
-Ogni entry di $M_S$ ha il proprio dizionario RGB dedicato in $M_A$: al test time, per un patch di test si trovano prima i vicini più prossimi in $M_S$ (patch normali con geometria più simile). Solo per questi si accede ai rispettivi dizionari RGB in $M_A$: così, il confronto del colore avviene esclusivamente tra patch che condividono una struttura geometrica simile. Ad esempio, il colore di una zona curva dell'oggetto non viene mai confrontato con le feature RGB di una zona piatta, evitando falsi positivi..
+Ogni entry di $M_S$ ha il proprio dizionario RGB dedicato in $M_A$: al test time, per un patch di test si trovano prima i vicini più prossimi in $M_S$ (patch normali con geometria più simile). Solo per questi si accede ai rispettivi dizionari RGB in $M_A$: così, il confronto del colore avviene esclusivamente tra patch che condividono una struttura geometrica simile. Ad esempio, il colore di una zona curva dell'oggetto non viene mai confrontato con le feature RGB di una zona piatta, evitando falsi positivi.
 
 \subparagraph{Inferenza e Score Fusion.}
 Per ogni patch di test si trovano i $k_1 = 10$ vicini più prossimi in $M_S$, che formano un dizionario locale. Invece di usare la distanza dal singolo nearest neighbor come anomaly score, si applica \textbf{sparse coding}: si cerca la combinazione lineare sparsa dei 10 elementi che meglio ricostruisce la feature di test, e la distanza di ricostruzione diventa lo score di anomalia geometrica. Lo stesso meccanismo viene poi applicato per la componente RGB usando il dizionario shape-guided estratto da $M_A$, producendo uno score di anomalia di colore.
@@ -1011,4 +1011,96 @@ RGB viene mappata sulla corrispondente distribuzione SDF. Le due mappe di anomal
 \subparagraph{Risultati e Impatto.}
 Shape-Guided superò BTF su MVTec 3D-AD (AU\-PRO $0.976$ vs $0.964$), con il vantaggio aggiuntivo di richiedere meno memoria rispetto a BTF che usa PatchCore sull'intero insieme RGB: la struttura shape-guided riduce il numero di feature RGB da indicizzare da $208{,}230$
 a $26{,}452$.
+
+\paragraph{Reg3D-AD (2023).}
+Reg3D-AD \cite{liu2023real3dad} è un metodo \textit{registration-based} progettato come baseline per lo scenario few-shot del benchmark Real3D-AD, dove ogni categoria dispone di un numero limitato di prototipi per il training (4 o meno). La sfida è particolarmente difficile perché i prototipi di training sono scansioni complete a 360° dell'oggetto, mentre i campioni di test sono acquisiti da un solo lato, replicando la condizione reale di una linea di produzione in cui lo scanner è fisso e ispeziona una sola faccia del prodotto.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{immagini/capitolo2/reg3d-ad.png}
+\caption{Pipeline di Reg3D-AD. In fase di training (frecce blu), le feature estratte dal training set vengono sottoposte a campionamento per selezionare quelle più rappresentative, che andranno a costituire la memory bank $M$. In fase di test (frecce gialle), il campione viene prima calibrato usando il prototipo come riferimento, poi le sue feature vengono estratte e confrontate con $M$ per calcolare l'anomaly score punto per punto. Fonte: \cite{liu2023real3dad}}
+\label{fig:reg3d_pipeline}
+\end{figure}
+
+\subparagraph{Registrazione e Feature Extraction.}
+Per prima cosa, Reg3D-AD al\-li\-nea il point cloud di test con il prototipo normale tramite RANSAC, riducendo le differenze dovute
+a variazioni di posa. Dopo l'allineamento, il metodo adotta una \textbf{dual-feature representation} ispirata a PatchCore \cite{roth2022towards}:
+\begin{itemize}
+    \item \textbf{Feature locali}: le coordinate $(x, y, z)$ di ciascun punto, che codificano la posizione e la struttura geometrica locale della superficie.
+    \item \textbf{Feature globali}: feature estratte da PointMAE \cite{pang2022masked}, che catturano la rappresentazione complessiva del prototipo nella sua interezza.
+\end{itemize}
+Entrambe le tipologie di feature vengono memorizzate in una feature memory bank costruita sui prototipi normali di training.
+
+\subparagraph{Risultati e Limitazioni.}
+Reg3D-AD ottenne un object-level AUROC medio di $0.704$ su Real3D-AD, superando significativamente tutti gli altri metodi del benchmark (BTF, M3DM, PatchCore nelle varie configurazioni), confermando quanto il few-shot e la disparità training/test tra scansione completa e parziale rendano il task difficile. La limitazione principale del metodo è la dipendenza dalla qualità dell'allineamento RANSAC: oggetti con geometria simmetrica o con superfici poco texturate possono generare allineamenti errati, propagando l'errore all'anomaly score.
+
+
+
+% ---------------------------------------------------------------
+\subsection{Metodi Multimodali RGB+3D (2023)}
+\label{subsec:metodi-3d-multimodali}
+
+Nonostante i buoni risultati ottenuti dai metodi precedenti, le informazioni di colore e texture contenute nelle immagini RGB restano complementari alla geometria 3D: ad esempio, un graffio superficiale può essere visibile nell'RGB ma impercettibile nella geometria, mentre un'ammaccatura può alterare la struttura 3D senza lasciare tracce evidenti nel colore. I metodi multimodali fondono entrambe le modalità per ottenere detection più robusta e completa \cite{lin2025survey}.
+
+\paragraph{AST --- Asymmetric Student-Teacher (2022).}
+AST (\textit{Asymmetric Stu\-dent-Teacher}) \cite{rudolph2023asymmetric} risolve un problema dei metodi student-teacher precedenti: se student e teacher hanno architettura simile, lo student tende a generalizzare anche su campioni anomali, producendo un anomaly score basso (e non riconoscendo quindi l'anomalia). AST introduce un'asimmetria architettonica radicale per forzare la divergenza degli output sui campioni anomali.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{immagini/capitolo2/ast-overview.png}
+\caption{Pipeline di AST. Il teacher (normalizing flow, viola) e lo student (rete feed-forward, rosa) ricevono feature estratte da un backbone ImageNet; lo student riceve in aggiunta la mappa di profondità processata con pixel-unshuffle e una maschera di foreground estratta dai dati 3D. L'anomaly score $L_s$ è la distanza tra gli output. Fonte: \cite{rudolph2023asymmetric}}
+\label{fig:ast_overview}
+\end{figure}
+
+
+\subparagraph{Architettura Asimmetrica.}
+\begin{itemize}
+    \item Il \textbf{teacher} è un \textbf{normalizing flow} basato su Real-NVP addestrato a trasformare la distribuzione delle feature normali verso una distribuzione gaussiana $\mathcal{N}(0, I)$. La biettività del flow garantisce che, per input fuori distribuzione (anomalie), il teacher produca output divergenti rispetto ai campioni normali.
+    \item Lo \textbf{student} è invece una rete feed-forward convenzionale, addestrata a replicare gli output del teacher sui soli campioni normali. La diversità architettonica impedisce allo student di imitare la divergenza del teacher sui campioni anomali, amplificando il segnale di anomalia.
+\end{itemize}
+
+Il teacher riceve le feature estratte da un backbone pre-addestrato su ImageNet. Lo student riceve le stesse feature a cui viene concatenata la mappa di profondità come canale aggiuntivo (tramite pixel-unshuffling per allinearne le dimensioni). Il dato 3D viene usato anche per estrarre una maschera di foreground che esclude il background dal calcolo della loss (Figura \ref{fig:ast_overview}).
+
+\subparagraph{Anomaly Score.}
+Lo student viene addestrato a minimizzare la distanza tra i propri output e quelli del teacher sui campioni normali. Al test time, una distanza elevata segnala un'anomalia.
+
+Il vantaggio rispetto all'uso diretto delle likelihood del flow come anomaly score è che eventuali stime di likelihood errate vengono compensate: se il flow assegna erroneamente alta likelihood a un campione anomalo, lo student non riuscirà comunque a replicare quell'output, mantenendo alto l'anomaly score.
+
+\subparagraph{Risultati.}
+AST fu tra i primi metodi a sfruttare efficacemente la combinazione RGB+depth su MVTec~3D-AD, superando i baseline puramente 2D e dimostrando il valore della profondità come modalità complementare. Rimane un riferimento consolidato nei benchmark recenti \cite{realiad3d2025}.
+
+
+% ----------------------- M3MD
+\paragraph{M3DM --- Multimodal 3D Anomaly Detection (2023).}
+M3DM \cite{wang2023multimodal} rappresenta un approccio multimodale completo, combinando feature RGB e point cloud in un framework di memory bank unificato (Figura \ref{fig:m3dm_overview}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{immagini/capitolo2/m3dm-pipeline.png}
+    \caption{Pipeline di M3DM. (1) \textit{Point Feature Alignment} (PFA): le feature del Point Transformer vengono allineate al piano immagine tramite interpolazione e proiezione. FPS indica il farthest point sampling e $F_{pt}$ è un Point Transformer pre-addestrato. (2) \textit{Unsupervised Feature Fusion} (UFF): le feature RGB e 3D vengono fuse tramite MLP con contrastive loss $\mathcal{L}_{con}$. $F{rgb}$ è un Vision Transformer, $\chi_{rgb}$ e $\chi_{pt}$ sono layer MLP, mentre $\sigma_r$ e $\sigma_p$ sono singoli layer fully connected. (3) \textit{Decision Layer Fusion} (DLF): integra le informazioni multimodali attraverso multiple memory bank e produce la decisione finale mediante due moduli learnable $\mathcal{D}_a$ e $\mathcal{D}_s$ per detection e segmentation. $\mathcal{M}_{rgb}$, $\mathcal{M}_{fs}$, $\mathcal{M}_{pt}$ sono le memory bank, $\phi$ e $\psi$ sono le funzioni di score per detection e segmentation con singola memory bank, e P rappresenta l'algoritmo di costruzione delle memory bank. Fonte: \cite{wang2023multimodal}}
+    \label{fig:m3dm_overview}
+\end{figure}
+
+\subparagraph{Feature Extraction e Point Feature Alignment.}
+M3DM utilizza due backbone pre-addestrati separati:
+\begin{itemize}
+    \item un \textbf{Point Transformer} \cite{zhao2021point} per le feature 3D 
+    \item un \textbf{Vision Transformer (ViT)} \cite{dosovitskiy2020image} per le feature RGB
+\end{itemize}
+    
+Poiché il Point Transformer opera su gruppi di punti 3D, M3DM introduce una fase di \textbf{Point Feature Alignment} (PFA) che allinea le feature 3D del point cloud in una rappresentazione nello spazio 2D tramite interpolazione e proiezione, rendendole direttamente comparabili con le feature spaziali del ViT.
+
+\subparagraph{Unsupervised Feature Fusion e Tre Memory Bank.}
+Invece di concatenare direttamente le feature delle due modalità (approccio che crea interferenze e performance peggiori), M3DM introduce una fase di \textbf{Unsupervised Feature Fusion} (UFF): due MLP proiettano le feature RGB e 3D in uno spazio comune, addestrati
+con una \textbf{patch-wise contrastive loss} $\mathcal{L}_{con}$ che incoraggia le feature della stessa posizione a essere vicine tra modalità diverse e quelle di posizioni diverse a essere lontane. Le feature fuse costituiscono una terza rappresentazione.
+
+Le feature di tutte e tre le sorgenti (RGB, 3D, fusione) vengono memorizzate in \textbf{tre memory bank separate} $\mathcal{M}_{rgb}$, $\mathcal{M}_{pt}$, $\mathcal{M}_{fs}$ (costruite con coreset subsampling). Al momento del test, ogni memory bank definisce un anomaly score e una segmentation map indipendenti tra loro.
+
+\subparagraph{Decision Layer Fusion e Scoring.}
+Al test time le distanze dai nearest neighbor vengono calcolate separatamente nelle tre memory bank, ottenendo tre anomaly score indipendenti e analogamente tre segmentation map. La fusione finale è affidata a due moduli \textbf{learnable} $\mathcal{D}_a$ e $\mathcal{D}_s$, basati su OCSVM, che combinano i punteggi delle tre memory bank producendo rispettivamente l'anomaly score a livello immagine
+e la segmentation map.
+
+\subparagraph{Impatto e Limitazioni.}
+M3DM stabilì un nuovo state-of-the-art su MV\-Tec 3D-AD al momento della sua introduzione, confermando che la fusione di mo\-da\-li\-tà complementari porta benefici misurabili rispetto ai metodi unimodali. Il metodo è ampiamente adottato come punto di confronto in benchmark
+successivi (Real-IAD D$^3$ \cite{realiad3d2025}, SiM3D \cite{sim3d2025}). Le limitazioni principali riguardano il costo computazionale (due backbone separati più la procedura di fusione) e la dipendenza dalla qualità dell'allineamento spaziale tra la nuvola di punti e le immagini RGB, che richiede una calibrazione accurata del setup di acquisizione.
 
