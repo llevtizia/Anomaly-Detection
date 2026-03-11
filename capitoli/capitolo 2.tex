@@ -968,8 +968,7 @@ Per la componente 3D estrae descrittori \textbf{FPFH} (Fast Point Feature Histog
 
 
 \subparagraph{k-NN Scoring.}
-Durante il training, BTF raccoglie i descrittori di tutti i punti di tutte le nuvole normali in un unico insieme $S = \{\phi(x, j) \; \forall x \; \forall j\}$, senza alcuna compressione o subsampling. Al test time, per ogni punto del campione di test si calcola la distanza dal suo k-esimo vicino più prossimo nell'insieme $S$: una distanza elevata indica che il punto si discosta dalla distribuzione
-normale appresa e segnala una potenziale anomalia. Questo produce direttamente una mappa di anomalia a livello di punto (\textit{point-level segmentation}), mentre lo score a livello di campione è determinato dal punto con la distanza massima. La scelta di usare l'intero insieme $S$ senza compressione è resa praticabile dalla bassa dimensionalità dei descrittori FPFH, molto più contenuta rispetto alle feature dense estratte da CNN.
+Durante il training, BTF raccoglie i descrittori di tutti i punti di tutte le nuvole normali in un unico insieme $S = \{\phi(x, j) \; \forall x \; \forall j\}$, senza alcuna compressione o subsampling. Al test time, per ogni punto del campione di test si calcola la distanza dal suo k-esimo vicino più prossimo nell'insieme $S$: una distanza elevata indica che il punto si discosta dalla distribuzione normale appresa e segnala una potenziale anomalia. Questo produce direttamente una mappa di anomalia a livello di punto (\textit{point-level segmentation}), mentre lo score a livello di campione è determinato dal punto con la distanza massima. La scelta di usare l'intero insieme $S$ senza compressione è resa praticabile dalla bassa dimensionalità dei descrittori FPFH, molto più contenuta rispetto alle feature dense estratte da CNN.
 
 
 \subparagraph{Risultati e Impatto.}
@@ -1005,8 +1004,7 @@ Ogni entry di $M_S$ ha il proprio dizionario RGB dedicato in $M_A$: al test time
 \subparagraph{Inferenza e Score Fusion.}
 Per ogni patch di test si trovano i $k_1 = 10$ vicini più prossimi in $M_S$, che formano un dizionario locale. Invece di usare la distanza dal singolo nearest neighbor come anomaly score, si applica \textbf{sparse coding}: si cerca la combinazione lineare sparsa dei 10 elementi che meglio ricostruisce la feature di test, e la distanza di ricostruzione diventa lo score di anomalia geometrica. Lo stesso meccanismo viene poi applicato per la componente RGB usando il dizionario shape-guided estratto da $M_A$, producendo uno score di anomalia di colore.
 
-Poiché le scale numeriche dei due score sono molto diverse, viene applicato un allineamento score-map calibrato su 25 campioni normali: la media $\pm 3 \times \text{standard deviation}$ della distribuzione
-RGB viene mappata sulla corrispondente distribuzione SDF. Le due mappe di anomalia vengono infine fuse per massimo pixel-wise.
+Poiché le scale numeriche dei due score sono molto diverse, viene applicato un allineamento score-map calibrato su 25 campioni normali: la media $\pm 3 \times \text{standard deviation}$ della distribuzione RGB viene mappata sulla corrispondente distribuzione SDF. Le due mappe di anomalia vengono infine fuse per massimo pixel-wise.
 
 \subparagraph{Risultati e Impatto.}
 Shape-Guided superò BTF su MVTec 3D-AD (AU\-PRO $0.976$ vs $0.964$), con il vantaggio aggiuntivo di richiedere meno memoria rispetto a BTF che usa PatchCore sull'intero insieme RGB: la struttura shape-guided riduce il numero di feature RGB da indicizzare da $208{,}230$
@@ -1023,8 +1021,7 @@ Reg3D-AD \cite{liu2023real3dad} è un metodo \textit{registration-based} progett
 \end{figure}
 
 \subparagraph{Registrazione e Feature Extraction.}
-Per prima cosa, Reg3D-AD al\-li\-nea il point cloud di test con il prototipo normale tramite RANSAC, riducendo le differenze dovute
-a variazioni di posa. Dopo l'allineamento, il metodo adotta una \textbf{dual-feature representation} ispirata a PatchCore \cite{roth2022towards}:
+Per prima cosa, Reg3D-AD al\-li\-nea il point cloud di test con il prototipo normale tramite RANSAC, riducendo le differenze dovute a variazioni di posa. Dopo l'allineamento, il metodo adotta una \textbf{dual-feature representation} ispirata a PatchCore \cite{roth2022towards}:
 \begin{itemize}
     \item \textbf{Feature locali}: le coordinate $(x, y, z)$ di ciascun punto, che codificano la posizione e la struttura geometrica locale della superficie.
     \item \textbf{Feature globali}: feature estratte da PointMAE \cite{pang2022masked}, che catturano la rappresentazione complessiva del prototipo nella sua interezza.
@@ -1067,7 +1064,7 @@ Lo student viene addestrato a minimizzare la distanza tra i propri output e quel
 Il vantaggio rispetto all'uso diretto delle likelihood del flow come anomaly score è che eventuali stime di likelihood errate vengono compensate: se il flow assegna erroneamente alta likelihood a un campione anomalo, lo student non riuscirà comunque a replicare quell'output, mantenendo alto l'anomaly score.
 
 \subparagraph{Risultati.}
-AST fu tra i primi metodi a sfruttare efficacemente la combinazione RGB+depth su MVTec~3D-AD, superando i baseline puramente 2D e dimostrando il valore della profondità come modalità complementare. Rimane un riferimento consolidato nei benchmark recenti \cite{realiad3d2025}.
+AST fu tra i primi metodi a sfruttare efficacemente la combinazione RGB+depth su MVTec~3D-AD, superando i baseline puramente 2D e dimostrando il valore della profondità come modalità complementare. Rimane un riferimento consolidato nei benchmark recenti \cite{zhu2025realiadd3}.
 
 
 % ----------------------- M3MD
@@ -1091,16 +1088,165 @@ M3DM utilizza due backbone pre-addestrati separati:
 Poiché il Point Transformer opera su gruppi di punti 3D, M3DM introduce una fase di \textbf{Point Feature Alignment} (PFA) che allinea le feature 3D del point cloud in una rappresentazione nello spazio 2D tramite interpolazione e proiezione, rendendole direttamente comparabili con le feature spaziali del ViT.
 
 \subparagraph{Unsupervised Feature Fusion e Tre Memory Bank.}
-Invece di concatenare direttamente le feature delle due modalità (approccio che crea interferenze e performance peggiori), M3DM introduce una fase di \textbf{Unsupervised Feature Fusion} (UFF): due MLP proiettano le feature RGB e 3D in uno spazio comune, addestrati
-con una \textbf{patch-wise contrastive loss} $\mathcal{L}_{con}$ che incoraggia le feature della stessa posizione a essere vicine tra modalità diverse e quelle di posizioni diverse a essere lontane. Le feature fuse costituiscono una terza rappresentazione.
+Invece di concatenare direttamente le feature delle due modalità (approccio che crea interferenze e performance peggiori), M3DM introduce una fase di \textbf{Unsupervised Feature Fusion} (UFF): due MLP proiettano le feature RGB e 3D in uno spazio comune, addestrati con una \textbf{patch-wise contrastive loss} $\mathcal{L}_{con}$ che incoraggia le feature della stessa posizione a essere vicine tra modalità diverse e quelle di posizioni diverse a essere lontane. Le feature fuse costituiscono una terza rappresentazione.
 
 Le feature di tutte e tre le sorgenti (RGB, 3D, fusione) vengono memorizzate in \textbf{tre memory bank separate} $\mathcal{M}_{rgb}$, $\mathcal{M}_{pt}$, $\mathcal{M}_{fs}$ (costruite con coreset subsampling). Al momento del test, ogni memory bank definisce un anomaly score e una segmentation map indipendenti tra loro.
 
 \subparagraph{Decision Layer Fusion e Scoring.}
-Al test time le distanze dai nearest neighbor vengono calcolate separatamente nelle tre memory bank, ottenendo tre anomaly score indipendenti e analogamente tre segmentation map. La fusione finale è affidata a due moduli \textbf{learnable} $\mathcal{D}_a$ e $\mathcal{D}_s$, basati su OCSVM, che combinano i punteggi delle tre memory bank producendo rispettivamente l'anomaly score a livello immagine
-e la segmentation map.
+Al test time le distanze dai nearest neighbor vengono calcolate separatamente nelle tre memory bank, ottenendo tre anomaly score indipendenti e analogamente tre segmentation map. La fusione finale è affidata a due moduli \textbf{learnable} $\mathcal{D}_a$ e $\mathcal{D}_s$, basati su OCSVM, che combinano i punteggi delle tre memory bank producendo rispettivamente l'anomaly score a livello immagine e la segmentation map.
 
 \subparagraph{Impatto e Limitazioni.}
-M3DM stabilì un nuovo state-of-the-art su MV\-Tec 3D-AD al momento della sua introduzione, confermando che la fusione di mo\-da\-li\-tà complementari porta benefici misurabili rispetto ai metodi unimodali. Il metodo è ampiamente adottato come punto di confronto in benchmark
-successivi (Real-IAD D$^3$ \cite{realiad3d2025}, SiM3D \cite{sim3d2025}). Le limitazioni principali riguardano il costo computazionale (due backbone separati più la procedura di fusione) e la dipendenza dalla qualità dell'allineamento spaziale tra la nuvola di punti e le immagini RGB, che richiede una calibrazione accurata del setup di acquisizione.
+M3DM stabilì un nuovo state-of-the-art su MV\-Tec 3D-AD al momento della sua introduzione, confermando che la fusione di mo\-da\-li\-tà complementari porta benefici misurabili rispetto ai metodi unimodali. Il metodo è ampiamente adottato come punto di confronto in benchmark successivi (Real-IAD D$^3$ \cite{zhu2025realiadd3}, SiM3D \cite{sim3d2025}). Le limitazioni principali riguardano il costo computazionale (due backbone separati più la procedura di fusione) e la dipendenza dalla qualità dell'allineamento spaziale tra la nuvola di punti e le immagini RGB, che richiede una calibrazione accurata del setup di acquisizione.
 
+%--------------------------
+\paragraph{CFM --- Crossmodal Feature Mapping (2024).}
+Mentre BTF e M3DM memorizzano grandi memory bank di feature multimodali, il che li rende accurati ma lenti e pesanti in memoria, e AST rinuncia alla struttura 3D riducendola ad un canale aggiuntivo, CFM (\textit{Crossmodal Feature Mapping}) \cite{costanzino2024cfm} propone un paradigma alternativo che elimina completamente le memory bank mantenendo performance state-of-the-art, sfruttando gli stessi backbone frozen di M3DM, DINO ViT-B/8 \cite{caron2021emerging} per le feature RGB e Point-MAE \cite{pang2022masked} per le feature 3D.
+
+
+\subparagraph{Crossmodal Mapping come Segnale di Anomalia.}
+In campioni normali esiste una \textbf{relazione} sistematica tra le feature RGB e le feature 3D della stessa posizione: una zona curva dell'oggetto ha sia una certa geometria nel point cloud sia una certa texture nell'immagine, e questa corrispondenza è apprendibile.
+
+CFM impara questa relazione tramite due funzioni di mapping $\mathcal{M}_{2D\to3D}$ e $\mathcal{M}_{3D\to2D}$, implementate come MLP leggeri a tre layer, addestrati su campioni normali: $\mathcal{M}_{2D\to3D}$ apprende a predire le feature 3D a partire dalle feature RGB corrispondente, e $\mathcal{M}_{3D\to2D}$ l'opposto (Figura \ref{fig:cfm_pipeline}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{cfm_architecture_full.jpg}
+\caption{Pipeline di CFM. Date un'immagine RGB $I_{2D}$ e una Point Cloud $P_{3D}$: una coppia di feature extractor $\mathcal{F}_{2D}$, $\mathcal{F}_{3D}$ basati su architetture Transformer estrae feature map pixel-allineate $E_{2D}$, $E_{3D}$. Una coppia di mapping crossmodali $\mathcal{M}_{2D\to3D}$, $\mathcal{M}_{3D\to2D}$ mappa le feature estratte da una modalità verso l'altra, elaborando ogni pixel in modo indipendente. Infine, le feature estratte $E_{2D}$, $E_{3D}$ e mappate $\hat{E}_{3D}$, $\hat{E}_{2D}$ vengono confrontate tramite una funzione di discrepanza $\mathcal{D}$, producendo mappe di anomalia per modalità $\Psi_{2D}$, $\Psi_{3D}$, che vengono combinate da una funzione di aggregazione $\mathcal{A}$ per ottenere la mappa di anomalia finale $\Psi$. Fonte: \cite{costanzino2024cfm}}
+\label{fig:cfm_pipeline}
+\end{figure}
+
+
+Un campione anomalo, per definizione, presenta combinazioni di feature RGB-3D mai osservate nel training. Al test time, il mapping non riesce a predire correttamente la feature dell'altra modalità: la discrepanza (distanza euclidea) tra la feature ricostruita $\hat{E}_{3D} = \mathcal{M}_{2D\to3D}(E_{2D})$ e quella reale in input $E_{3D}$ diventa la mappa di anomalia $\Psi_{3D}$, e analogamente $\Psi_{2D}$. Le due mappe vengono infine aggregate in una singola anomaly map $\Psi$ tramite \textbf{prodotto pixel-wise} ($\Psi = \Psi_{2D} \cdot \Psi_{3D}$), richiedendo che entrambe le modalità concordino nel segnalare un'anomalia
+
+\subparagraph{Vantaggi e Limitazioni.}
+L'assenza di memory bank rende CFM notevolmente più veloce rispetto a M3DM e BTF, pur ottenendo performance superiori su MVTec 3D-AD. Viene inoltre proposta una tecnica di \textit{layer pruning} sui backbone frozen per ricavare varianti compatte (Small, Tiny) del framework con ulteriori guadagni di efficienza. La limitazione principale è la natura intrinsecamente multimodale del metodo: a differenza di approcci basati su memory bank, CFM richiede la presenza di entrambe le modalità sia in training che in test, e non può essere applicato a scenari unimodali 2D o 3D. CFM rappresenta un contributo metodologico rilevante perché dimostra che la relazione inter-modale stessa, e non la densità della memory bank, è la vera sorgente informativa per l'anomaly detection multimodale.
+
+
+%%% ---------------------------------------
+\subsection{Sviluppi Recenti e Multimodalità Avanzata (2024--2025)}
+\label{subsec:metodi-3d-recenti}
+
+Le tendenze più recenti nella ricerca 3D si muovono verso scenari ancora più complessi: multi-vista, acquisizioni in ambienti non controllati, e l'integrazione di una terza modalità (pseudo-3D da fotometria stereo), come testimoniato dai dataset Real-IAD D$^3$ \cite{zhu2025realiadd3} e SiM3D \cite{sim3d2025}.
+
+
+\paragraph{D\textsuperscript{3}M --- D\textsuperscript{3}-Memory (2025).}
+D\textsuperscript{3}M (\textit{D\textsuperscript{3}-Memory}) \cite{zhu2025realiadd3} è proposto insieme al benchmark \textbf{Real-IAD D\textsuperscript{3}} (discusso in dettaglio nel 
+Capitolo~\ref{sec:dataset}), che affianca alle classiche modalità RGB e point cloud una terza modalità inedita: dati \textbf{pseudo-3D} ottenuti tramite stereo fotometrico. La motivazione è che le immagini 2D non catturano difetti geometrici sottili (graffi, ammaccature), mentre i point cloud mancano di risoluzione per difetti superficiali finissimi: la pseudo-3D colma parzialmente questo divario, fornendo mappe di normali di superficie a basso costo computazionale, senza richiedere sensori di profondità dedicati.
+%riferimento da aggiornare con la sezione giusta%
+
+
+\subparagraph{Architettura di D\textsuperscript{3}M.}
+D\textsuperscript{3}M estende il framework di M3DM \cite{wang2023multimodal} a tre modalità, introducendo due innovazioni principali (Figura \ref{fig:d3m_architecture}):
+
+\begin{itemize}
+    \item \textbf{Channel-Spatial Swapping (CSS)}: modulo di fusione leggero che scam\-bia il 10\% dell'informazione tra le feature map RGB $X_{2D}$ e pseudo-3D $X_{PS}$:
+    \begin{equation}
+        X_{2D}^{\text{swap}} = (1-\alpha) \cdot X_{2D} + \alpha \cdot X_{PS}^{c\leftrightarrow s}, \quad
+        X_{PS}^{\text{swap}} = (1-\alpha) \cdot X_{PS} + \alpha \cdot X_{2D}^{c\leftrightarrow s}
+    \end{equation}    
+    dove $\alpha = 0.1$ è il rapporto di scambio e $c\leftrightarrow s$ indica lo scambio di canali e regioni spaziali $k \times k$. Lo scambio arricchisce ciascuna modalità dell'informazione dell'altra senza distruggerla, sfruttando la complementarità tra texture RGB e normali pseudo-3D
+
+    \item \textbf{Fusione Contrastiva Non Supervisionata} tra le feature 2D arricchite e quelle del point cloud 3D, analoga alla contrastive loss di M3DM \cite{wang2023multimodal}.  Opera a livello di patch confrontando feature della stessa posizione spaziale e genera una rappresentazione fusa $\mathcal{M}_{D^3}$ da memorizzare in una terza memory bank. Le feature estratte sono: DINO (ViT-b/8) \cite{caron2021emerging} per RGB e pseudo-3D, PointMAE \cite{pang2022masked} per il point cloud
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{immagini/capitolo2/d3m.png}
+\caption{Architettura del framework D\textsuperscript{3}M. Il blocco in alto a sinistra illustra l'estrazione di feature 2D e pseudo-3D tramite i backbone $\mathcal{F}_{2D}$ e $\mathcal{F}_{ps}$, seguite dal modulo CSS (dettagliato in basso a sinistra) che esegue Spatial Exchange e Channel Exchange tra le due modalità. Il blocco in alto a destra mostra l'estrazione di feature 3D tramite $\mathcal{F}_{3D}$. Il blocco centrale (Multimodal Feature Fusion) fonde le tre sorgenti tramite contrastive loss $\mathcal{L}_{con}$, producendo tre memory bank $\mathcal{M}_{ps}$, $\mathcal{M}_{D^3}$, $\mathcal{M}_{2D}$. I classificatori $\mathcal{D}_a$ e $\mathcal{D}_s$ producono rispettivamente l'anomaly score e la segmentation map finale. Fonte: \cite{zhu2025realiadd3}}
+\label{fig:d3m_architecture}
+\end{figure}
+
+
+\subparagraph{Tre Memory Bank e Decision Layer.}
+Analogamente a M3DM, le tre sorgenti di feature ($X_{2D}^{\text{swap}}$, $X_{PS}^{\text{swap}}$, $\mathcal{M}_{D^3}$) creano tre memory bank separate $\mathcal{M}_{2D}$, $\mathcal{M}_{PS}$, $\mathcal{M}_{D}$ fusa, costruite tramite coreset subsampling. L'anomaly score finale e la segmentation map vengono prodotti da due classificatori OCSVM $\mathcal{D}_a$ e $\mathcal{D}_s$ che integrano i contributi delle tre memory bank:
+\begin{align}
+    a &= \mathcal{D}_a\bigl(\phi(\mathcal{M}_{2D}, f_{2D}),\; \phi(\mathcal{M}_{PS}, f_{PS}),\; 
+        \psi(\mathcal{M}_{D^3}, f_{D^3})\bigr) \\
+    S &= \mathcal{D}_s\bigl(\psi(\mathcal{M}_{2D}, f_{2D}),\; \psi(\mathcal{M}_{PS}, f_{PS}),\; 
+        \psi(\mathcal{M}_{D^3}, f_{D^3})\bigr)
+\end{align}
+
+\subparagraph{Risultati e Contributo Principale.}
+Su Real-IAD D\textsuperscript{3}, D\textsuperscript{3}M supera consistentemente le configurazioni monomodale (solo RGB o solo 3D) e bimodale (RGB+3D, incluso M3DM), raggiungendo un I-AUROC medio di $0.890$ e un P-AUROC di $0.937$, contro $0.841$ e $0.922$ di M3DM. L'aggiunta di dati pseudo-3D porta un contributo aggiuntivo rispetto alle due modalità classiche: in particolare, risulta indispensabile per difetti superficiali sottili che i point cloud non risolvono geometricamente ma che alterano le normali di superficie. Il contributo metodologico principale non è tanto l'architettura in sé (che riprende M3DM), quanto la dimostrazione che una modalità intermedia a basso costo acquisitivo può migliorare la detection senza sensori aggiuntivi dedicati.
+
+% ---------------------------------------------------------------
+% CONFRONTO METODI 3D
+% ---------------------------------------------------------------
+\subsection{Confronto}
+
+Analogamente a quanto fatto per i metodi 2D, presentiamo un confronto sintetico dei metodi 3D e multimodali analizzati, riportando le performance sui principali benchmark di riferimento. La molteplicità dei benchmark adottati in letteratura (MVTec 3D-AD, Real3D-AD, Real-IAD D\textsuperscript{3}) riflette la novità del campo rispetto al 2D: a differenza di MVTec AD, non esiste ancora un unico benchmark universalmente adottato per i metodi 3D.
+
+\begin{table}[h]
+\centering
+\caption{Confronto sintetico dei principali metodi 3D e multimodali (valori indicativi)}
+\label{tab:panorama_metodi_3d}
+\footnotesize
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\textbf{Metodo} & \textbf{Anno} & \textbf{I-AUROC} & \textbf{AUPRO} & \textbf{Modalità} &
+\textbf{Tr.} & \textbf{Vel.} \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{Benchmark: MVTec 3D-AD}} \\
+\midrule
+Voxel f-AnoGAN$^\dagger$  & 2021 & ---  & 0.639 & RGB+3D & Sì  & Lenta  \\
+BTF & 2023 & ---  & 0.964 & RGB+3D  & No  & Media  \\
+AST & 2022 & 0.862 & 0.985 & RGB+depth  & Sì  & Veloce \\
+Shape-Guided & 2023 & ---  & 0.976 & RGB+3D & No* & Media  \\
+M3DM & 2023 & 0.944 & 0.988 & RGB+3D  & No* & Lenta  \\
+CFM  & 2024 & 0.949 & 0.989 & RGB+3D  & Sì  & Media  \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{Benchmark: Real3D-AD (few-shot, 4 prototipi)}} \\
+\midrule
+Reg3D-AD & 2023 & 0.704 & ---  & 3D only & No* & Media  \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{Benchmark: Real-IAD D\textsuperscript{3}}} \\
+\midrule
+M3DM$^\ddagger$  & 2023 & 0.841 & 0.922 & RGB+3D  & No* & Lenta  \\
+D\textsuperscript{3}M   & 2025 & 0.890 & 0.937 & RGB+3D+PS & No* & Lenta  \\
+\bottomrule
+\end{tabular}
+\vspace{2mm}
+\parbox{\linewidth}{\scriptsize
+\textbf{Note:} Valori in proporzione (0--1). 
+$^\dagger$Voxel f-AnoGAN: AUPRO 0.583 in configurazione solo-3D. *Costruzione offline di memory bank o coreset richiesta. $^\ddagger$M3DM riportato come baseline su Real-IAD D\textsuperscript{3} nel paper di D\textsuperscript{3}M. 
+PS = dati pseudo-3D da fotometria stereo. Velocità relativa su GPU moderna: Veloce ($<$50ms), Media (50-200ms), Lenta ($>$200ms). I-AUROC non disponibile (\textit{---}) per metodi che riportano esclusivamente metriche di segmentazione.}
+\end{table}
+
+\subsubsection{Guida alla Selezione per Scenario Applicativo (3D)}
+
+\begin{table}[h]
+\centering
+\caption{Guida pratica alla selezione del metodo 3D/multimodale}
+\label{tab:guida_selezione_3d}
+\begin{tabular}{lp{9.5cm}}
+\toprule
+\textbf{Scenario Prioritario} & \textbf{Metodo Consigliato e Motivazione} \\
+\midrule
+\textbf{Accuratezza Massima (3D)} & \textbf{CFM} (crossmodal mapping, superiore a M3DM su MVTec 3D-AD) o \textbf{D\textsuperscript{3}M} se disponibile la terza modalità pseudo-3D. \\
+\textbf{Efficienza Computazionale} & \textbf{BTF} (descrittori FPFH, nessun training) o \textbf{AST} (student-teacher leggero) per il miglior compromesso accuratezza/velocità. \\
+\textbf{Dati Limitati (Few-Shot)} & \textbf{Reg3D-AD} per scenari con pochissimi prototipi ($\leq$ 4), grazie a RANSAC che compensa la scarsità di esempi normali. \\
+\textbf{Solo Point Cloud (no RGB)} & \textbf{BTF} (FPFH + k-NN, rotation-invariant) come baseline robusto. \textbf{Shape-Guided} per scenari che richiedono anche localizzazione precisa. \\
+\textbf{Fusione RGB+3D Completa} & \textbf{M3DM} o \textbf{CFM} per texture/geometria che si completano; \textbf{D\textsuperscript{3}M} se si dispone di fotometria stereo. \\
+\textbf{Deployment Rapido (no training)} & \textbf{BTF} o \textbf{Shape-Guided}: sufficiente costruzione offline della memory bank, nessun addestramento di reti richiesto. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Tendenze Evolutive e Considerazioni Finali (Metodi 3D)}
+
+L'analisi comparativa dei metodi 3D rivela un percorso evolutivo più rapido e compresso rispetto al 2D: in soli quattro anni (2021--2025) il campo è passato da semplici adattamenti voxel, con performance modeste, a metodi multimodali avanzati competitivi con i migliori sistemi 2D. Cinque tendenze principali caratterizzano questa evoluzione:
+
+\begin{enumerate}
+    \item \textbf{Da voxel a point cloud}: I primi metodi voxel (Voxel AE, Voxel f-AnoGAN) hanno rapidamente ceduto il passo a rappresentazioni native per dati 3D. L'adozione di descrittori geometrici rotation-invariant (FPFH in BTF) e di backbone pre-addestrati su point cloud (PointMAE in M3DM, Reg3D-AD) ha permesso miglioramenti di performance significativi.
+
+    \item \textbf{Multimodalità}: I metodi unimodali 3D raggiungono prestazioni inferiori rispetto alle alternative multimodali RGB+3D. La complementarità delle due sorgenti (colore e texture dall'immagine, geometria e profondità dal point cloud) è un principio consolidato, come dimostrato da AST, M3DM e CFM.
+
+    \item \textbf{Memory bank vs. mapping crossmodale}: Emerge una separazione nei metodi, tra approcci che memorizzano esplicitamente feature normali in memory bank (M3DM, Shape-Guided) e approcci che apprendono relazioni inter-modali (CFM). Il secondo approccio offre un percorso più efficiente, eliminando la necessità di strutture di ricerca approssimata su milioni di feature.
+
+    \item \textbf{Oltre RGB+3D}: La terza modalità pseudo-3D introdotta da D\textsuperscript{3}M apre la strada a framework a $n$ modalità, dove ciascuna sorgente copre un range diverso di difetti (superficiali, geometrici, fotometrici). Questo suggerisce possibili future architetture ancora più flessibili nel numero e nel tipo di input.
+
+    \item \textbf{Benchmark ancora frammentati}: A differenza del 2D, dove MVTec AD ha rappresentato un punto di convergenza univoco, il panorama 3D è ancora diviso tra MVTec 3D-AD, Real3D-AD e Real-IAD D\textsuperscript{3}. La mancanza di un benchmark condiviso rende i confronti diretti tra metodi più difficili e meno conclusivi.
+\end{enumerate}
+
+\paragraph{Conclusioni Generali.}
+Il campo dell'anomaly detection industriale ha percorso in meno di un decennio un'evoluzione straordinaria, che ha portato i metodi 2D a saturare i principali benchmark e ha aperto un nuovo fronte di ricerca nella tridimensionalità. Oggi la frontiera si muove verso l'integrazione intelligente di modalità complementari, la generalizzazione a nuovi domini con pochissimi esempi, e la compatibilità con vincoli hardware stringenti. I metodi 3D e multimodali non sostituiscono i metodi 2D, ma li completano: la scelta tra approcci visivi, geometrici o ibridi rimane strettamente legata ai sensori disponibili, alla natura dei difetti attesi e ai requisiti operativi del contesto produttivo specifico.
