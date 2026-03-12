@@ -569,11 +569,11 @@ Il suo obiettivo è superare le principali limitazioni di MVTec 3D-AD: precision
 
 \paragraph{Few-Shot Setting.} Ogni training set per categoria contiene \textbf{4 campioni normali}, costruiti come prototipi dalla fusione di più scansioni a 360°. Questo \textbf{few-shot scenario} riflette vincoli reali dell'industria: creare un prototipo ad alta precisione può richiedere fino a due giorni per categoria. I campioni di test, invece, sono acquisiti da un \textbf{singolo lato}, simulando le condizioni di una linea produttiva con posizioni di scansione fisse.
 
-\paragraph{ADBENCH-3D.} Real3D-AD introdusse un benchmark sistematico (AD\-BENCH-3D) che standardizza pipeline end-to-end: preprocessing, split dei dati, metriche, script di valutazione e toolkit di visualizzazione. Il benchmark valutò 8 metodi esistenti, rivelando che la maggior parte non raggiunge il \textbf{50\% di AUROC object-level}, evidenziando un ampio margine di miglioramento.
+%\paragraph{ADBENCH-3D.} Real3D-AD introdusse un benchmark sistematico (AD\-BENCH-3D) che standardizza pipeline end-to-end: preprocessing, split dei dati, metriche, script di valutazione e toolkit di visualizzazione. Il benchmark valutò 8 metodi esistenti, rivelando che la maggior parte non raggiunge il \textbf{50\% di AUROC object-level}, evidenziando un ampio margine di miglioramento.
 
-\paragraph{Reg3D-AD.} Per colmare questo gap, il paper propose \textbf{Reg3D-AD}, un metodo general-purpose basato su registrazione di point cloud. Il metodo costruisce una \textit{feature memory bank} che preserva sia rappresentazioni locali che globali del prototipo normale. All'inferenza, il point cloud di test viene allineato al prototipo e le anomalie vengono identificate misurando la distanza tra le feature del campione di test e quelle memorizzate.
+%\paragraph{Reg3D-AD.} Per colmare questo gap, il paper propose \textbf{Reg3D-AD}, un metodo general-purpose basato su registrazione di point cloud. Il metodo costruisce una \textit{feature memory bank} che preserva sia rappresentazioni locali che globali del prototipo normale. All'inferenza, il point cloud di test viene allineato al prototipo e le anomalie vengono identificate misurando la distanza tra le feature del campione di test e quelle memorizzate.
 
-\paragraph{Impatto.} Real3D-AD stabilì uno standard per la ricerca su point cloud industriali ad alta precisione, distinguendosi nettamente dai dataset RGBD precedenti e motivando lo sviluppo di metodi capaci di elaborare geometria 3D pura senza dipendere da informazioni cromatiche.
+%\paragraph{Impatto.} Real3D-AD stabilì uno standard per la ricerca su point cloud industriali ad alta precisione, distinguendosi nettamente dai dataset RGBD precedenti e motivando lo sviluppo di metodi capaci di elaborare geometria 3D pura senza dipendere da informazioni cromatiche.
 
 
 
