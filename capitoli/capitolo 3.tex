@@ -722,6 +722,44 @@ Le anomalie sono sia simulate (generate in Blender e modificate manualmente in P
 \paragraph{Impatto e Limitazioni.} PAD evidenziò che i metodi standard degradano significativamente sotto variazioni di posa, e che la modellazione esplicita della geometria 3D tramite NeRF è una direzione promettente per l'anomaly detection in scenari non controllati. Il dataset presenta tuttavia alcune limitazioni: include esclusivamente oggetti rigidi standard, senza la variabilità naturale tipica dei prodotti industriali reali, e la complessità nella raccolta di campioni con caratteristiche diverse ne limita la diversità. OmniposeAD fatica a generalizzare a categorie di oggetti non viste durante il training, lasciando aperta la questione della generalizzazione a nuove classi.
 
 
+%%%%%% -------- RAD
+\subsection{RAD (2024)}
+\label{sec:rad}
+
+L'anomaly detection è una capacità necessaria in ambienti industriali, tuttavia la maggior parte dei dataset esistenti sono raccolti in condizioni controllate, con pose fisse e sensori perfettamente calibrati. In scenari reali con robot industriali, le osservazioni sono influenzate da fattori esterni (illuminazione variabile, pose casuali degli oggetti, sfondi inconsistenti) e interni (calibrazione imperfetta della camera, imprecisioni nei movimenti). \textbf{RAD} (\textit{Realistic Anomaly Detection}) \cite{zhou2024rad} introduce il primo dataset multi-view per anomaly detection acquisito con un braccio robotico reale, colmando questo gap e fornendo dati acquisiti in condizioni realisticamente rumorose.
+
+\paragraph{Acquisizione.} I dati sono acquisiti con un braccio robotico Franka Emika Panda equipaggiato con una camera Intel RealSense D415 (1280$\times$720). Ogni oggetto è catturato da \textbf{68 viewpoints predefiniti} che coprono una rotazione completa a 360°. Rispetto ai multi-camera rig o agli scanner rotanti usati in dataset precedenti (PAD, Real3D-AD), il braccio robotico garantisce copertura multi-view densa con un singolo sensore senza manipolare l'oggetto. Nonostante la camera sia RGB-D, solo le immagini RGB sono rilasciate a causa del rumore eccessivo nelle misure di profondità in condizioni reali. Ogni immagine, infine, è accompagnata dai metadati sulla posizione della camera.
+
+\paragraph{Caratteristiche.} Il dataset contiene \textbf{5,848 immagini RGB} distribuite su \textbf{13 categorie} di oggetti quotidiani, tra cui oggetti da cucina, giocattoli e articoli di consumo (ad esempio, tazza, cucchiaio, cover per telefono, pallina da tennis). Sono presenti \textbf{4 tipologie di difetti}: 
+\begin{itemize}
+    \item \textit{graffi} e incisioni superficiali
+    \item \textit{parti mancanti}
+    \item \textit{macchie} e scolorimento localizzato
+    \item \textit{deformazioni meccaniche}, escluse le categorie in materiale rigido (binderclip, box, charger e phonecase)
+\end{itemize}
+Le maschere di annotazione pixel-wise sono generate confrontando le immagini difettose con le corrispondenti viste normali.
+
+\paragraph{Metodi.} RAD valutò tre famiglie di approcci nel setting pose-agnostic:
+\begin{itemize}
+    \item \textbf{2D feature-based}: vengono valutati otto metodi non supervisionati operanti su immagini 2D RGB (CFlow, EfficientAD, FastFlow, PaDiM, PatchCore, ReverseDistillation, STFPM, UFlow) e tre varianti zero-shot basate su CLIP (WinCLIP, AdaCLIP, VCPCLIP)
+    \item \textbf{3D reconstruction}: SplatPose e PIAD, che costruiscono rappresentazioni 3D tramite 3D Gaussian Splatting
+    \item \textbf{VLM pipelines}: Qwen2.5-VL e ChatGPT-4o, valutati con un protocollo a tre step (classificazione delle anomalie a livello di immagine, predizione dei bounding box dell'anomalia tramite prompting, conversione dei bounding box in maschere binarie per la valutazione pixel-wise)
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{immagini/capitolo3/rad-pipeline.png}
+    \caption{Pipeline del benchmark RAD. Il framework integra la raccolta dati multi-view tramite braccio robotico, l'annotazione fine-grained delle anomalie, e tre modelli di modelli: 2D, 3D e VLM testuali. Gli output includono classificazione, segmentazione pixel-wise e identificazione del tipo di anomalia.}
+    \label{fig:rad_pipeline}
+\end{figure}
+
+
+
+\paragraph{Risultati e Metriche.} La metrica adottata è AUROC image-level e pixel-level. Il risultato principale è controintuitivo: i metodi \textbf{2D feature-embedding} maturi superano significativamente i metodi 3D e VLM a livello image-level, con PatchCore che ottiene il miglior AUROC medio di 0.833. Questo avviene perché i metodi 3D basati su \textit{3D Gaussian Splatting}, pur generando viste di riferimento geometricamente coerenti, rimangono vulnerabili a superfici speculari, simmetrie geometriche e copertura sparsa dei viewpoints: condizioni che producono artefatti di ricostruzione interpretati erroneamente come anomalie. PatchCore, al contrario, cattura implicitamente la variabilità multi-view tramite la sua memory bank di feature normali, risultando più robusto a piccoli disallineamenti. 
+A livello pixel-level il gap si riduce: VCPCLIP raggiunge 0.987 di media, e i metodi 3D (SplatPose 0.977, PIAD 0.984) risultano competitivi, suggerendo che la modellazione geometrica esplicita supporta la localizzazione fine delle anomalie. I VLM rimangono inefficaci su entrambe le metriche (AUROC $\approx$ 0.52), principalmente per l'assenza di supervisione pixel-level nel pre-training e per l'incapacità di distinguere difetti reali da variazioni di apparenza dovute al cambio di punto di vista. Inoltre, poiché gli attuali VLM non supportano nativamente la generazione di maschere pixel-level, le approssimazioni tramite bounding box introducono ulteriori imprecisioni.
+
+
+\paragraph{Impatto e Limitazioni.} L'analisi individua tre sfide fondamentali per l'i\-spe\-zio\-ne robotica realistica: superfici riflettenti, simmetria geometrica e copertura sparsa dei viewpoints. Le superfici speculari destabilizzano il feature matching e la stima della posa, mentre la simmetria introduce ambiguità nell'ottimizzazione della posa. Questi risultati evidenziano che né l'augmentazione geometrica né i VLM zero-shot sono sufficienti, motivando approcci futuri che ragionino congiuntamente su apparenza e geometria con consapevolezza dell'incertezza.
 
 
 
