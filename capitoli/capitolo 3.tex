@@ -561,9 +561,7 @@ Il benchmark iniziale rivelò inoltre un ampio margine di miglioramento, con per
 \subsection{Real3D-AD (2023)}
 \label{sec:real3d_ad}
 
-Real3D-AD \cite{liu2023real3dad} è il primo dataset composto esclusivamente da \textbf{point cloud ad alta precisione}, senza componente RGB.
-
-Il suo obiettivo è superare le principali limitazioni di MVTec 3D-AD: precisione insufficiente, presenza di blind spots e assenza di point cloud veri (MVTec 3D-AD fornisce dati RGBD, definiti ``2.5D'').
+Real3D-AD \cite{liu2023real3dad} è il primo dataset composto esclusivamente da \textbf{point cloud ad alta precisione}, senza componente RGB. Il suo obiettivo è superare le principali limitazioni di MVTec 3D-AD: precisione insufficiente, presenza di blind spots e assenza di point cloud veri (MVTec 3D-AD fornisce dati RGBD, definiti ``2.5D'').
 
 \paragraph{Caratteristiche.} Il dataset contiene \textbf{1,254 campioni} distribuiti su \textbf{12 categorie} di oggetti diversi (Airplane, Car, Candybar, Chicken, Diamond, Duck, Fish, Gemstone, Seahorse, , Shell, Starfish, Toffees). Ogni campione è una scansione 3D acquisita con uno scanner binoculare ad alta risoluzione (PMAX-S130), con una precisione di \textbf{0.011--0.015 mm} (circa 10 volte superiore a MVTec 3D-AD, 0.11 mm) e copertura a \textbf{360° senza blind spots}. Le anomalie sono classificate in due categorie: \textbf{incompleteness} 
 e \textbf{redundancy}, e annotate punto per punto tramite CloudCompare.
@@ -614,6 +612,63 @@ Annotazioni & Pixel-precise (2D) & Punto per punto (3D) \\
 \label{sec:dataset_multimodali}
 
 I dataset presentati in questa sezione condividono con MVTec 3D-AD e Real3D-AD l'obiettivo di andare oltre le immagini RGB, ma adottano una strategia diversa: anziché sostituire l’immagine 2D con dati geometrici, la \textbf{integrano}. La combinazione di immagini RGB con depth map, normal map, point cloud o viste multiple permette di sfruttare sia le informazioni cromatiche e di texture sia la struttura geometrica dell'oggetto. Questa sezione ripercorre l'evoluzione di questi dataset dal 2022 al 2025, seguendo la progressione da ambienti sintetici controllati (Eyecandies) verso scenari realistici e large-scale (Real-IAD D\textsuperscript{3}, SiM3D).
+
+
+%%% EYECANDIES
+\subsection{Eyecandies (2022)}
+\label{sec:eyecandies}
+
+La raccolta di dataset reali per l'anomaly detection industriale è ostacolata dalla \textit{rarità e imprevedibilità dei difetti}, dai \textit{costi di acquisizione controllata} e dalle \textit{inconsistenze dell'annotazione manuale}. Per questo, Eyecandies \cite{bonfiglioli2022eyecandies} introdusse una soluzione alternativa: \textbf{dati completamente sintetici} generati proceduralmente, che offrono controllo completo sulle condizioni di acquisizione, annotazioni automatiche e perfettamente precise, e variabilità parametrizzabile sia per le condizioni normali che per le anomalie. 
+
+Eyecandies non si propone come sostituto dei dataset reali, né come strumento di pre-training per applicazioni industriali: gli autori forniscono esplicitamente un benchmark per il confronto equo tra metodi, senza avanzare pretese di generalizzazione al dominio reale.
+
+\paragraph{Caratteristiche.} Il dataset contiene \textbf{15,000 campioni} di oggetti sintetici proceduralmente generati, ciascuno renderizzato in 6 condizioni diverse per un totale di \textbf{90,000 rendering foto-realistici}, distribuiti su \textbf{10 classi} di dolci (Can\-dy Cane, Chocolate Cookie, Chocolate Praline, Confetto, Gummy Bear, Hazelnut Truffle, Licorice Sandwich, Lollipop, Marshmallow, Peppermint Candy). 
+
+La scena simula un \textbf{nastro trasportatore industriale} che attraversa una light box. Ogni oggetto è renderizzato con \textbf{6 condizioni di illuminazione controllate}: 
+\begin{itemize}
+    \item una con soli box lights (luci ai quattro angoli della light box),
+    \item quattro con una singola camera light per volta (una per direzione),
+    \item una con tutte le camera lights attive insieme.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{immagini/capitolo3/eyecandies-dataset.png}
+    \caption{Esempi del dataset Eyecandies per ciascuna delle 10 classi. Per ogni categoria, le quattro colonne di sinistra mostrano campioni normali con variabilità intra-classe (colore, forma, orientamento), mentre le quattro colonne di destra mostrano campioni anomali. La variabilità nei campioni normali è ottenuta parametrizzando il pipeline di rendering.}
+    \label{fig:eyecandies_dataset}
+\end{figure}
+
+
+Questa struttura è progettata per studiare l'impatto dell'illuminazione di\-re\-zio\-na\-le sul rilevamento di anomalie superficiali. Ogni campione, inoltre, include tre modalità:
+
+\begin{itemize}
+    \item \textbf{RGB}: immagine renderizzata foto-realistica
+    \item \textbf{Depth map}: mappa di profondità (coordinata Z nel riferimento della camera)
+    \item \textbf{Normal map}: vettori normali alla superficie, espressi nel riferimento della camera
+\end{itemize}
+
+\paragraph{Tipologie di Anomalie.} Le anomalie sono classificate in \textbf{3 gruppi}, ciascuno progettato per essere rilevabile principalmente tramite una modalità specifica:
+\begin{enumerate}
+    \item \textbf{Alterazioni di colore}: macchie e bruciature, visibili nell'immagine RGB
+    \item \textbf{Deformazioni della forma}: come rigonfiamenti o ammaccature, rilevabili nella depth map
+    \item \textbf{Graffi e imperfezioni superficiali}: scalfitture che alterano i vettori normali senza modificare la geometria — visibili solo nelle normal maps
+\end{enumerate}
+
+Tutte le anomalie sono annotate con maschere binarie pixel-precise, generate automaticamente dalla pipeline di rendering senza intervento umano.
+
+\paragraph{Esperimenti.} Si addestra un deep convolutional autoencoder separatamente per ogni categoria di oggetti, utilizzando diverse combinazioni di input al fine di isolare e verificare il contributo di ciascuna modalità:
+\begin{itemize}
+    \item \textbf{RGB only}
+    \item \textbf{RGB + Depth (RGBD)}
+    \item \textbf{RGB + Depth + Normals}
+\end{itemize}
+
+Per ogni categoria, il modello viene addestrato esclusivamente su cam\-pio\-ni normali e testato sull'intero test set (contenente sia campioni normali che anomali). L'ipotesi è che le regioni anomale producano un \textit{errore di ricostruzione maggiore}, consentendo di generare mappe di anomalia pixel-wise (distanza L1) e uno score globale per l'intera immagine (calcolato come massimo della mappa di anomalia). 
+
+\paragraph{Risultati.} I risultati, riportati in termini di image-level e pixel-level AUROC, mostrano che ogni modalità aggiuntiva contribuisce al miglioramento delle performance: RGBD supera RGB-only per le deformazioni di forma, mentre l'aggiunta delle mappe delle normali apporta ulteriori miglioramenti per le imperfezioni superficiali, confermando la corrispondenza progettata tra tipologia di anomalia e modalità di rilevamento.
+
+\paragraph{Impatto e Limitazioni.} Eyecandies rimane un riferimento per combinazioni di modalità e per la validazione in condizioni perfettamente controllate. Il \textit{sim-to-real gap} (la differenza tra oggetti sintetici e reali in termini di texture, materiali e rumore di acquisizione) ne limita tuttavia la rappresentatività rispetto agli scenari industriali reali, rendendolo complementare piuttosto che sostitutivo dei benchmark su dati reali.
+
 
 
 
