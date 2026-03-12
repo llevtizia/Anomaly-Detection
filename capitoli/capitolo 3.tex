@@ -669,6 +669,59 @@ Per ogni categoria, il modello viene addestrato esclusivamente su cam\-pio\-ni n
 
 \paragraph{Impatto e Limitazioni.} Eyecandies rimane un riferimento per combinazioni di modalità e per la validazione in condizioni perfettamente controllate. Il \textit{sim-to-real gap} (la differenza tra oggetti sintetici e reali in termini di texture, materiali e rumore di acquisizione) ne limita tuttavia la rappresentatività rispetto agli scenari industriali reali, rendendolo complementare piuttosto che sostitutivo dei benchmark su dati reali.
 
+%%%% PAD / MAD 
+\subsection{PAD / MAD (2023)}
+\label{sec:pad}
+
+I dataset e i metodi visti finora assumono che gli oggetti siano sempre nella stessa posizione e orientamento (\textit{pose-aligned assumption}), il che limita la capacità di rilevare anomalie potenzialmente occluse da pose arbitrarie. In scenari reali (robot pick-and-place, nastri trasportatori non allineati, ispezioni manuali) questa assunzione non regge, causando falsi positivi nei metodi convenzionali. 
+
+\citeauthor{zhou2023pad} \cite{zhou2023pad} introducono quindi il primo setting e dataset esplicitamente progettati per l'anomaly detection in condizioni di posa arbitraria: il dataset \textbf{MAD} (\textit{Multi-pose Anomaly Detection}) e il benchmark \textbf{PAD} (\textit{Pose-Agnostic Anomaly Detection}).
+
+
+\paragraph{Caratteristiche.} MAD contiene \textbf{oltre 11,000 immagini RGB ad alta risoluzione} di \textbf{20 giocattoli LEGO a forma di animale} (tra i quali Gorilla, Unicorn, Mallard, Turtle, Whale, Bird, Owl, Puppy), scelti per la varietà di geometrie e colori. Il dataset è suddiviso in:
+
+\begin{itemize}
+    \item \textbf{MAD-Sim}: generato proceduralmente con Blender, con un rapporto tra i campioni di training e test pari circa a 2:1
+    \item \textbf{MAD-Real}: dati acquisiti in scene reali, con circa un quinto dei campioni di MAD-Sim per un rapporto tra esempi di training e test di circa 4:1
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{immagini/capitolo3/mad-dataset.png}
+    \caption{Il dataset MAD. (a) I 20 giocattoli LEGO a forma di animale nelle loro pose simulate; (b) esempi delle tre tipologie di anomalie (burrs, stains e missing parts) su tre categorie distinte, con le regioni anomale evidenziate in rosso.}
+    \label{fig:mad_dataset}
+\end{figure}
+
+
+\paragraph{Tipologie di Anomalie.} MAD include tre tipologie di anomalie:
+\begin{itemize}
+    \item \textbf{Burrs}: sbavature sui bordi
+    \item \textbf{Stains}: macchie superficiali
+    \item \textbf{Missing parts}: componenti mancanti
+\end{itemize}
+Le anomalie sono sia simulate (generate in Blender e modificate manualmente in Photoshop) che reali (difetti autentici su pezzi LEGO provenienti dalla linea produttiva).
+
+\paragraph{OmniposeAD.} Il paper propose \textbf{OmniposeAD}, che introduce per la prima volta le \textbf{Neural Radiance Fields (NeRF)} \cite{mildenhall2021nerf} nel paradigma dell'anomaly detection. NeRF codifica l'oggetto anomaly-free da diverse pose, permettendo di generare immagini di riferimento normali da qualsiasi angolazione (Figura \ref{fig:omniposead_pipeline}). Al test, l'immagine query viene confrontata con la ricostruzione NeRF della posa corrispondente per localizzare le anomalie. Questo approccio consente di rilevare anomalie anche da pose mai viste durante il training.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{immagini/capitolo3/pad-pipeline.png}
+    \caption{Pipeline di OmniposeAD. (1) Un Neural Radiance Field viene addestrato su viste multi-posa dell'oggetto normale. (2) L'immagine query attraversa una stima della posa in due stadi (coarse-to-fine): prima tramite matching con il database anomaly-free, poi raffinata con iNeRF. (3) NeRF renderizza l'immagine di riferimento normale alla posa stimata, che viene confrontata con la query per la localizzazione delle anomalie.}
+    \label{fig:omniposead_pipeline}
+\end{figure}
+
+
+\paragraph{Metodi.} PAD valuta metodi delle due famiglie principali, coprendo 8 pa\-ra\-dig\-mi distinti: 
+\begin{itemize}
+    \item feature embedding-based: PatchCore, STFPM, FastFlow, CFlow, CFA, CutPaste
+    \item reconstruction-based: DRAEM, FAVAE, OCR-GAN, UniAD
+\end{itemize}
+
+\paragraph{Risultati e Metriche.} Il benchmark valuta i metodi tramite AUROC image-level e pixel-level nel setting PAD. I risultati mostrano che i metodi standard degradano significativamente rispetto alle loro performance su dataset pose-aligned: metodi basati su pseudo-anomalie come DRAEM e CutPaste sono particolarmente penalizzati, poiché la stessa regione può apparire diversa a seconda della posa, rendendo difficile caratterizzare le anomalie tramite semplice data augmentation. Per la localizzazione pixel-level, diversi metodi mantengono performance accettabili, mentre la detection image-level rimane una sfida aperta per tutti i metodi considerati. OmniposeAD ottiene le migliori performance su entrambe le metriche, superando CFlow di +7.0/+19.6 e UniAD di +8.7/+28.7 rispettivamente in pixel-level e image-level AUROC.
+
+\paragraph{Impatto e Limitazioni.} PAD evidenziò che i metodi standard degradano significativamente sotto variazioni di posa, e che la modellazione esplicita della geometria 3D tramite NeRF è una direzione promettente per l'anomaly detection in scenari non controllati. Il dataset presenta tuttavia alcune limitazioni: include esclusivamente oggetti rigidi standard, senza la variabilità naturale tipica dei prodotti industriali reali, e la complessità nella raccolta di campioni con caratteristiche diverse ne limita la diversità. OmniposeAD fatica a generalizzare a categorie di oggetti non viste durante il training, lasciando aperta la questione della generalizzazione a nuove classi.
+
+
 
 
 
