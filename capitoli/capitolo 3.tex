@@ -190,11 +190,11 @@ MVTec Anomaly Detection (MVTec AD) \cite{bergmann2019mvtec} è diventato il benc
     \item \textbf{Variation Model}: adatto a oggetti con variazioni limitate
 \end{itemize}
 
-\paragraph{Metriche Standardizzate.} Il dataset introdusse e popolarizzò due metriche fondamentali:
+\paragraph{Metriche Standardizzate.} Il dataset introdusse due metriche fondamentali:
 \begin{itemize}
     \item \textbf{AUROC (Area Under ROC Curve)}: per valutazione a livello im\-ma\-gi\-ne e pixel
-    \item \textbf{PRO (Per-Region Overlap)}: metrica pixel-level che penalizza errori su piccole regioni anomale, affrontando il bias dell'AUROC pixel-level verso grandi regioni (discussa in Sezione \ref{sec:metriche})
-\end{itemize} % da aggiungere il riferimento
+    \item \textbf{PRO (Per-Region Overlap)}: metrica pixel-level che penalizza errori su piccole regioni anomale, affrontando il bias dell'AUROC pixel-level verso grandi regioni (discussa in Sezione \ref{subsec:pro})
+\end{itemize} 
 
 \paragraph{Impatto.} MVTec AD ha avuto un profondo impatto sulla ricerca:
 \begin{enumerate}
@@ -611,7 +611,7 @@ Annotazioni & Pixel-precise (2D) & Punto per punto (3D) \\
 \section{Dataset Multimodali}
 \label{sec:dataset_multimodali}
 
-I dataset presentati in questa sezione condividono con MVTec 3D-AD e Real3D-AD l'obiettivo di andare oltre le immagini RGB, ma adottano una strategia diversa: anziché sostituire l’immagine 2D con dati geometrici, la \textbf{integrano}. La combinazione di immagini RGB con depth map, normal map, point cloud o viste multiple permette di sfruttare sia le informazioni cromatiche e di texture sia la struttura geometrica dell'oggetto. Questa sezione ripercorre l'evoluzione di questi dataset dal 2022 al 2025, seguendo la progressione da ambienti sintetici controllati (Eyecandies) verso scenari realistici e large-scale (Real-IAD D\textsuperscript{3}, SiM3D).
+I dataset presentati in questa sezione condividono con MVTec 3D-AD e Real3D-AD l'obiettivo di andare oltre le immagini RGB, ma adottano una strategia diversa: anziché sostituire l'immagine 2D con dati geometrici, la \textbf{integrano}. La combinazione di immagini RGB con depth map, normal map, point cloud o viste multiple permette di sfruttare sia le informazioni cromatiche e di texture sia la struttura geometrica dell'oggetto. Questa sezione ripercorre l'evoluzione di questi dataset dal 2022 al 2025, seguendo la progressione da ambienti sintetici controllati (Eyecandies) verso scenari realistici e large-scale (Real-IAD D\textsuperscript{3}, SiM3D).
 
 
 %%% EYECANDIES
@@ -882,5 +882,250 @@ SiM3D individua tre direzioni di ricerca ancora aperte nel campo dell'ADS 3D
     \item l'assenza di backbone 3D scalabili ad alta risoluzione: i metodi multimodali esistenti sono stati progettati per point cloud a bassa risoluzione e non trasferiscono efficacemente a SiM3D
 \end{enumerate}
 
+%-------------------------
 
+\section{Metriche di Valutazione}
+\label{sec:metriche}
+% ---------------------------
+
+Nell'introduzione presentata nella Sezione \ref{subsec:metriche_intro} sono state introdotte le principali famiglie di metriche adottate nei benchmark di anomaly detection. In questa sezione viene approfondita ciascuna metrica, discutendone le proprietà formali, i punti di forza, le limitazioni e i contesti applicativi in cui è preferita.
+
+% ----------------------------------------
+\subsection{AUROC (Area Under the Receiver Operating Characteristic Curve)}
+\label{subsec:auroc}
+
+L'AUROC è la metrica più diffusa nei benchmark di anomaly detection industriale per la sua robustezza allo sbilanciamento tra classi normali e anomale. La curva ROC \cite{bergmann2019mvtec} traccia il tasso di veri positivi (\textit{True Positive Rate}, TPR) in funzione del tasso di falsi positivi (\textit{False Positive Rate}, FPR) al variare della soglia di decisione $\tau$:
+\[
+  \mathrm{TPR}(\tau) = \frac{TP(\tau)}{TP(\tau)+FN(\tau)},
+  \qquad
+  \mathrm{FPR}(\tau) = \frac{FP(\tau)}{FP(\tau)+TN(\tau)}.
+\]
+L'area sotto la curva, compresa nell'intervallo $[0,1]$, misura la capacità di discriminazione del modello indipendentemente dalla soglia scelta. Un valore pari a 0.5 corrisponde a una classificazione casuale; 1.0 indica separazione perfetta tra normali e anomalie.
+
+Nei benchmark industriali l'AUROC è riportata a due livelli distinti:
+
+\begin{itemize}
+  \item \textbf{Image-level AUROC (I-AUROC)}: misura la capacità del modello di classificare un'intera immagine come normale o anomala, assegnandole un singolo score (tipicamente il massimo o la media della mappa di anomalia pixel-wise).
+  \item \textbf{Pixel-level AUROC (P-AUROC)}: misura la qualità della localizzazione, trattando ogni pixel come un esempio indipendente e confrontando lo score pixel-wise con la ground truth binaria.
+\end{itemize}
+
+\paragraph{Limitazioni.}
+Il P-AUROC presenta un bias sistematico verso le regioni anomale di grandi dimensioni: una macchia estesa contribuisce proporzionalmente di più alla metrica rispetto a un micro-graffio. Questa asimmetria ha motivato lo sviluppo della metrica PRO (Sezione \ref{subsec:pro}).
+
+
+% ----------------------------------------
+
+\subsection{PRO e AU-PRO (Per-Region Overlap)}
+\label{subsec:pro}
+
+
+La metrica PRO \cite{bergmann2019mvtec, bergmann2020uninformed} affronta il bias dimensionale del P-AUROC. Anziché trattare ogni pixel come indipendente, PRO valuta la qualità della localizzazione pesando equamente le regioni di ground truth indipendentemente dalla loro dimensione \cite{bergmann2020uninformed}.
+
+Per il calcolo, la mappa di anomalia viene prima binarizzata applicando una soglia: per ciascuna componente connessa nella ground truth, si calcola la percentuale di overlap con la regione anomala binarizzata. Questo valore viene calcolato per un numero di soglie crescenti fino a raggiungere un false-positive rate medio per-pixel del 30\% sull'intero dataset; l'area sotto la curva PRO risultante, normalizzata a un valore massimo di 1, costituisce la misura finale di performance.
+
+
+I diversi dataset adottano limiti di integrazione differenti in funzione delle caratteristiche dei difetti:
+\begin{itemize}
+  \item MVTec 3D-AD usa AU-PRO con $\mathrm{FPR}_{\max}=0.30$, dato che le anomalie occupano spesso una frazione minima dell'area totale
+  \item MVTec AD 2 adotta $\mathrm{FPR}_{\max}=0.05$, riducendo la tolleranza per i falsi positivi
+\end{itemize}
+
+% ----------------------------------------
+\subsection{sPRO (Saturated Per-Region Overlap)}
+\label{subsec:spro}
+
+La metrica sPRO, introdotta in MVTec LOCO AD~\cite{bergmann2022beyond}, è una generalizzazione di PRO per le anomalie logiche, in cui la ground truth può essere sovradimensionata rispetto all'area strettamente rilevante ai fini della rilevazione. La metrica introduce una soglia di saturazione $s \in [0,1]$: il contributo di una regione è saturato a 1 non appena l'overlap supera $s$, evitando di premiare localizzazioni molto estese rispetto a quelle già sufficientemente precise:
+\[
+  \mathrm{sPRO}(P) = \frac{1}{m}\sum_{i=1}^{m}
+    \min\!\left(\frac{|A_i \cap P|}{s_i,\;1}\right).
+\]
+
+
+Per esempio, nel caso di una puntina da disegno assente, è sufficiente che il metodo segmenti un'area delle dimensioni di una puntina all'interno dello scomparto vuoto, senza bisogno di coprire perfettamente tutti i pixel della regione annotata (potenzialmente più ampia). sPRO penalizza le sotto-segmentazioni (overlap insufficiente a raggiungere 
+la soglia $s_i$), mentre le predizioni eccessive all'interno della regione annotata non abbassano il punteggio grazie alla saturazione. Le sovrasegmentazioni esterne alle regioni annotate sono catturate dal FPR, riportato insieme a sPRO.
+
+% ----------------------------------------
+\subsection{AUPR (Area Under the Precision-Recall Curve)}
+\label{subsec:aupr}
+
+L'AUPR integra la curva Precision-Recall, che riporta la precisione in funzione del recall \cite{davis2006precisionrecall} al variare della soglia. A differenza dell'AUROC, l'AUPR è particolarmente informativa in scenari con sbilanciamento estremo tra classi: quando le anomalie rappresentano una frazione molto ridotta del test set, l'AUROC può risultare elevata anche per classificatori poco precisi, mentre l'AUPR rimane sensibile alla qualità delle predizioni e più informativa. VisA \cite{zou2022spot} ha adottato l'AUPR come metrica complementare all'AUROC proprio per questa ragione, dato che le immagini anomale rappresentano circa il 10\% del totale.
+
+% ----------------------------------------
+\subsection{F1-Score}
+\label{subsec:f1}
+
+L'F1-score è la media armonica di precisione e recall \cite{davis2006precisionrecall}, calcolata dopo aver fissato una soglia ottimale $\tau$ (tipicamente quella che massimizza l'F1 sul validation set):
+\[
+  F_1 = \frac{2\cdot\mathrm{Precision}\cdot\mathrm{Recall}}{\mathrm{Precision}+\mathrm{Recall}}.
+\]
+Essendo una metrica \textit{threshold-dependent}, l'F1 dipende dalla scelta di $\tau$, il che la rende meno adatta ai confronti tra metodi in assenza di un protocollo di calibrazione condiviso. Tuttavia, è particolarmente utile per valutare le performance in condizioni operative dove la soglia è fissata a priori da requisiti di sistema (ad esempio, massimo 5\% di falsi negativi) come in MVTec AD 2~\cite{bergmann2025mvtecad2}, che la adotta come metrica complementare all'AU-PRO.
+
+% ----------------------------------------
+\subsection{MAE (Mean Absolute Error)}
+\label{subsec:mae}
+
+Il MAE misura l'errore medio assoluto tra la mappa di anomalia predetta $\hat{A}$ e la ground truth $G$, entrambe normalizzate in $[0,1]$~\cite{borji2015salient} su un'immagine di dimensioni $H \times W$:
+\[
+  \mathrm{MAE} = \frac{1}{HW}\sum_{i,j}|\hat{A}_{ij} - G_{ij}|.
+\]
+
+È adottato principalmente in metodi basati su saliency detection o ri\-co\-stru\-zio\-ne, come nel dataset Magnetic Tile Defects \cite{huang2018surface}, dove la mappa predetta viene confrontata direttamente con la maschera ground truth. Il MAE risulta meno informativo dell'AUROC in contesti industriali dove le regioni anomale occupano una frazione minima dell'immagine, poiché la metrica è dominata dai pixel normali. Offre tuttavia un'interpretazione diretta della qualità della mappa di anomalia come segnale continuo, indipendentemente da una soglia di binarizzazione.
+
+% ----------------------------------------
+\subsection{V-AUPRO (Voxel-level AU-PRO)}
+\label{subsec:vaupro}
+
+V-AUPRO è un'estensione della metrica AU-PRO al dominio 3D, introdotta da SiM3D~\cite{sim3d2025}. La metrica PRO voxel-level è definita come:
+
+\[
+  \mathrm{PRO}_t = \frac{1}{N}\sum_{n=1}^{N}\frac{|\Psi_t \cap V_n|}{|V_n|},
+\]
+
+dove $\Psi_t$ è l'Anomaly Volume binarizzato alla soglia $t$, $N$ è il numero di difetti nella ground truth e $V_n$ sono i voxel appartenenti all'$n$-esimo difetto. La curva PRO viene costruita calcolando questo valore per diverse soglie $t$, stimate a diversi false positive rate: il FPR è calcolato esclusivamente sui voxel non vuoti, escludendo le regioni della griglia 3D prive di punti.
+
+V-AUPRO si ottiene integrando la curva fino a un FPR massimo dell'1\%, normalizzando il risultato nell'intervallo $[0,1]$. La soglia di integrazione dell'1\% è più stringente rispetto al 30\% adottato da AU-PRO su MVTec AD e al 5\% di MVTec AD 2, riflettendo i requisiti delle applicazioni industriali reali per cui SiM3D è stato progettato.
+
+% ----------------------------------------
+\subsection{Considerazioni sulla Scelta delle Metriche}
+\label{subsec:scelta_metriche}
+% ----------------------------------------
+
+La scelta delle metriche valutate influenza direttamente quali aspetti della performance vengono ottimizzati e la direzione di sviluppo degli algoritmi. La Tabella \ref{tab:metriche_dataset} riassume le metriche adottate da ciascun benchmark, evidenziando come l'evoluzione verso scenari più realistici si rifletta in criteri di valutazione più stringenti.
+
+Un rischio è quello di sviluppare modelli che massimizzano una singola metrica senza generalizzare ad altre. Per questo, i benchmark più recenti riportano sistematicamente metriche complementari (I-AUROC, AU-PRO e F1) fornendo una valutazione più completa e meno suscettibile a ottimizzazioni specifiche.
+
+\begin{table}[htbp]
+\centering
+\caption{Metriche di valutazione adottate dai principali dataset per l'anomaly detection industriale. \checkmark indica che la metrica è valutata nel paper.}
+\label{tab:metriche_dataset}
+\footnotesize
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Dataset} & \textbf{I-AUROC} & \textbf{P-AUROC} & \textbf{AU-PRO} & \textbf{sPRO} & \textbf{AUPR} & \textbf{F1/F$_\beta$} & \textbf{MAE} \\
+\midrule
+Magnetic Tile Defects &   & \checkmark & &  & & \checkmark & \checkmark \\
+MVTec AD  & \checkmark & \checkmark & \checkmark & & & & \\
+MPDD   & \checkmark & \checkmark & & & & & \\
+VisA  & \checkmark & \checkmark & & & \checkmark & & \\
+MVTec LOCO AD & \checkmark & & & \checkmark & & & \\
+Real-IAD  & \checkmark & \checkmark & \checkmark & & & & \\
+MVTec AD 2 & \checkmark & & \checkmark & & & \checkmark & \\
+\midrule
+MVTec 3D-AD  & \checkmark & \checkmark & \checkmark & & & & \\
+Real3D-AD & \checkmark & & & & & & \\
+\midrule
+Eyecandies  & \checkmark & \checkmark & & & & & \\
+PAD / MAD  & \checkmark & \checkmark & & & & & \\
+RAD   & \checkmark & \checkmark & & & & & \\
+Real-IAD D$^3$   & \checkmark & \checkmark & & & & & \\
+SiM3D & \checkmark & & \checkmark$^*$ & & & & \\
+\bottomrule
+\multicolumn{8}{l}{\footnotesize $^*$SiM3D adotta V-AUPRO@1\% (estensione voxel-level di AU-PRO) anziché AU-PRO standard.} \\
+\multicolumn{8}{l}{\footnotesize Magnetic Tile Defects: F$_\beta$ con $\beta^2=0.3$. MVTec AD 2: F1-score con soglia fissa.}
+\end{tabular}
+\end{table}
+
+%%% --------------------------
+\section{Analisi Comparativa dei Dataset}
+\label{sec:analisi_comparativa}
+
+
+I quattordici dataset analizzati in questo capitolo rappresentano l'evoluzione degli ultimi sette anni (2018--2025) che riflette la complessità crescente delle sfide proposte alla ricerca. La Tabella \ref{tab:riepilogo_dataset} ne sintetizza le caratteristiche principali, consentendo un confronto diretto sugli aspetti più rilevanti: modalità di acquisizione, ampiezza del dataset, tipologia di anomalie, caratteristiche distintive e metriche di riferimento.
+
+\begin{table}[htbp]
+\centering
+\caption{Riepilogo comparativo dei principali dataset per IAD (2018--2025).}
+\label{tab:riepilogo_dataset}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{%
+  >{\raggedright\arraybackslash}p{1.5cm}
+  >{\raggedright\arraybackslash}p{2.4cm}
+  >{\raggedright\arraybackslash}p{1.6cm}
+  r
+  >{\raggedleft\arraybackslash}p{1.5cm}
+  >{\raggedright\arraybackslash}p{2.8cm}
+  >{\raggedright\arraybackslash}p{4.2cm}
+}
+\toprule
+\textbf{Anno} & \textbf{Dataset} & \textbf{Modalità} & \textbf{Cat.}
+  & \textbf{Campioni} & \textbf{Tipo anomalie} & \textbf{Caratteristiche principali} \\
+\midrule
+\multicolumn{7}{c}{\textit{\textbf{Dataset 2D RGB}}} \\
+\midrule
+2018 & Magnetic Tile & 2D grayscale & 6 & 1{,}344 & Superficie (crepe, fori, sbavature) & Primo dataset AD industriale dedicato; introduce MCuePushU; metriche: AUC, MAE, F$_\beta$. \\
+\addlinespace
+2019 & \textbf{MVTec AD} & 2D RGB & 15 & 5{,}354 & Superficie + strutturale (73 tipologie) & \textbf{Benchmark universale}; annotazioni pixel-precise; separa training/test; introduce AUROC e PRO. \\
+\addlinespace
+2021 & MPDD & 2D RGB & 6 & 1{,}346 & Graffi, buchi, ruggine, parti mancanti & Focus su parti metalliche; gap di $-15\%$ AUROC rispetto a MVTec AD; evidenzia limiti di generalizzazione. \\
+\addlinespace
+2022 & VisA & 2D RGB & 12 & 10{,}821 & Superficie + strutturale (multi-istanza) & Strutture complesse; protocolli few-shot (1-shot, 5-shot); introduce AUPR e SPD self-supervised. \\
+\addlinespace
+2022 & MVTec LOCO AD & 2D RGB & 5 & 3{,}644 & Strutturale + logico & Primo dataset con anomalie logiche; introduce sPRO; richiede reasoning contestuale. \\
+\addlinespace
+2024 & Real-IAD & 2D RGB & 30 & 150{,}000 & Multi-tipo (materiali eterogenei) & Large-scale; acquisizione multi-vista (5 angolazioni); introduce setting FUIAD con training rumoroso. \\
+\addlinespace
+2025 & MVTec AD 2 & 2D RGB & 8 & 8{,}004 & Superficie + bordi immagine & Oggetti trasparenti/riflettenti; illuminazione variabile; anomalie ai margini; AU-PRO@5\%. \\
+\midrule
+\multicolumn{7}{c}{\textit{\textbf{Dataset 3D}}} \\
+\midrule
+2021 & MVTec 3D-AD & RGB + XYZ & 10 & 4{,}147 & Geometriche (ammaccature, deformazioni) & Primo dataset 3D industriale; RGB + point cloud; motiva architetture multi-modali. \\
+\addlinespace
+2023 & Real3D-AD & Point cloud & 12 & 1{,}254 & Incompleteness, redundancy & Precisione $0.011$\,mm; copertura 360°; setting few-shot (4 prototipi); introduce ADBENCH-3D. \\
+\midrule
+\multicolumn{7}{c}{\textit{\textbf{Dataset Multimodali}}} \\
+\midrule
+2022 & Eyecandies & RGB + D + N & 10 & 90{,}000 & Colore, deformazione, imperfezione & Sintetico; controllo totale su illuminazione; 3 modalità (RGB, depth, normal map). \\
+\addlinespace
+2023 & PAD / MAD & 2D RGB & 20 & 11{,}000+ & Sbavature, macchie, parti mancanti & Pose-agnostic; primo uso di NeRF per AD; versioni reale (MAD-Real) e sintetica (MAD-Sim). \\
+\addlinespace
+2024 & RAD & 2D RGB & 13 & 5{,}848 & Graffi, macchie, parti mancanti, deformazioni & 68 viewpoint con braccio robotico; noisy-pose; valuta VLM e 3D Gaussian Splatting. \\
+\addlinespace
+2025 & Real-IAD D$^3$ & RGB + PC + N & 20 & 8{,}450 & 69 tipi (graffi, ammaccature, crepe) & Tri-modale; precisione $0.002$\,mm; stereo fotometrico per pseudo-3D; introduce D$^3$M. \\
+\addlinespace
+2025 & SiM3D & Gray + PC & 8 & 333 ist. & Aspetto, geometria, contaminazioni & Single-instance training; valutazione voxel-level; setup real2real e synth2real; 12--36 viste. \\
+\bottomrule
+\multicolumn{7}{l}{\footnotesize D = depth map; N = normal map; PC = point cloud; ist. = istanze complete multi-vista.}
+\end{tabular}
+\end{table}
+
+
+\paragraph{Osservazioni finali.}
+L'analisi comparativa dei dataset rivela l'evoluzione di tre caratteristiche principali
+
+\begin{enumerate}
+    \item \textbf{Aumento della complessità dei dati}: dai 1.344 campioni in scala di grigi di Magnetic Tile alle 150.000 immagini RGB multi-view di Real-IAD, fino alle 333 istanze 3D complete di SiM3D. Questa progressione sottolinea l'ampliamento e la specificazione maggiore dei dati considerati
+    \item \textbf{Aumento delle anomalie}: i dataset di prima generazione si concentrano sui difetti superficiali (graffi, crepe, macchie), facilmente annotabili ed evidenti. I benchmark successivi introducono progressivamente anomalie logiche (MVTec LOCO AD), difetti geometrici sempre più sottili (Real3D-AD), imperfezioni superficiali rilevabili con stereo fotometrico (Real-IAD D$^3$) e deformazioni di volume (SiM3D). Aumenta quindi la complessità e l'astrazione da gestire per l'architettura.
+    \item \textbf{Protocolli di valutazione più specifici}: dallo scenario one-class standard (training solo su esempi normali) verso setting più articolati: few-shot (Real3D-AD, VisA), noisy training (Real-IAD FUIAD), pose-agnostic (PAD, RAD) e single-instance (SiM3D). Ciascuna di queste varianti affronta un vincolo reale della produzione industriale, dimostrando la necessità di nuovi riferimenti per misurare il progresso del campo.
+\end{enumerate}
+
+% —--------------------------------------------------
+\section{Tendenze e Sfide Future}
+\label{sec:tendenze_future}
+
+
+In conclusione, emergono le principali direzioni di ricerca per il futuro del settore, che riflettono la sempre maggiore ricerca di generalizzazione e la necessità di deployment in scenari reali.
+
+\paragraph{Da detection a comprensione.}
+I primi benchmark si concentravano principalmente sulla capacità di separare campioni normali da anomali e di localizzare le anomalie nell’immagine. I dataset più recenti, in particolare MVTec LOCO AD e Real-IAD, ampliano la visione introducendo la comprensione della struttura logica dell'oggetto, delle relazioni tra componenti, dei vincoli di assemblaggio. Questa direzione può portare verso sistemi capaci non solo di rilevare un'anomalia, ma di classificarla, spiegarla e suggerirne la causa, avvicinando l'anomaly detection ad una ispezione interpretabile.
+
+\paragraph{Integrazione multimodale.}
+L'integrazione di modalità complementari (RGB, depth, point cloud, normal map) sta diventando la norma nei benchmark più recenti (MVTec 3D-AD, Eyecandies, Real-IAD D$^3$, SiM3D). La sfida principale è sviluppare architetture capaci di fondere le varie modalità in modo adattivo, considerando tipo di anomalia e contesto applicativo. I risultati di SiM3D mostrano che i backbone 3D esistenti, progettati per point cloud a bassa risoluzione, non scalano ai dataset ad alta risoluzione: questo apre un ulteriore spazio di ricerca sulle architetture per processare point cloud ad alta risoluzione.
+
+\paragraph{Riduzione del gap sintetico-reale.}
+Eyecandies e MAD-Sim dimostrano i vantaggi di dati sintetici (controllo completo, annotazioni automatiche, scala illimitata), ma anche i suoi limiti: il gap in texture, materiali e rumore di acquisizione riduce la trasferibilità dei modelli. Emergono quindi dataset ibridi come SiM3D, che affiancano rendering da modello CAD e acquisizioni reali, e tecniche di domain adaptation che usano i dati sintetici come fonte di pre-training per poi adattarsi al reale con pochi campioni. Lo sviluppo di modelli generativi può portare verso la generazione di difetti sintetici sempre più realistici, consentendo di aumentare artificialmente i dataset di training.
+
+\paragraph{Setting few-shot e zero-shot.}
+La raccolta di campioni normali ad alta qualità può essere complessa in contesti industriali e la disponibilità di esempi anomali è limitata dalla rarità dei difetti reali. Per questo, i dataset più recenti introducono protocolli few-shot (VisA, Real3D-AD) e single-instance
+(SiM3D), mentre i vision-language model come WinCLIP e AnomalyCLIP definiscono prospettive zero-shot, con modelli guidati solo da descrizioni testuali. I risultati di RAD mostrano tuttavia che i VLM attuali non competono con i metodi feature-based, lasciando aperta la questione di come integrare ragionamento semantico con feature locali di basso livello.
+
+\paragraph{Massimo realismo.}
+MVTec AD 2 e RAD introducono sfide sempre più complesse: illuminazione variabile, oggetti trasparenti e riflettenti, pose non fisse, bracci robotici. Un benchmark utile non misura le performance in condizioni ideali, ma in quelle in cui i sistemi effettivamente operano: questo porta verso dati acquisiti in ambienti industriali reali, con minore controllo delle condizioni, rispetto a condizioni perfettamente controllate in un laboratorio.
+
+\paragraph{Modelli unificati e generalizzazione.}
+La maggior parte dei metodi analizzati nel Capitolo 2 adotta un approccio per categoria: viene addestrato un modello per ogni tipo di oggetto, che impara il concetto di normalità dagli esempi di quella categoria. Benchmark come Real-IAD (30 categorie) e Real-IAD D$^3$ (20 categorie) si indirizzano, invece, verso modelli unificati che possono operare su categorie eterogenee senza re-addestramento. I modelli dovranno avere una rappresentazione più flessibile della normalità, per potersi adattare a texture, materiali e forme molto diverse tra loro. 
+
+
+\medskip
+In sintesi, il panorama dei dataset per l'anomaly detection industriale riflette un campo in crescita, in cui le sfide si spostano dalla detection di difetti superficiali in condizioni controllate verso la comprensione di anomalie complesse in scenari realistici, per rispondere alle esigenze dell’analisi industriale moderna.
 
