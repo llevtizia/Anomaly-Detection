@@ -8,7 +8,8 @@
 \usepackage{graphicx}          % Pacchetto base per immagini
 \usepackage{float}             % Per posizionamento preciso [H]
 \usepackage{subfig} 
-\usepackage{subcaption}        
+\usepackage{subcaption} 
+\usepackage{pdfpages}       
 
 \usepackage[italian,english]{babel}
 \usepackage{array}
@@ -20,10 +21,10 @@
 % SPECIFICA IL PATH DELLE IMMAGINI
 \graphicspath{{immagini/capitolo1/}{immagini/capitolo2/}{immagini/capitolo3/}}
 
-% Altri pacchetti utili
-\usepackage[font=small,labelfont=bf]{caption}  % Caption personalizzate
+%  pacchetti utili
+\usepackage[font=small,labelfont=bf]{caption}  % caption 
 
-\usepackage[backend=biber,style=ieee]{biblatex} % puoi cambiare stile
+\usepackage[backend=biber,style=ieee]{biblatex} % 
 \usepackage[autostyle,italian=guillemets]{csquotes}
 \addbibresource{capitoli/bibliografia.bib}              % collega il file .bib
 
@@ -33,7 +34,13 @@
 
 \begin{document}
 
-\maketitle
+\includepdf{copertina.pdf}
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
+\newpage
+\includepdf{frontespizio.pdf}
 
 \tableofcontents
 
