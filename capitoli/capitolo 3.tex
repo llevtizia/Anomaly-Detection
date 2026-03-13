@@ -812,3 +812,75 @@ Real-IAD {D$^3$} \cite{zhu2025realiadd3} affianca ad immagini RGB ad alta risolu
 
 
 
+%%%%%%% ---------- SIM 3D
+\subsection{SiM3D (2025)}
+\label{sec:sim3d}
+
+SiM3D (\textit{Single-instance Multiview Multimodal and Multisetup}) \cite{sim3d2025} introduce il primo benchmark per anomaly detection e segmentation (ADS) che integra simultaneamente informazione \textbf{multi-view} e \textbf{multimodale}, proponendo sia un dataset ad alta risoluzione che un protocollo di benchmark incentrato su uno scenario specifico, la \textbf{single-instance anomaly detection}, in cui un solo oggetto nominale è disponibile per il training.
+
+\paragraph{Acquisizione.}
+Il dataset è acquisito tramite lo scanner 3D industriale \textit{Atos Q} di ZEISS, montato su un braccio robotico ad alta ripetibilità. Il sensore è composto da una coppia stereo di due camere grayscale da \textbf{12\,Mpx} ($4096 \times 3000$ pixel) e un proiettore di luce strutturata. I point clouds possono raggiungere fino a 12 milioni di elementi con una distanza inter-punto tra 0.04 e 0.15\,mm. 
+
+Per ciascuna istanza vengono acquisite da \textbf{12 a 36 viste} dell'oggetto, ottenendo per ogni vista:
+\begin{itemize}
+    \item un'immagine grayscale $I_i$,
+    \item una nuvola di punti $P_i$,
+    \item la posa di acquisizione $[R_i | T_i]$ (la coppia
+    rotazione-traslazione che allinea la vista $i$ alla vista di riferimento $v_1$)
+\end{itemize}
+Il sensore fornisce inoltre un'unica \textbf{mesh integrata} $M$ per istanza, ottenuta registrando e fondendo le nuvole di punti di tutte le viste acquisite.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{immagini/capitolo3/sim3d-pipeline.jpg}
+    \caption{Pipeline di creazione del dataset SiM3D. (1) Acquisto degli otto tipi di oggetti, ciascuno associato a un modello CAD, e introduzione manuale di difetti realistici su metà delle istanze; (2) Setup di acquisizione con scanner 3D ad alta precisione e camere ad alta risoluzione montate su braccio robotico; (3) Scansioni a 360° di ciascuna istanza per training e test set reali, e rendering da modello CAD per il training set sintetico; (4) Generazione delle ground truth di segmentazione 3D tramite pipeline mista 2D--3D con raffinamento manuale e voxelizzazione finale.}
+    \label{fig:sim3d_pipeline}
+\end{figure}
+
+
+\paragraph{Caratteristiche.}
+Il dataset comprende \textbf{333 istanze} appartenenti a \textbf{8 tipologie di oggetti} (Plastic Stool, Rubbish Bin, Wicker Vase, Bathroom Furniture, Container, Plastic Vase, Wooden Stool, Sink Cabinet). Le anomalie sono state introdotte \textit{manualmente} simulando difetti realistici su metà delle istanze
+\begin{itemize}
+    \item alterazioni dell'\textbf{aspetto}: modifiche alla vernice
+    \item alterazioni della \textbf{geometria}: ammaccature
+    \item \textbf{entrambi}: contaminazioni
+\end{itemize}
+
+\paragraph{Dati sintetici.}
+Per ogni tipologia di oggetto è disponibile un \textbf{modello CAD} ufficiale del produttore. Il modello viene allineato a una mesh reale di riferimento e caricato in Blender, dove tramite il renderer Cycles vengono renderizzate immagini dalle stesse pose $v_i$ delle acquisizioni reali. I render RGB sono convertiti in immagini grayscale per coerenza con il sensore reale; vengono renderizzate anche depth map,poi proiettate in nuvole di punti tramite i parametri intrinseci della camera.
+
+
+\paragraph{Setup sperimentali.}
+SiM3D definisce due configurazioni di training distinte:
+\begin{itemize}
+    \item \textbf{\texttt{real2real}}: il training set è una singola istanza nominale reale e il test set comprende tutte le altre (nominali e anomale).
+    \item \textbf{\texttt{synth2real}}: il training set è il rendering sintetico del modello CAD e il test set è identico al setup \texttt{real2real}.
+\end{itemize}
+
+\paragraph{Annotazione e rappresentazione 3D.}
+La ground truth è prodotta tramite una \textbf{strategia di annotazione in due fasi}: 
+\begin{itemize}
+    \item prima si annotano manualmente le viste 2D in cui le anomalie sono visibili
+    \item poi le maschere 2D vengono proiettate sulla mesh integrata tramite i parametri di calibrazione noti
+    \item infine, la mesh viene convertita in una \textbf{voxel grid} con risoluzione di \textbf{2\,mm} per voxel
+\end{itemize}
+
+Il task di output è quindi un \textbf{Anomaly Volume} $V \in \mathbb{R}^{X \times Y \times Z}$, anziché la tradizionale Anomaly Map 2D: ogni voxel porta uno score di anomalia, consentendo la localizzazione precisa dei difetti nello spazio tridimensionale.
+
+\paragraph{Metodi e Risultati.}
+Per stabilire baseline sul task multiview 3D ADS, me\-to\-di single-view consolidati vengono estesi \textbf{proiettando le Anomaly Map 2D nello spazio 3D} e aggregandole nella voxel grid tramite max pooling per voxel. 
+
+Dai risultati ottenuti, si può notare che i metodi che processano solo immagini RGB performano meglio rispetto a quelli multimodali: i backbone 3D esistenti sono stati progettati per point cloud a bassa risoluzione ($\sim$8K punti), mentre SiM3D ne fornisce $\sim$2.3M dopo downsampling, rendendo inutilizzabili i feature extractor nativi di M3DM e CFM. AST è l'unica eccezione, operando su depth map che conservano la struttura 2D. 
+
+PatchCore raggiunge il miglior detection (\textbf{0.754} I-AUROC in \texttt{real2real}), AST la miglior segmentation (\textbf{0.699} V-AUPRO@1\%). Il gap tra i due setup è marcato per il detection (0.754 vs.\ 0.540) ma quasi nullo per la segmentation (0.699 vs.\ 0.695).
+
+\paragraph{Impatto.}
+SiM3D individua tre direzioni di ricerca ancora aperte nel campo dell'ADS 3D
+\begin{enumerate}
+    \item la necessità di metodi capaci di processare l'informazione multi-view direttamente in ingresso in maniera più efficiente, anziché aggregare output single-view a posteriori
+    \item la mancanza di tecniche robuste al domain shift sintetico-reale: nel setup \texttt{synth2real} il gap di detection rispetto a \texttt{real2real} è consistente, mentre la segmentation risulta molto meno penalizzata
+    \item l'assenza di backbone 3D scalabili ad alta risoluzione: i metodi multimodali esistenti sono stati progettati per point cloud a bassa risoluzione e non trasferiscono efficacemente a SiM3D
+\end{enumerate}
+
+
+
