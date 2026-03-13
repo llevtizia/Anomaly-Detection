@@ -1,0 +1,29 @@
+La tesi ha tracciato l'evoluzione del visual anomaly detection industriale attraverso lo sviluppo dei metodi e la progressione dei dataset di riferimento. Il percorso, che parte dal 2018 fino ai lavori più recenti del 2025, evidenzia come il campo sia in continua crescita.
+
+\medskip
+
+Il \textbf{Capitolo 1} ha definito le basi concettuali necessarie a comprendere questa evoluzione: i principi del machine learning, l'architettura delle reti neurali convoluzionali e il ruolo del transfer learning, alla base dei backbone pre-addestrati su ImageNet utilizzati per estrarre rappresentazioni senza supervisione esplicita sulle anomalie.
+
+\medskip
+
+Il \textbf{Capitolo 2} ha seguito lo spostamento progressivo da approcci generativi di prima generazione (autoencoder e GAN, limitati dalla difficoltà di modellare distribuzioni complesse e dall'instabilità dell'addestramento) verso metodi feature-based che usano backbone pre-addestrati (PaDiM, SPADE, PatchCore) con performance superiori e maggiore stabilità. In fasi successive, i normalizing flow hanno introdotto densità esatte sulla distribuzione delle feature normali; le tecniche di sintesi di anomalie (CutPaste, DRAEM) hanno trasformato il problema in una classificazione binaria; i modelli student-teacher avanzati (EfficientAD) hanno bilanciato accuratezza ed efficienza computazionale. Infine, i vision-language model e i framework multimodali per dati 3D hanno aperto nuovi ambiti di ricerca, pur rivelando limiti ancora significativi: i VLM attuali non competono con i metodi feature-based su benchmark standard, e i backbone 3D esistenti non scalano ai dataset ad alta risoluzione.
+
+\medskip
+
+Il \textbf{Capitolo 3} ha seguito l'evoluzione dei dataset. MVTec AD ha definito il primo benchmark di riferimento, portando ad un primo confronto. I dataset successivi hanno progressivamente ampliato il problema: dalle anomalie logiche di MVTec LOCO AD alle informazioni geometriche di MVTec 3D-AD e Real3D-AD, fino agli scenari large-scale e multi-view di Real-IAD e alle condizioni più realistiche di MVTec AD 2 e RAD. Ogni nuovo benchmark ha evidenziato i limiti dei precedenti, orientando la ricerca verso soluzioni più robuste e generalizzabili.
+
+\medskip
+
+Dall'analisi complessiva emergono alcune osservazioni trasversali. In primo luogo, il rapporto tra le \textit{performance su benchmark controllati} e la \textit{robustezza in scenari reali}: l'ottimizzazione su un singolo dataset non garantisce la generalizzazione. 
+In secondo luogo, l'integrazione multimodale (RGB, depth, point cloud, mappe delle normali) rappresenta la direzione migliore per affrontare sempre maggiori categorie di difetti (che possono essere visibili in alcune modalità e non in altre), sviluppando architetture capaci di fondere le informazioni.
+In terzo luogo, la disponibilità di dati rimane uno dei vincoli principali: la rarità dei difetti reali e i costi di acquisizione spingono verso approcci few-shot, zero-shot e l'uso di dati sintetici, ma il gap tra simulazione e realtà resta ampio.
+
+\medskip
+
+Le direzioni di ricerca più rilevanti per il futuro convergono verso tre obiettivi: lo sviluppo di modelli capaci di operare su categorie eterogenee senza re-addestramento, la costruzione di architetture 3D scalabili ad alta risoluzione e il passaggio da sistemi di \textit{detection} a sistemi di \textit{comprensione}, capaci di segnalare un'anomalia ma anche di classificarla. 
+Il progresso dipenderà dalla disponibilità di benchmark sempre più rappresentativi delle condizioni operative reali.
+
+\medskip
+
+In sintesi, il visual anomaly detection industriale si configura oggi come un campo ben definito nella sua metodologia di base, ma ancora aperto sulle sfide più avanzate. 
+Il percorso seguito in questa tesi, dalla detection di graffi su superfici strutturate alla comprensione di assemblaggi complessi in ambienti non controllati, riflette la relazione tra la solidità dei risultati ottenuti e l'ambizione verso sistemi sempre più vicini alle esigenze dell'industria reale.
