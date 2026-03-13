@@ -730,13 +730,13 @@ L'anomaly detection è una capacità necessaria in ambienti industriali, tuttavi
 
 \paragraph{Acquisizione.} I dati sono acquisiti con un braccio robotico Franka Emika Panda equipaggiato con una camera Intel RealSense D415 (1280$\times$720). Ogni oggetto è catturato da \textbf{68 viewpoints predefiniti} che coprono una rotazione completa a 360°. Rispetto ai multi-camera rig o agli scanner rotanti usati in dataset precedenti (PAD, Real3D-AD), il braccio robotico garantisce copertura multi-view densa con un singolo sensore senza manipolare l'oggetto. Nonostante la camera sia RGB-D, solo le immagini RGB sono rilasciate a causa del rumore eccessivo nelle misure di profondità in condizioni reali. Ogni immagine, infine, è accompagnata dai metadati sulla posizione della camera.
 
-\paragraph{Caratteristiche.} Il dataset contiene \textbf{5,848 immagini RGB} distribuite su \textbf{13 categorie} di oggetti quotidiani, tra cui oggetti da cucina, giocattoli e articoli di consumo (ad esempio, tazza, cucchiaio, cover per telefono, pallina da tennis). Sono presenti \textbf{4 tipologie di difetti}: 
-\begin{itemize}
+\paragraph{Caratteristiche.} Il dataset contiene \textbf{5,848 immagini RGB} distribuite su \textbf{13 categorie} di oggetti quotidiani, tra cui oggetti da cucina, giocattoli e articoli di consumo (ad esempio, tazza, cucchiaio, cover per telefono, pallina da tennis, etc). Sono presenti \textbf{4 tipologie di difetti}: 
+\begin{enumerate}
     \item \textit{graffi} e incisioni superficiali
     \item \textit{parti mancanti}
     \item \textit{macchie} e scolorimento localizzato
     \item \textit{deformazioni meccaniche}, escluse le categorie in materiale rigido (binderclip, box, charger e phonecase)
-\end{itemize}
+\end{enumerate}
 Le maschere di annotazione pixel-wise sono generate confrontando le immagini difettose con le corrispondenti viste normali.
 
 \paragraph{Metodi.} RAD valutò tre famiglie di approcci nel setting pose-agnostic:
@@ -763,6 +763,52 @@ A livello pixel-level il gap si riduce: VCPCLIP raggiunge 0.987 di media, e i me
 
 
 
+%%%% ----------------- Real IAD D3
+\subsection{Real-IAD {D$^3$} (2025)}
+\label{sec:real_iad_d3}
+
+Real-IAD {D$^3$} \cite{zhu2025realiadd3} affianca ad immagini RGB ad alta risoluzione e point cloud 3D con precisione micrometrica una terza modalità di rappresentazione dei dati: \textbf{pseudo-3D da stereo fotometrico}, con l'obiettivo di catturare difetti superficiali sottili non rilevabili dalle sole modalità 2D o 3D.
+
+\paragraph{Acquisizione.} Il sistema integra tre modalità usando un unico setup:
+
+\begin{enumerate}
+    \item \textbf{RGB}: camera ad alta risoluzione (3,648$\times$5,472 pixel) per texture e colore
+    \item \textbf{Point cloud 3D}: sistema a luce strutturata DLP a quattro direzioni, con precisione fino a \textbf{0.002 mm} e risoluzione massima di 16.2 milioni di punti (5,328$\times$3,040)
+    \item \textbf{Pseudo-3D}: normali alla superficie ottenute tramite stereo fotometrico, calcolando i vettori normali $\mathbf{n}(x,y)$ da quattro immagini acquisite con diverse direzioni di illuminazione: 
+    \[
+    \mathbf{n}(x,y) = (\mathbf{L}^\top \mathbf{L})^{-1} 
+    \mathbf{L}^\top \mathbf{I}(x,y)
+    \]
+    dove $\mathbf{I}(x,y)$ è il vettore delle intensità pixel dalle quattro immagini e $\mathbf{L}$ è la matrice delle direzioni di illuminazione.
+\end{enumerate}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{immagini/capitolo3/real-iad-3-preparation.png}
+    \caption{Pipeline di acquisizione di Real-IAD D$^3$. (a) Preparazione dei materiali e creazione dei difetti per le 20 categorie; (b) Setup di acquisizione con singola camera, sistema DLP a quattro direzioni per il point cloud 3D e sorgente multi-luce a quattro zone per il pseudo-3D tramite stereo fotometrico; (c) Annotazione e cleaning con precisione pixel-wise; (d) Visualizzazione multimodale: 2D, pseudo-3D e point cloud 3D.}
+    \label{fig:real_iad_d3_pipeline}
+\end{figure}
+
+
+
+\paragraph{Caratteristiche.} Il dataset contiene \textbf{8,450 campioni}, di cui 5,000 normali e 3,450 anomali, distribuiti su \textbf{20 categorie} di componenti industriali reali (che includono, ad esmepio, connettori elettronici, parti meccaniche e sensori) con dimensioni compatte (7–27 mm di lunghezza). Le anomalie sono raggruppate in \textbf{69 gruppi di difetti} (come  graffi, ammaccature, crepe, parti mancanti e deformazioni), con circa 50 campioni per gruppo e una media di 3.45 tipi di difetti per categoria. La proporzione delle aree con anomalie varia tra 0.46\% e 6.39\% dell'area totale per quanto riguarda le imamgini 2D, mentre varia tra 0.33\% e 7.34\% per i punti difettosi nel point cloud.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{immagini/capitolo3/real-iad-3-samples.png}
+    \caption{Esempi delle 20 categorie del dataset Real-IAD D$^3$. Per ogni categoria, la prima colonna mostra un campione anomaly-free; le tre colonne successive mostrano campioni anomali nelle tre modalità: RGB, pseudo-3D (stereo fotometrico) e point cloud 3D.}
+    \label{fig:real_iad_d3_samples}
+\end{figure}
+
+
+\paragraph{D$^3$M.} Il paper introduce \textbf{D$^3$M} (\textit{D$^3$-Memory}), un framework memory-bank esteso al dominio trimodale, discusso in dettaglio nella Sezione~\ref{subsec:metodi-3d-recenti}.
+
+\paragraph{Metodi e Risultati.} {D$^3$M} fu confrontato con metodi \textit{single-modality} (CFlow e SimpleNet per RGB, PointMAE per point cloud) e \textit{multi-modality} (AST, PointMAE+PatchCore, M3DM), valutati con \textbf{I-AUROC} e \textbf{P-AUROC}. I me\-to\-di single-modality mostrano limitazioni complementari: il 2D fatica con difetti geo\-me\-tri\-ci come graffi e ammaccature, mentre il 3D manca di dettagli di texture superficiale. La combinazione 2D+3D migliora ma non cattura le irregolarità superficiali sottili. 
+
+{D$^3$M} raggiunge \textbf{0.890 I-AUROC} e \textbf{0.937 P-AUROC}, superando M3DM (0.841 / 0.922) e PointMAE+PatchCore (0.812 / 0.905), con la modalità pseu\-do-3D che fornisce il contributo incrementale decisivo: la sola combinazione 2D+pseudo-3D (PatchCore: 0.839 I-AUROC) supera già il solo 2D (0.747).
+
+
+\paragraph{Impatto.} Real-IAD D³ stabilisce che i dati pseudo-3D da stereo fotometrico sono una modalità genuinamente complementare a RGB e point cloud, catturando informazioni superficiali non accessibili alle altre due. La piattaforma di acquisizione integrata, che allinea naturalmente le tre modalità senza calibrazione aggiuntiva, rappresenta un contributo metodologico rilevante per la raccolta di dataset multimodali industriali.
 
 
 
