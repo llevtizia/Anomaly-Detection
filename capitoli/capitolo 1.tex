@@ -602,6 +602,7 @@ La cross-entropy è generalmente preferita all'MSE per problemi di classificazio
 
 
 \begin{table}[h]
+\caption{Funzioni di errore per diversi tipi di problema.}
 \centering
 \resizebox{\linewidth}{!}{
 \begin{tabular}{p{4cm}p{6cm}p{4cm}}
@@ -613,7 +614,7 @@ Classificazione binaria & $\displaystyle -\sum [t\log y + (1-t)\log(1-y)]$ & Sig
 Classificazione multi-classe & $\displaystyle -\sum \sum_k t_k \log y_k$ & Softmax \\
 \bottomrule
 \end{tabular}}
-\caption{Funzioni di errore per diversi tipi di problema.}
+
 \label{tab:loss_functions}
 \end{table}
 

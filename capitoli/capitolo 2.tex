@@ -517,6 +517,7 @@ PatchCore e MemSeg rappresentano due filosofie complementari nell'uso della memo
 \end{table}
 
 
+
 \begin{itemize}
 \item \textbf{PatchCore}: Deployment rapido senza training, massima robustezza a variazioni spaziali, accuratezza eccellente. Ideale quando non si può/vuole addestrare e gli oggetti possono essere disallineati o ruotati.
 
@@ -864,6 +865,7 @@ Dopo aver esaminato l'evoluzione dei metodi, presentiamo un confronto sintetico 
 }
 \end{table}
 
+
 \subsubsection{Panorama Sintetico dei Metodi}
 La Tabella \ref{tab:panorama_metodi} riporta un confronto sintetico tra i metodi più rilevanti discussi in questo capitolo, evidenziando le loro caratteristiche principali e performance indicative sul benchmark MVTec AD.
 
@@ -876,19 +878,21 @@ La scelta del metodo ottimale dipende fortemente dal contesto applicativo. La Ta
 \centering
 \caption{Guida pratica alla selezione del metodo}
 \label{tab:guida_selezione}
-\begin{tabular}{lp{9.5cm}}
-\toprule
-\textbf{Scenario Prioritario} & \textbf{Metodo Consigliato e Motivazione} \\
-\midrule
-\textbf{Accuratezza Massima} & \textbf{EfficientAD} (ensemble ottimizzato) o \textbf{RD++} (student-teacher avanzato) per performance top-tier ($>$99.4\% AUROC). \textbf{PatchCore} se non si può addestrare. \\
-\textbf{Inferenza Real-Time} & \textbf{SimpleNet} (estremamente leggero) o \textbf{MemSeg} (segmentazione diretta) per latenze $<$10ms. \textbf{EfficientAD} per miglior bilanciamento accuratezza/velocità. \\
-\textbf{Dati Limitati (Few-Shot)} & \textbf{AnomalyCLIP} (eccelle con K$<$10 esempi) sfruttando conoscenza semantica pre-esistente. \textbf{RD++} per un approccio solamente visivo. \\
-\textbf{Validazione Concettuale Rapida} & \textbf{SimpleNet} (implementazione minimalista) o \textbf{PatchCore} (nessun training). Consentono validazione concettuale in tempi brevi. \\
-\textbf{Generalizzazione Cross-Domain} & \textbf{AnomalyCLIP} (migliore robustezza a cambiamenti di dominio) grazie all'allineamento visione-linguaggio. \\
-\textbf{Localizzazione Precisa} & \textbf{MemSeg} (segmentazione end-to-end) o \textbf{DRAEM} (ricostruzione discriminativa) per mappe di anomalia dettagliate. \\
-\textbf{Zero-Shot / Nessun Training} & \textbf{WinCLIP} (pronto all'uso) o \textbf{PatchCore} (solo costruzione coreset). \\
-\bottomrule
-\end{tabular}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{lp{9.5cm}}
+    \toprule
+    \textbf{Scenario Prioritario} & \textbf{Metodo Consigliato e Motivazione} \\
+    \midrule
+    \textbf{Accuratezza Massima} & \textbf{EfficientAD} (ensemble ottimizzato) o \textbf{RD++} (student-teacher avanzato) per performance top-tier ($>$99.4\% AUROC). \textbf{PatchCore} se non si può addestrare. \\
+    \textbf{Inferenza Real-Time} & \textbf{SimpleNet} (estremamente leggero) o \textbf{MemSeg} (segmentazione diretta) per latenze $<$10ms. \textbf{EfficientAD} per miglior bilanciamento accuratezza/velocità. \\
+    \textbf{Dati Limitati (Few-Shot)} & \textbf{AnomalyCLIP} (eccelle con K$<$10 esempi) sfruttando conoscenza semantica pre-esistente. \textbf{RD++} per un approccio solamente visivo. \\
+    \textbf{Validazione Concettuale Rapida} & \textbf{SimpleNet} (implementazione minimalista) o \textbf{PatchCore} (nessun training). Consentono validazione concettuale in tempi brevi. \\
+    \textbf{Generalizzazione Cross-Domain} & \textbf{AnomalyCLIP} (migliore robustezza a cambiamenti di dominio) grazie all'allineamento visione-linguaggio. \\
+    \textbf{Localizzazione Precisa} & \textbf{MemSeg} (segmentazione end-to-end) o \textbf{DRAEM} (ricostruzione discriminativa) per mappe di anomalia dettagliate. \\
+    \textbf{Zero-Shot / Nessun Training} & \textbf{WinCLIP} (pronto all'uso) o \textbf{PatchCore} (solo costruzione coreset). \\
+    \bottomrule
+    \end{tabular}
+}
 \end{table}
 
 
@@ -1182,36 +1186,39 @@ Analogamente a quanto fatto per i metodi 2D, presentiamo un confronto sintetico 
 \centering
 \caption{Confronto sintetico dei principali metodi 3D e multimodali (valori indicativi)}
 \label{tab:panorama_metodi_3d}
-\footnotesize
-\begin{tabular}{@{}lcccccc@{}}
-\toprule
-\textbf{Metodo} & \textbf{Anno} & \textbf{I-AUROC} & \textbf{AUPRO} & \textbf{Modalità} &
-\textbf{Tr.} & \textbf{Vel.} \\
-\midrule
-\multicolumn{7}{@{}l}{\textit{Benchmark: MVTec 3D-AD}} \\
-\midrule
-Voxel f-AnoGAN$^\dagger$  & 2021 & ---  & 0.639 & RGB+3D & Sì  & Lenta  \\
-BTF & 2023 & ---  & 0.964 & RGB+3D  & No  & Media  \\
-AST & 2022 & 0.862 & 0.985 & RGB+depth  & Sì  & Veloce \\
-Shape-Guided & 2023 & ---  & 0.976 & RGB+3D & No* & Media  \\
-M3DM & 2023 & 0.944 & 0.988 & RGB+3D  & No* & Lenta  \\
-CFM  & 2024 & 0.949 & 0.989 & RGB+3D  & Sì  & Media  \\
-\midrule
-\multicolumn{7}{@{}l}{\textit{Benchmark: Real3D-AD (few-shot, 4 prototipi)}} \\
-\midrule
-Reg3D-AD & 2023 & 0.704 & ---  & 3D only & No* & Media  \\
-\midrule
-\multicolumn{7}{@{}l}{\textit{Benchmark: Real-IAD D\textsuperscript{3}}} \\
-\midrule
-M3DM$^\ddagger$  & 2023 & 0.841 & 0.922 & RGB+3D  & No* & Lenta  \\
-D\textsuperscript{3}M   & 2025 & 0.890 & 0.937 & RGB+3D+PS & No* & Lenta  \\
-\bottomrule
-\end{tabular}
-\vspace{2mm}
-\parbox{\linewidth}{\scriptsize
-\textbf{Note:} Valori in proporzione (0--1). 
-$^\dagger$Voxel f-AnoGAN: AUPRO 0.583 in configurazione solo-3D. *Costruzione offline di memory bank o coreset richiesta. $^\ddagger$M3DM riportato come baseline su Real-IAD D\textsuperscript{3} nel paper di D\textsuperscript{3}M. 
-PS = dati pseudo-3D da fotometria stereo. Velocità relativa su GPU moderna: Veloce ($<$50ms), Media (50-200ms), Lenta ($>$200ms). I-AUROC non disponibile (\textit{---}) per metodi che riportano esclusivamente metriche di segmentazione.}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{@{}lcccccc@{}}
+    \toprule
+    \textbf{Metodo} & \textbf{Anno} & \textbf{I-AUROC} & \textbf{AUPRO} & \textbf{Modalità} &
+    \textbf{Tr.} & \textbf{Vel.} \\
+    \midrule
+    \multicolumn{7}{@{}l}{\textit{Benchmark: MVTec 3D-AD}} \\
+    \midrule
+    Voxel f-AnoGAN$^\dagger$  & 2021 & ---  & 0.639 & RGB+3D & Sì  & Lenta  \\
+    BTF & 2023 & ---  & 0.964 & RGB+3D  & No  & Media  \\
+    AST & 2022 & 0.862 & 0.985 & RGB+depth  & Sì  & Veloce \\
+    Shape-Guided & 2023 & ---  & 0.976 & RGB+3D & No* & Media  \\
+    M3DM & 2023 & 0.944 & 0.988 & RGB+3D  & No* & Lenta  \\
+    CFM  & 2024 & 0.949 & 0.989 & RGB+3D  & Sì  & Media  \\
+    \midrule
+    \multicolumn{7}{@{}l}{\textit{Benchmark: Real3D-AD (few-shot, 4 prototipi)}} \\
+    \midrule
+    Reg3D-AD & 2023 & 0.704 & ---  & 3D only & No* & Media  \\
+    \midrule
+    \multicolumn{7}{@{}l}{\textit{Benchmark: Real-IAD D\textsuperscript{3}}} \\
+    \midrule
+    M3DM$^\ddagger$  & 2023 & 0.841 & 0.922 & RGB+3D  & No* & Lenta  \\
+    D\textsuperscript{3}M   & 2025 & 0.890 & 0.937 & RGB+3D+PS & No* & Lenta  \\
+    \bottomrule
+    \end{tabular}
+}
+\vspace{5mm}
+\parbox{\linewidth}{
+    \scriptsize
+    \textbf{Note:} Valori in proporzione (0--1). 
+    $^\dagger$Voxel f-AnoGAN: AUPRO 0.583 in configurazione solo-3D. *Costruzione offline di memory bank o coreset richiesta. $^\ddagger$M3DM riportato come baseline su Real-IAD D\textsuperscript{3} nel paper di D\textsuperscript{3}M. 
+    PS = dati pseudo-3D da fotometria stereo. Velocità relativa su GPU moderna: Veloce ($<$50ms), Media (50-200ms), Lenta ($>$200ms). I-AUROC non disponibile (\textit{---}) per metodi che riportano esclusivamente metriche di segmentazione.
+}
 \end{table}
 
 \subsubsection{Guida alla Selezione per Scenario Applicativo (3D)}
@@ -1220,18 +1227,20 @@ PS = dati pseudo-3D da fotometria stereo. Velocità relativa su GPU moderna: Vel
 \centering
 \caption{Guida pratica alla selezione del metodo 3D/multimodale}
 \label{tab:guida_selezione_3d}
-\begin{tabular}{lp{9.5cm}}
-\toprule
-\textbf{Scenario Prioritario} & \textbf{Metodo Consigliato e Motivazione} \\
-\midrule
-\textbf{Accuratezza Massima (3D)} & \textbf{CFM} (crossmodal mapping, superiore a M3DM su MVTec 3D-AD) o \textbf{D\textsuperscript{3}M} se disponibile la terza modalità pseudo-3D. \\
-\textbf{Efficienza Computazionale} & \textbf{BTF} (descrittori FPFH, nessun training) o \textbf{AST} (student-teacher leggero) per il miglior compromesso accuratezza/velocità. \\
-\textbf{Dati Limitati (Few-Shot)} & \textbf{Reg3D-AD} per scenari con pochissimi prototipi ($\leq$ 4), grazie a RANSAC che compensa la scarsità di esempi normali. \\
-\textbf{Solo Point Cloud (no RGB)} & \textbf{BTF} (FPFH + k-NN, rotation-invariant) come baseline robusto. \textbf{Shape-Guided} per scenari che richiedono anche localizzazione precisa. \\
-\textbf{Fusione RGB+3D Completa} & \textbf{M3DM} o \textbf{CFM} per texture/geometria che si completano; \textbf{D\textsuperscript{3}M} se si dispone di fotometria stereo. \\
-\textbf{Deployment Rapido (no training)} & \textbf{BTF} o \textbf{Shape-Guided}: sufficiente costruzione offline della memory bank, nessun addestramento di reti richiesto. \\
-\bottomrule
-\end{tabular}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{lp{9.5cm}}
+    \toprule
+    \textbf{Scenario Prioritario} & \textbf{Metodo Consigliato e Motivazione} \\
+    \midrule
+    \textbf{Accuratezza Massima (3D)} & \textbf{CFM} (crossmodal mapping, superiore a M3DM su MVTec 3D-AD) o \textbf{D\textsuperscript{3}M} se disponibile la terza modalità pseudo-3D. \\
+    \textbf{Efficienza Computazionale} & \textbf{BTF} (descrittori FPFH, nessun training) o \textbf{AST} (student-teacher leggero) per il miglior compromesso accuratezza/velocità. \\
+    \textbf{Dati Limitati (Few-Shot)} & \textbf{Reg3D-AD} per scenari con pochissimi prototipi ($\leq$ 4), grazie a RANSAC che compensa la scarsità di esempi normali. \\
+    \textbf{Solo Point Cloud (no RGB)} & \textbf{BTF} (FPFH + k-NN, rotation-invariant) come baseline robusto. \textbf{Shape-Guided} per scenari che richiedono anche localizzazione precisa. \\
+    \textbf{Fusione RGB+3D Completa} & \textbf{M3DM} o \textbf{CFM} per texture/geometria che si completano; \textbf{D\textsuperscript{3}M} se si dispone di fotometria stereo. \\
+    \textbf{Deployment Rapido (no training)} & \textbf{BTF} o \textbf{Shape-Guided}: sufficiente costruzione offline della memory bank, nessun addestramento di reti richiesto. \\
+    \bottomrule
+    \end{tabular}
+}
 \end{table}
 
 \subsubsection{Tendenze Evolutive e Considerazioni Finali (Metodi 3D)}
