@@ -497,21 +497,23 @@ PatchCore e MemSeg rappresentano due filosofie complementari nell'uso della memo
 \begin{table}[h]
 \centering
 \caption{Confronto tra approcci memory-based}
-\begin{tabular}{lcc}
-\toprule
-Aspetto & PatchCore & MemSeg \\
-\midrule
-Paradigma & Non-parametrico & Semantic segmentation \\
-Training & No (solo coreset) & Sì (end-to-end) \\
-Anomaly simulation & No & Sì  \\
-Memoria & Coreset di patch features & N immagini normali intere \\
-Scoring & Nearest-neighbor distance & Segmentation diretta \\
-Output & Distance map & Binary segmentation \\
-Velocità inferenza & Veloce & Molto veloce  \\
-Allineamento spaziale & Robusto & Più sensibile \\
-Accuratezza & Molto alta (99.1\%) & Molto alta (99.56\%) \\
-\bottomrule
-\end{tabular}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{lcc}
+    \toprule
+    Aspetto & PatchCore & MemSeg \\
+    \midrule
+    Paradigma & Non-parametrico & Semantic segmentation \\
+    Training & No (solo coreset) & Sì (end-to-end) \\
+    Anomaly simulation & No & Sì  \\
+    Memoria & Coreset di patch features & N immagini normali intere \\
+    Scoring & Nearest-neighbor distance & Segmentation diretta \\
+    Output & Distance map & Binary segmentation \\
+    Velocità inferenza & Veloce & Molto veloce  \\
+    Allineamento spaziale & Robusto & Più sensibile \\
+    Accuratezza & Molto alta (99.1\%) & Molto alta (99.56\%) \\
+    \bottomrule
+    \end{tabular}
+}
 \end{table}
 
 
@@ -835,28 +837,30 @@ Dopo aver esaminato l'evoluzione dei metodi, presentiamo un confronto sintetico 
 \centering
 \caption{Confronto sintetico dei principali metodi (valori indicativi su MVTec AD)}
 \label{tab:panorama_metodi}
-\footnotesize
-\begin{tabular}{@{}lcccccc@{}}
-\toprule
-\textbf{Metodo} & \textbf{Anno} & \textbf{I-AUROC} & \textbf{P-AUROC} & \textbf{Tipo} & \textbf{Tr.} & \textbf{Vel.} \\
-\midrule
-PaDiM & 2020 & 97.9 & 98.3 & Feature & No & Media \\
-SPADE & 2021 & 85.5 & 96.0 & k-NN & No & Lenta \\
-CutPaste & 2021 & 95.2 & 96.8 & Synthetic & Sì & Veloce \\
-DRAEM & 2021 & 98.4 & 98.6 & Rec+Disc & Sì & Media \\
-FastFlow & 2021 & 99.4 & 98.5 & Flows & Sì & Media \\
-PatchCore & 2022 & 99.1 & 98.1 & Memory & No* & Media \\
-MemSeg & 2022 & 99.6 & 98.8 & Segm. & Sì & \textbf{Veloce†} \\
-RD++ & 2023 & 99.4 & 98.3 & S-T & Sì & Media \\
-SimpleNet & 2023 & 99.2 & 98.1 & Discrim. & Sì & \textbf{Veloce†} \\
-EfficientAD & 2024 & 99.5 & 98.7 & Ensemble & Sì & Veloce \\
-WinCLIP & 2023 & 91.8 & 95.2 & V-L & \textbf{No} & Lenta \\
-AnomalyCLIP‡ & 2024 & 95-98 & 93-96 & V-L & Opz. & Media \\
-\bottomrule
-\end{tabular}
-\vspace{2mm}
-\parbox{\linewidth}{\scriptsize 
-\textbf{Note:} Valori in \%. *PatchCore richiede costruzione coreset offline. †Molto veloce ($<$10ms). ‡AnomalyCLIP: zero-shot (85-88), few-shot (95-96), full-shot (97-98). Velocità relativa su GPU moderna: Veloce† ($<$10ms), Veloce (10-50ms), Media (50-150ms), Lenta ($>$150ms). Abbreviazioni: I-AUROC (Image AUROC), P-AUROC (Pixel AUROC), Tr. (Training), S-T (Student-Teacher), V-L (Vision-Language), Rec+Disc (Ricostruzione+Discriminatore), Segm. (Segmentazione).
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{lcccccc}
+    \toprule
+    \textbf{Metodo} & \textbf{Anno} & \textbf{I-AUROC} & \textbf{P-AUROC} & \textbf{Tipo} & \textbf{Tr.} & \textbf{Vel.} \\
+    \midrule
+    PaDiM & 2020 & 97.9 & 98.3 & Feature & No & Media \\
+    SPADE & 2021 & 85.5 & 96.0 & k-NN & No & Lenta \\
+    CutPaste & 2021 & 95.2 & 96.8 & Synthetic & Sì & Veloce \\
+    DRAEM & 2021 & 98.4 & 98.6 & Rec+Disc & Sì & Media \\
+    FastFlow & 2021 & 99.4 & 98.5 & Flows & Sì & Media \\
+    PatchCore & 2022 & 99.1 & 98.1 & Memory & No* & Media \\
+    MemSeg & 2022 & 99.6 & 98.8 & Segm. & Sì & \textbf{Veloce†} \\
+    RD++ & 2023 & 99.4 & 98.3 & S-T & Sì & Media \\
+    SimpleNet & 2023 & 99.2 & 98.1 & Discrim. & Sì & \textbf{Veloce†} \\
+    EfficientAD & 2024 & 99.5 & 98.7 & Ensemble & Sì & Veloce \\
+    WinCLIP & 2023 & 91.8 & 95.2 & V-L & \textbf{No} & Lenta \\
+    AnomalyCLIP‡ & 2024 & 95-98 & 93-96 & V-L & Opz. & Media \\
+    \bottomrule
+    \end{tabular}
+}
+\vspace{5mm}
+\parbox{\linewidth}{
+    \scriptsize 
+    \textbf{Note:} Valori in \%. *PatchCore richiede costruzione coreset offline. †Molto veloce ($<$10ms). ‡AnomalyCLIP: zero-shot (85-88), few-shot (95-96), full-shot (97-98). Velocità relativa su GPU moderna: Veloce† ($<$10ms), Veloce (10-50ms), Media (50-150ms), Lenta ($>$150ms). Abbreviazioni: I-AUROC (Image AUROC), P-AUROC (Pixel AUROC), Tr. (Training), S-T (Student-Teacher), V-L (Vision-Language), Rec+Disc (Ricostruzione+Discriminatore), Segm. (Segmentazione).
 }
 \end{table}
 

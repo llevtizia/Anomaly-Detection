@@ -600,18 +600,19 @@ La cross-entropy è generalmente preferita all'MSE per problemi di classificazio
 \item Evita problemi di saturazione che possono verificarsi con MSE e funzioni di attivazione sigmoidali
 \end{itemize}
 
-
 \begin{table}[h]
 \centering
-\begin{tabular}{p{4cm}p{6cm}p{4cm}}
-\toprule
-\textbf{Tipo} & \textbf{Formula} & \textbf{Attivazione output} \\
-\midrule
-Regressione & $\displaystyle \frac{1}{2}\sum (y-t)^2$ & Identità \\
-Classificazione binaria & $\displaystyle -\sum [t\log y + (1-t)\log(1-y)]$ & Sigmoid \\
-Classificazione multi-classe & $\displaystyle -\sum \sum_k t_k \log y_k$ & Softmax \\
-\bottomrule
-\end{tabular}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{l l l}
+    \toprule
+    \textbf{Tipo} & \textbf{Formula} & \textbf{Attivazione output} \\
+    \midrule
+    Regressione & $\displaystyle \frac{1}{2}\sum (y-t)^2$ & Identità \\
+    Classificazione binaria & $\displaystyle -\sum [t\log y + (1-t)\log(1-y)]$ & Sigmoid \\
+    Classificazione multi-classe & $\displaystyle -\sum \sum_k t_k \log y_k$ & Softmax \\
+    \bottomrule
+    \end{tabular}
+}
 \caption{Funzioni di errore per diversi tipi di problema.}
 \label{tab:loss_functions}
 \end{table}
