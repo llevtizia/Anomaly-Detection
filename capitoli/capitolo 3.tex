@@ -52,45 +52,47 @@ La Tabella \ref{tab:dataset_evolution} sintetizza questa progressione temporale,
 \caption{Evoluzione dei dataset per anomaly detection industriale (2018-2025). La suddivisione in tre generazioni riflette l'espansione dalle basi 2D alla multimodalità, fino agli scenari realistici e multi-vista.}
 \label{tab:dataset_evolution}
 \footnotesize
-\begin{tabular}{>{\raggedright\arraybackslash}p{0.8cm}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{10cm}}
-\toprule
-\textbf{Anno} & \textbf{Dataset} & \textbf{Contributi Principali / Innovazioni} \\
-\midrule
-\multicolumn{3}{c}{\textit{\textbf{Prima Generazione: Benchmark 2D e definizione del task (2018--2020)}}} \\
-\midrule
-2018 & Magnetic Tile Defects & Dataset pionieristico per difetti industriali; immagini in scala di grigi; valutazione di modelli di saliency detection. \\
-\addlinespace
-2019 & \textbf{MVTec AD} & \textbf{Benchmark di riferimento universale}; 15 categorie (oggetti e texture); annotazioni pixel-precise; separazione chiara training/test; standardizzazione di metriche (AUROC, PRO). \\
-\addlinespace
-2021 & MPDD & Focus su parti metalliche; scenari tipici dell'industria metallurgica (graffi, fori, ruggine). \\
-\addlinespace
-2022 & VisA & Oggetti con strutture complesse e multiple istanze; introduce protocolli few-shot e high-shot per valutare la sensibilità locale dei metodi self-supervised. \\
-\midrule
-\multicolumn{3}{c}{\textit{\textbf{Seconda Generazione: Espansione multimodale e anomalie complesse (2021--2022)}}} \\
-\midrule
-2021 & MVTec 3D-AD & Primo dataset 3D industriale; unisce RGB, depth map e point cloud; anomalie geometriche (graffi, ammaccature, contaminazioni). \\
-\addlinespace
-2022 & MVTec LOCO AD & Introduzione delle \textbf{anomalie logiche} (errori di assemblaggio, componenti fuori posto); metrica sPRO per valutare il rilevamento di difetti contestuali. \\
-\addlinespace
-2022 & Eyecandies & Dataset \textbf{sintetico} su larga scala (90K campioni); controllo completo su illuminazione, materiali e anomalie; include RGB, depth e mappe delle normali. \\
-\midrule
-\multicolumn{3}{c}{\textit{\textbf{Terza Generazione: Scenari realistici, multi-vista e large-scale (2023--2025)}}} \\
-\midrule
-2023 & Real3D-AD & Dataset 3D ad alta precisione; setting \textbf{few-shot} (4 campioni per categoria); copertura a 360° senza punti ciechi. \\
-\addlinespace
-2023 & PAD / MAD & Setting \textbf{pose-agnostic}; acquisizioni multi-vista ($\sim$20 viewpoint); versioni sia reali (MAD-Real) che sintetiche (MAD-Sim). \\
-\addlinespace
-2024 & Real-IAD & Dataset \textbf{large-scale} (150K immagini); 30 categorie industriali; acquisizione multi-vista (5 angolazioni); progettato per il deployment in scenari reali. \\
-\addlinespace
-2024 & RAD & \textbf{Multi-vista estremo} (60+ viewpoint); setting \textbf{noisy-pose} per testare la robustezza; include ricostruzione 3D a partire dalle viste RGB. \\
-\addlinespace
-2025 & \textbf{MVTec AD 2} & Introduce \textbf{sfide realistiche}: oggetti trasparenti/riflettenti, condizioni di illuminazione variabili, anomalie ai bordi dell'immagine, variazione nel numero di oggetti. \\
-\addlinespace
-2025 & Real-IAD D³ & Estensione \textbf{tri-modale} di Real-IAD: RGB, point cloud e mappe delle normali; 20 categorie; 69 gruppi di difetti per valutazione fine. \\
-\addlinespace
-2025 & SiM3D & Dataset \textbf{ibrido} (reale + sintetico); multi-vista (12--36 viste per istanza); valutazione voxel-level per segmentazione 3D. \\
-\bottomrule
-\end{tabular}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{>{\raggedright\arraybackslash}p{0.8cm}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{10cm}}
+    \toprule
+    \textbf{Anno} & \textbf{Dataset} & \textbf{Contributi Principali / Innovazioni} \\
+    \midrule
+    \multicolumn{3}{c}{\textit{\textbf{Prima Generazione: Benchmark 2D e definizione del task (2018--2020)}}} \\
+    \midrule
+    2018 & Magnetic Tile Defects & Dataset pionieristico per difetti industriali; immagini in scala di grigi; valutazione di modelli di saliency detection. \\
+    \addlinespace
+    2019 & \textbf{MVTec AD} & \textbf{Benchmark di riferimento universale}; 15 categorie (oggetti e texture); annotazioni pixel-precise; separazione chiara training/test; standardizzazione di metriche (AUROC, PRO). \\
+    \addlinespace
+    2021 & MPDD & Focus su parti metalliche; scenari tipici dell'industria metallurgica (graffi, fori, ruggine). \\
+    \addlinespace
+    2022 & VisA & Oggetti con strutture complesse e multiple istanze; introduce protocolli few-shot e high-shot per valutare la sensibilità locale dei metodi self-supervised. \\
+    \midrule
+    \multicolumn{3}{c}{\textit{\textbf{Seconda Generazione: Espansione multimodale e anomalie complesse (2021--2022)}}} \\
+    \midrule
+    2021 & MVTec 3D-AD & Primo dataset 3D industriale; unisce RGB, depth map e point cloud; anomalie geometriche (graffi, ammaccature, contaminazioni). \\
+    \addlinespace
+    2022 & MVTec LOCO AD & Introduzione delle \textbf{anomalie logiche} (errori di assemblaggio, componenti fuori posto); metrica sPRO per valutare il rilevamento di difetti contestuali. \\
+    \addlinespace
+    2022 & Eyecandies & Dataset \textbf{sintetico} su larga scala (90K campioni); controllo completo su illuminazione, materiali e anomalie; include RGB, depth e mappe delle normali. \\
+    \midrule
+    \multicolumn{3}{c}{\textit{\textbf{Terza Generazione: Scenari realistici, multi-vista e large-scale (2023--2025)}}} \\
+    \midrule
+    2023 & Real3D-AD & Dataset 3D ad alta precisione; setting \textbf{few-shot} (4 campioni per categoria); copertura a 360° senza punti ciechi. \\
+    \addlinespace
+    2023 & PAD / MAD & Setting \textbf{pose-agnostic}; acquisizioni multi-vista ($\sim$20 viewpoint); versioni sia reali (MAD-Real) che sintetiche (MAD-Sim). \\
+    \addlinespace
+    2024 & Real-IAD & Dataset \textbf{large-scale} (150K immagini); 30 categorie industriali; acquisizione multi-vista (5 angolazioni); progettato per il deployment in scenari reali. \\
+    \addlinespace
+    2024 & RAD & \textbf{Multi-vista estremo} (60+ viewpoint); setting \textbf{noisy-pose} per testare la robustezza; include ricostruzione 3D a partire dalle viste RGB. \\
+    \addlinespace
+    2025 & \textbf{MVTec AD 2} & Introduce \textbf{sfide realistiche}: oggetti trasparenti/riflettenti, condizioni di illuminazione variabili, anomalie ai bordi dell'immagine, variazione nel numero di oggetti. \\
+    \addlinespace
+    2025 & Real-IAD D³ & Estensione \textbf{tri-modale} di Real-IAD: RGB, point cloud e mappe delle normali; 20 categorie; 69 gruppi di difetti per valutazione fine. \\
+    \addlinespace
+    2025 & SiM3D & Dataset \textbf{ibrido} (reale + sintetico); multi-vista (12--36 viste per istanza); valutazione voxel-level per segmentazione 3D. \\
+    \bottomrule
+    \end{tabular}
+}
 \end{table}
 
 
@@ -485,24 +487,26 @@ La Tabella \ref{tab:mvtecad2_comparison} confronta le caratteristiche di MVTec A
 \caption{Confronto qualitativo dei dataset 2D basato su diversi criteri. MVTec AD 2 introduce immagini reali con alta variabilità nello stato anomaly-free e diverse condizioni di illuminazione. Adattato da \cite{bergmann2025mvtecad2}.}
 \label{tab:mvtecad2_comparison}
 \small
-\begin{tabular}{lccccccc}
-\toprule
-& \textbf{MVTec} & \textbf{MVTec} & \textbf{VisA} & \textbf{MVTec} & \textbf{Eye-} & \textbf{Real-} & \textbf{MVTec} \\
-& \textbf{AD} & \textbf{LOCO AD} & & \textbf{3D AD} & \textbf{candies} & \textbf{IAD} & \textbf{AD 2} \\
-\midrule
-Real images & \checkmark & \checkmark & \checkmark & \checkmark & \texttimes & \checkmark & \checkmark \\
-High Variability* & \texttimes & \checkmark & \texttimes & \checkmark & \checkmark & \texttimes & \checkmark \\
-Defects at Borders & \texttimes & \texttimes & \texttimes & \texttimes & \texttimes & \texttimes & \checkmark \\
-Variation \#Objects/image* & \texttimes & \texttimes & \texttimes & \texttimes & \texttimes & \texttimes & \checkmark \\
-Structural Defects & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
-Logical Defects & \texttimes & \checkmark & \texttimes & \texttimes & \texttimes & \texttimes & \texttimes \\
-2D Data & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
-3D Data & \texttimes & \texttimes & \texttimes & \checkmark & \checkmark & \texttimes & \texttimes \\
-Different Lighting & \texttimes & \texttimes & \texttimes & \texttimes & \checkmark & \texttimes & \checkmark \\
-Transparent Objects & \texttimes & \texttimes & \texttimes & \texttimes & \checkmark & \texttimes & \checkmark \\
-\bottomrule
-\multicolumn{8}{l}{\footnotesize *Variazione ammessa nei dati normali utilizzati durante training e validation}
-\end{tabular}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{lccccccc}
+    \toprule
+    & \textbf{MVTec} & \textbf{MVTec} & \textbf{VisA} & \textbf{MVTec} & \textbf{Eye-} & \textbf{Real-} & \textbf{MVTec} \\
+    & \textbf{AD} & \textbf{LOCO AD} & & \textbf{3D AD} & \textbf{candies} & \textbf{IAD} & \textbf{AD 2} \\
+    \midrule
+    Real images & \checkmark & \checkmark & \checkmark & \checkmark & \texttimes & \checkmark & \checkmark \\
+    High Variability* & \texttimes & \checkmark & \texttimes & \checkmark & \checkmark & \texttimes & \checkmark \\
+    Defects at Borders & \texttimes & \texttimes & \texttimes & \texttimes & \texttimes & \texttimes & \checkmark \\
+    Variation \#Objects/image* & \texttimes & \texttimes & \texttimes & \texttimes & \texttimes & \texttimes & \checkmark \\
+    Structural Defects & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+    Logical Defects & \texttimes & \checkmark & \texttimes & \texttimes & \texttimes & \texttimes & \texttimes \\
+    2D Data & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+    3D Data & \texttimes & \texttimes & \texttimes & \checkmark & \checkmark & \texttimes & \texttimes \\
+    Different Lighting & \texttimes & \texttimes & \texttimes & \texttimes & \checkmark & \texttimes & \checkmark \\
+    Transparent Objects & \texttimes & \texttimes & \texttimes & \texttimes & \checkmark & \texttimes & \checkmark \\
+    \bottomrule
+    \multicolumn{8}{l}{\footnotesize *Variazione ammessa nei dati normali utilizzati durante training e validation}
+    \end{tabular}
+}
 \end{table}
 
 
@@ -591,19 +595,21 @@ e \textbf{redundancy}, e annotate punto per punto tramite CloudCompare.
 \caption{Confronto tra i dataset 3D puri per anomaly detection industriale.}
 \label{tab:confronto_3d}
 \small
-\begin{tabular}{lcc}
-\toprule & \textbf{MVTec 3D-AD} & \textbf{Real3D-AD} \\
-\midrule Anno & 2021 & 2023 \\
-Modalità & RGB + XYZ (2.5D) & Point cloud puro (3D) \\
-Categorie & 10 & 12 \\
-Campioni totali & 4,147 & 1,254 \\
-Precisione & 0.11 mm & 0.011--0.015 mm \\
-Copertura & Singola vista & 360° (no blind spots) \\
-Training set & Multi-instance & Few-shot ($\leq$4 prototipi) \\
-Test set & Multi-vista & Singola vista \\
-Annotazioni & Pixel-precise (2D) & Punto per punto (3D) \\
-\bottomrule
-\end{tabular}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{lcc}
+    \toprule & \textbf{MVTec 3D-AD} & \textbf{Real3D-AD} \\
+    \midrule Anno & 2021 & 2023 \\
+    Modalità & RGB + XYZ (2.5D) & Point cloud puro (3D) \\
+    Categorie & 10 & 12 \\
+    Campioni totali & 4,147 & 1,254 \\
+    Precisione & 0.11 mm & 0.011--0.015 mm \\
+    Copertura & Singola vista & 360° (no blind spots) \\
+    Training set & Multi-instance & Few-shot ($\leq$4 prototipi) \\
+    Test set & Multi-vista & Singola vista \\
+    Annotazioni & Pixel-precise (2D) & Punto per punto (3D) \\
+    \bottomrule
+    \end{tabular}
+}
 \end{table}
 
 
@@ -999,30 +1005,32 @@ Un rischio è quello di sviluppare modelli che massimizzano una singola metrica 
 \caption{Metriche di valutazione adottate dai principali dataset per l'anomaly detection industriale. \checkmark indica che la metrica è valutata nel paper.}
 \label{tab:metriche_dataset}
 \footnotesize
-\begin{tabular}{lccccccc}
-\toprule
-\textbf{Dataset} & \textbf{I-AUROC} & \textbf{P-AUROC} & \textbf{AU-PRO} & \textbf{sPRO} & \textbf{AUPR} & \textbf{F1/F$_\beta$} & \textbf{MAE} \\
-\midrule
-Magnetic Tile Defects &   & \checkmark & &  & & \checkmark & \checkmark \\
-MVTec AD  & \checkmark & \checkmark & \checkmark & & & & \\
-MPDD   & \checkmark & \checkmark & & & & & \\
-VisA  & \checkmark & \checkmark & & & \checkmark & & \\
-MVTec LOCO AD & \checkmark & & & \checkmark & & & \\
-Real-IAD  & \checkmark & \checkmark & \checkmark & & & & \\
-MVTec AD 2 & \checkmark & & \checkmark & & & \checkmark & \\
-\midrule
-MVTec 3D-AD  & \checkmark & \checkmark & \checkmark & & & & \\
-Real3D-AD & \checkmark & & & & & & \\
-\midrule
-Eyecandies  & \checkmark & \checkmark & & & & & \\
-PAD / MAD  & \checkmark & \checkmark & & & & & \\
-RAD   & \checkmark & \checkmark & & & & & \\
-Real-IAD D$^3$   & \checkmark & \checkmark & & & & & \\
-SiM3D & \checkmark & & \checkmark$^*$ & & & & \\
-\bottomrule
-\multicolumn{8}{l}{\footnotesize $^*$SiM3D adotta V-AUPRO@1\% (estensione voxel-level di AU-PRO) anziché AU-PRO standard.} \\
-\multicolumn{8}{l}{\footnotesize Magnetic Tile Defects: F$_\beta$ con $\beta^2=0.3$. MVTec AD 2: F1-score con soglia fissa.}
-\end{tabular}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{lccccccc}
+    \toprule
+    \textbf{Dataset} & \textbf{I-AUROC} & \textbf{P-AUROC} & \textbf{AU-PRO} & \textbf{sPRO} & \textbf{AUPR} & \textbf{F1/F$_\beta$} & \textbf{MAE} \\
+    \midrule
+    Magnetic Tile Defects &   & \checkmark & &  & & \checkmark & \checkmark \\
+    MVTec AD  & \checkmark & \checkmark & \checkmark & & & & \\
+    MPDD   & \checkmark & \checkmark & & & & & \\
+    VisA  & \checkmark & \checkmark & & & \checkmark & & \\
+    MVTec LOCO AD & \checkmark & & & \checkmark & & & \\
+    Real-IAD  & \checkmark & \checkmark & \checkmark & & & & \\
+    MVTec AD 2 & \checkmark & & \checkmark & & & \checkmark & \\
+    \midrule
+    MVTec 3D-AD  & \checkmark & \checkmark & \checkmark & & & & \\
+    Real3D-AD & \checkmark & & & & & & \\
+    \midrule
+    Eyecandies  & \checkmark & \checkmark & & & & & \\
+    PAD / MAD  & \checkmark & \checkmark & & & & & \\
+    RAD   & \checkmark & \checkmark & & & & & \\
+    Real-IAD D$^3$   & \checkmark & \checkmark & & & & & \\
+    SiM3D & \checkmark & & \checkmark$^*$ & & & & \\
+    \bottomrule
+    \multicolumn{8}{l}{\footnotesize $^*$SiM3D adotta V-AUPRO@1\% (estensione voxel-level di AU-PRO) anziché AU-PRO standard.} \\
+    \multicolumn{8}{l}{\footnotesize Magnetic Tile Defects: F$_\beta$ con $\beta^2=0.3$. MVTec AD 2: F1-score con soglia fissa.}
+    \end{tabular}
+}
 \end{table}
 
 %%% --------------------------
@@ -1038,55 +1046,57 @@ I quattordici dataset analizzati in questo capitolo rappresentano l'evoluzione d
 \label{tab:riepilogo_dataset}
 \scriptsize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{%
-  >{\raggedright\arraybackslash}p{1.5cm}
-  >{\raggedright\arraybackslash}p{2.4cm}
-  >{\raggedright\arraybackslash}p{1.6cm}
-  r
-  >{\raggedleft\arraybackslash}p{1.5cm}
-  >{\raggedright\arraybackslash}p{2.8cm}
-  >{\raggedright\arraybackslash}p{4.2cm}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{%
+      >{\raggedright\arraybackslash}p{1.5cm}
+      >{\raggedright\arraybackslash}p{2.4cm}
+      >{\raggedright\arraybackslash}p{1.6cm}
+      r
+      >{\raggedleft\arraybackslash}p{1.5cm}
+      >{\raggedright\arraybackslash}p{2.8cm}
+      >{\raggedright\arraybackslash}p{4.2cm}
+    }
+    \toprule
+    \textbf{Anno} & \textbf{Dataset} & \textbf{Modalità} & \textbf{Cat.}
+      & \textbf{Campioni} & \textbf{Tipo anomalie} & \textbf{Caratteristiche principali} \\
+    \midrule
+    \multicolumn{7}{c}{\textit{\textbf{Dataset 2D RGB}}} \\
+    \midrule
+    2018 & Magnetic Tile & 2D grayscale & 6 & 1{,}344 & Superficie (crepe, fori, sbavature) & Primo dataset AD industriale dedicato; introduce MCuePushU; metriche: AUC, MAE, F$_\beta$. \\
+    \addlinespace
+    2019 & \textbf{MVTec AD} & 2D RGB & 15 & 5{,}354 & Superficie + strutturale (73 tipologie) & \textbf{Benchmark universale}; annotazioni pixel-precise; separa training/test; introduce AUROC e PRO. \\
+    \addlinespace
+    2021 & MPDD & 2D RGB & 6 & 1{,}346 & Graffi, buchi, ruggine, parti mancanti & Focus su parti metalliche; gap di $-15\%$ AUROC rispetto a MVTec AD; evidenzia limiti di generalizzazione. \\
+    \addlinespace
+    2022 & VisA & 2D RGB & 12 & 10{,}821 & Superficie + strutturale (multi-istanza) & Strutture complesse; protocolli few-shot (1-shot, 5-shot); introduce AUPR e SPD self-supervised. \\
+    \addlinespace
+    2022 & MVTec LOCO AD & 2D RGB & 5 & 3{,}644 & Strutturale + logico & Primo dataset con anomalie logiche; introduce sPRO; richiede reasoning contestuale. \\
+    \addlinespace
+    2024 & Real-IAD & 2D RGB & 30 & 150{,}000 & Multi-tipo (materiali eterogenei) & Large-scale; acquisizione multi-vista (5 angolazioni); introduce setting FUIAD con training rumoroso. \\
+    \addlinespace
+    2025 & MVTec AD 2 & 2D RGB & 8 & 8{,}004 & Superficie + bordi immagine & Oggetti trasparenti/riflettenti; illuminazione variabile; anomalie ai margini; AU-PRO@5\%. \\
+    \midrule
+    \multicolumn{7}{c}{\textit{\textbf{Dataset 3D}}} \\
+    \midrule
+    2021 & MVTec 3D-AD & RGB + XYZ & 10 & 4{,}147 & Geometriche (ammaccature, deformazioni) & Primo dataset 3D industriale; RGB + point cloud; motiva architetture multi-modali. \\
+    \addlinespace
+    2023 & Real3D-AD & Point cloud & 12 & 1{,}254 & Incompleteness, redundancy & Precisione $0.011$\,mm; copertura 360°; setting few-shot (4 prototipi); introduce ADBENCH-3D. \\
+    \midrule
+    \multicolumn{7}{c}{\textit{\textbf{Dataset Multimodali}}} \\
+    \midrule
+    2022 & Eyecandies & RGB + D + N & 10 & 90{,}000 & Colore, deformazione, imperfezione & Sintetico; controllo totale su illuminazione; 3 modalità (RGB, depth, normal map). \\
+    \addlinespace
+    2023 & PAD / MAD & 2D RGB & 20 & 11{,}000+ & Sbavature, macchie, parti mancanti & Pose-agnostic; primo uso di NeRF per AD; versioni reale (MAD-Real) e sintetica (MAD-Sim). \\
+    \addlinespace
+    2024 & RAD & 2D RGB & 13 & 5{,}848 & Graffi, macchie, parti mancanti, deformazioni & 68 viewpoint con braccio robotico; noisy-pose; valuta VLM e 3D Gaussian Splatting. \\
+    \addlinespace
+    2025 & Real-IAD D$^3$ & RGB + PC + N & 20 & 8{,}450 & 69 tipi (graffi, ammaccature, crepe) & Tri-modale; precisione $0.002$\,mm; stereo fotometrico per pseudo-3D; introduce D$^3$M. \\
+    \addlinespace
+    2025 & SiM3D & Gray + PC & 8 & 333 ist. & Aspetto, geometria, contaminazioni & Single-instance training; valutazione voxel-level; setup real2real e synth2real; 12--36 viste. \\
+    \bottomrule
+    \multicolumn{7}{l}{\footnotesize D = depth map; N = normal map; PC = point cloud; ist. = istanze complete multi-vista.}
+    \end{tabular}
 }
-\toprule
-\textbf{Anno} & \textbf{Dataset} & \textbf{Modalità} & \textbf{Cat.}
-  & \textbf{Campioni} & \textbf{Tipo anomalie} & \textbf{Caratteristiche principali} \\
-\midrule
-\multicolumn{7}{c}{\textit{\textbf{Dataset 2D RGB}}} \\
-\midrule
-2018 & Magnetic Tile & 2D grayscale & 6 & 1{,}344 & Superficie (crepe, fori, sbavature) & Primo dataset AD industriale dedicato; introduce MCuePushU; metriche: AUC, MAE, F$_\beta$. \\
-\addlinespace
-2019 & \textbf{MVTec AD} & 2D RGB & 15 & 5{,}354 & Superficie + strutturale (73 tipologie) & \textbf{Benchmark universale}; annotazioni pixel-precise; separa training/test; introduce AUROC e PRO. \\
-\addlinespace
-2021 & MPDD & 2D RGB & 6 & 1{,}346 & Graffi, buchi, ruggine, parti mancanti & Focus su parti metalliche; gap di $-15\%$ AUROC rispetto a MVTec AD; evidenzia limiti di generalizzazione. \\
-\addlinespace
-2022 & VisA & 2D RGB & 12 & 10{,}821 & Superficie + strutturale (multi-istanza) & Strutture complesse; protocolli few-shot (1-shot, 5-shot); introduce AUPR e SPD self-supervised. \\
-\addlinespace
-2022 & MVTec LOCO AD & 2D RGB & 5 & 3{,}644 & Strutturale + logico & Primo dataset con anomalie logiche; introduce sPRO; richiede reasoning contestuale. \\
-\addlinespace
-2024 & Real-IAD & 2D RGB & 30 & 150{,}000 & Multi-tipo (materiali eterogenei) & Large-scale; acquisizione multi-vista (5 angolazioni); introduce setting FUIAD con training rumoroso. \\
-\addlinespace
-2025 & MVTec AD 2 & 2D RGB & 8 & 8{,}004 & Superficie + bordi immagine & Oggetti trasparenti/riflettenti; illuminazione variabile; anomalie ai margini; AU-PRO@5\%. \\
-\midrule
-\multicolumn{7}{c}{\textit{\textbf{Dataset 3D}}} \\
-\midrule
-2021 & MVTec 3D-AD & RGB + XYZ & 10 & 4{,}147 & Geometriche (ammaccature, deformazioni) & Primo dataset 3D industriale; RGB + point cloud; motiva architetture multi-modali. \\
-\addlinespace
-2023 & Real3D-AD & Point cloud & 12 & 1{,}254 & Incompleteness, redundancy & Precisione $0.011$\,mm; copertura 360°; setting few-shot (4 prototipi); introduce ADBENCH-3D. \\
-\midrule
-\multicolumn{7}{c}{\textit{\textbf{Dataset Multimodali}}} \\
-\midrule
-2022 & Eyecandies & RGB + D + N & 10 & 90{,}000 & Colore, deformazione, imperfezione & Sintetico; controllo totale su illuminazione; 3 modalità (RGB, depth, normal map). \\
-\addlinespace
-2023 & PAD / MAD & 2D RGB & 20 & 11{,}000+ & Sbavature, macchie, parti mancanti & Pose-agnostic; primo uso di NeRF per AD; versioni reale (MAD-Real) e sintetica (MAD-Sim). \\
-\addlinespace
-2024 & RAD & 2D RGB & 13 & 5{,}848 & Graffi, macchie, parti mancanti, deformazioni & 68 viewpoint con braccio robotico; noisy-pose; valuta VLM e 3D Gaussian Splatting. \\
-\addlinespace
-2025 & Real-IAD D$^3$ & RGB + PC + N & 20 & 8{,}450 & 69 tipi (graffi, ammaccature, crepe) & Tri-modale; precisione $0.002$\,mm; stereo fotometrico per pseudo-3D; introduce D$^3$M. \\
-\addlinespace
-2025 & SiM3D & Gray + PC & 8 & 333 ist. & Aspetto, geometria, contaminazioni & Single-instance training; valutazione voxel-level; setup real2real e synth2real; 12--36 viste. \\
-\bottomrule
-\multicolumn{7}{l}{\footnotesize D = depth map; N = normal map; PC = point cloud; ist. = istanze complete multi-vista.}
-\end{tabular}
 \end{table}
 
 
