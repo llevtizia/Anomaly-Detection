@@ -1,0 +1,32 @@
+\subsection{Transformer-based Reconstruction (2022)}
+\label{subsec:uniad}
+
+\paragraph{UniAD (2022).}
+Il limite principale dei metodi descritti fino a questo punto è l’addestramento di un modello separato per ciascuna categoria di oggetti. Questo paradigma \textit{one-class-one-model}, oltre all'elevato consumo di memoria, è poco adatto a scenari reali, dove le categorie sono numerose e presentano variazioni intra-classe (un oggetto può essere costituito da tipi diversi). \textbf{UniAD} \cite{you2022unified} propone un framework unificato che apprende la distribuzione normale di categorie diverse senza accedere alle etichette di classe, né in addestramento né in test.
+
+\subparagraph{Identical Shortcut.}
+In un modello di ricostruzione addestrato su dati multi-classe, la complessità può spingere la rete verso la soluzione più semplice: copiare direttamente l'input come output. In questo caso sia i campioni normali che quelli anomali vengono ricostruiti allo stesso modo, rendendo impossibile la detection. Questo fenomeno viene definito \textbf{identical shortcut}: analizzando le formulazioni di layer MLP, CNN e attention, viene dimostrato che il query embedding nell'attention layer è l'unico meccanismo resistente allo shortcut, poiché introduce informazione esterna al flusso di ricostruzione.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{uniad.png}
+\caption{Framework di UniAD, composto da un Neighbor Masked Encoder (NME) e un Layer-wise Query Decoder (LQD). In ogni layer del LQD, un query embedding apprendibile aiuta il modello a rappresentare la distribuzione complessa dei dati di training. La full attention del Transformer viene sostituita dalla Neighbor Masked Attention per evitare la fuga di informazione dall'input all'output. Il Feature Jittering incoraggia il modello a recuperare il segnale corretto da input rumorosi. I tre meccanismi agiscono insieme contro l'identical shortcut. Fonte: \cite{you2022unified}}
+\label{fig:uniad_framework}
+\end{figure}
+
+\subparagraph{Architettura.}
+UniAD affronta l'identical shortcut con tre miglioramenti all'architettura del Transformer:
+
+\begin{enumerate}
+    \item \textbf{Layer-wise Query Decoder (LQD)}: intensifica l'uso del query embedding aggiungendo un embedding appendibile in ogni layer del decoder
+    
+    \item \textbf{Neighbor Masked Attention (NMA)}: maschera la relazione di ciascun token con sé stesso e con i propri vicini diretti. Il modello così deve inferire le feature mancanti dal contesto globale, rendendo impossibile la copia locale
+    
+    \item \textbf{Feature Jittering (FJ)}: disturba le feature di input durante il training, richiedendo al modello di recuperare il segnale corretto nonostante il rumore. Questo rafforza l'apprendimento della distribuzione normale.
+\end{enumerate}
+
+\subparagraph{Risultati e Impatto.}
+Valutato su MVTec AD nel setting unificato a 15 categorie, UniAD raggiunge il 96.5\% di image-level AUROC, superando DRAEM di 8.4\%. Il risultato dimostra che un singolo modello unificato può avvicinarsi alle performance di modelli specializzati, aprendo la strada al pa\-ra\-dig\-ma della \textit{multi-class anomaly detection} come problema autonomo.
+
+\subparagraph{Limitazioni.}
+Nonostante i risultati promettenti, UniAD presenta alcuni limiti. La complessità del Transformer comporta costi computazionali superiori rispetto ai metodi feature-based come PatchCore. Inoltre, benché il modello unificato riduca il numero di parametri totali, la gestione di categorie con distribuzioni molto eterogenee rimane un problema non risolto.
