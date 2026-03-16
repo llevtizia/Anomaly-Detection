@@ -1,3 +1,6 @@
+%%%%% -------------------------------------------------
+%  dopo subsection{Synthetic Anomaly Generation (2021)} e 
+% prima di \subsection{Memory-based Methods (2022)}
 \subsection{Transformer-based Reconstruction (2022)}
 \label{subsec:uniad}
 
@@ -30,3 +33,60 @@ Valutato su MVTec AD nel setting unificato a 15 categorie, UniAD raggiunge il 96
 
 \subparagraph{Limitazioni.}
 Nonostante i risultati promettenti, UniAD presenta alcuni limiti. La complessità del Transformer comporta costi computazionali superiori rispetto ai metodi feature-based come PatchCore. Inoltre, benché il modello unificato riduca il numero di parametri totali, la gestione di categorie con distribuzioni molto eterogenee rimane un problema non risolto.
+
+% tabella 3.2 aggiornata
+\begin{table}[h]
+\centering
+\caption{Confronto sintetico dei principali metodi (valori indicativi su MVTec AD)}
+\label{tab:panorama_metodi}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{lcccccc}
+    \toprule
+    \textbf{Metodo} & \textbf{Anno} & \textbf{I-AUROC} & \textbf{P-AUROC} & \textbf{Tipo} & \textbf{Tr.} & \textbf{Vel.} \\
+    \midrule
+    PaDiM & 2020 & 97.9 & 98.3 & Feature & No & Media \\
+    SPADE & 2021 & 85.5 & 96.0 & k-NN & No & Lenta \\
+    CutPaste & 2021 & 95.2 & 96.8 & Synthetic & Sì & Veloce \\
+    DRAEM & 2021 & 98.4 & 98.6 & Rec+Disc & Sì & Media \\
+    FastFlow & 2021 & 99.4 & 98.5 & Flows & Sì & Media \\
+    UniAD & 2022 & 96.5 & 98.1 & Transf. & Sì & Media \\
+    PatchCore & 2022 & 99.1 & 98.1 & Memory & No* & Media \\
+    MemSeg & 2022 & 99.6 & 98.8 & Segm. & Sì & \textbf{Veloce†} \\
+    RD++ & 2023 & 99.4 & 98.3 & S-T & Sì & Media \\
+    SimpleNet & 2023 & 99.2 & 98.1 & Discrim. & Sì & \textbf{Veloce†} \\
+    EfficientAD & 2024 & 99.5 & 98.7 & Ensemble & Sì & Veloce \\
+    WinCLIP & 2023 & 91.8 & 95.2 & V-L & \textbf{No} & Lenta \\
+    AnomalyCLIP‡ & 2024 & 95-98 & 93-96 & V-L & Opz. & Media \\
+    \bottomrule
+    \end{tabular}
+}
+\vspace{5mm}
+\parbox{\linewidth}{
+    \scriptsize 
+    \textbf{Note:} Valori in \%. *PatchCore richiede costruzione coreset offline. †Molto veloce ($<$10ms). ‡AnomalyCLIP: zero-shot (85-88), few-shot (95-96), full-shot (97-98). Velocità relativa su GPU moderna: Veloce† ($<$10ms), Veloce (10-50ms), Media (50-150ms), Lenta ($>$150ms). Abbreviazioni: I-AUROC (Image AUROC), P-AUROC (Pixel AUROC), Tr. (Training), S-T (Student-Teacher), V-L (Vision-Language), Rec+Disc (Ricostruzione+Discriminatore), Segm. (Segmentazione), Transf. (Transformer-based).
+}
+\end{table}
+
+
+% tabella 3.3 aggiornata
+
+\begin{table}[h]
+\centering
+\caption{Guida pratica alla selezione del metodo}
+\label{tab:guida_selezione}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{lp{9.5cm}}
+    \toprule
+    \textbf{Scenario Prioritario} & \textbf{Metodo Consigliato e Motivazione} \\
+    \midrule
+    \textbf{Accuratezza Massima} & \textbf{EfficientAD} (ensemble ottimizzato) o \textbf{RD++} (student-teacher avanzato) per performance top-tier ($>$99.4\% AUROC). \textbf{PatchCore} se non si può addestrare. \\
+    \textbf{Inferenza Real-Time} & \textbf{SimpleNet} (estremamente leggero) o \textbf{MemSeg} (segmentazione diretta) per latenze $<$10ms. \textbf{EfficientAD} per miglior bilanciamento accuratezza/velocità. \\
+    \textbf{Dati Limitati (Few-Shot)} & \textbf{AnomalyCLIP} (eccelle con K$<$10 esempi) sfruttando conoscenza semantica pre-esistente. \textbf{RD++} per un approccio solamente visivo. \\
+    \textbf{Validazione Concettuale Rapida} & \textbf{SimpleNet} (implementazione minimalista) o \textbf{PatchCore} (nessun training). Consentono validazione concettuale in tempi brevi. \\
+    \textbf{Generalizzazione Cross-Domain} & \textbf{AnomalyCLIP} (migliore robustezza a cambiamenti di dominio) grazie all'allineamento visione-linguaggio. \\
+    \textbf{Localizzazione Precisa} & \textbf{MemSeg} (segmentazione end-to-end) o \textbf{DRAEM} (ricostruzione discriminativa) per mappe di anomalia dettagliate. \\
+    \textbf{Zero-Shot / Nessun Training} & \textbf{WinCLIP} (pronto all'uso) o \textbf{PatchCore} (solo costruzione coreset). \\
+    \bottomrule
+    \end{tabular}
+}
+\end{table}
